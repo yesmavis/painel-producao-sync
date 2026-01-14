@@ -313,6 +313,26 @@ if ('serviceWorker' in navigator) {
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
+  // passo 1 - referencia principal dos pedidos
+  const pedidosRef = ref(db, 'pedidos');
+
+  //passo 2 - funcao para criar pedido
+  function criarPedido(tipo, take = false) {
+  const novoPedidoRef = push(pedidosRef);
+
+  set(novoPedidoRef, {
+    tipo,
+    take,
+    status: 'preparo',
+    criadoEm: Date.now()
+  });
+}
+
+  //passo 3 - sincronizacao
+  onValue(pedidosRef, (snapshot) => {
+    console.log('🔥 Firebase atualizado:', snapshot.val());
+});
+  
   // 🔧 Expor para uso global (importante)
   window.firebaseDB = {
     db,
@@ -320,8 +340,11 @@ if ('serviceWorker' in navigator) {
     set,
     push,
     onValue,
-    remove
+    remove,
+    pedidosRef,
+    criarPedido
   };
+
 </script>
 <script type="module">
   // 🔎 TESTE DE CONEXÃO COM FIREBASE (SEGURANÇA)
