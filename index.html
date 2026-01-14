@@ -195,14 +195,17 @@ button {
 </div>
 
 <div class="botoes">
-<button class="carne" onclick="novoPedido('CARNE','#e53935','carne',false)">CARNE</button>
-<button class="carne take" onclick="novoPedido('CARNE + TAKE','#e53935','carne',true)">CARNE + TAKE</button>
-<button class="peixe" onclick="novoPedido('PEIXE','#1e88e5','peixe',false)">PEIXE</button>
-<button class="peixe take" onclick="novoPedido('PEIXE + TAKE','#1e88e5','peixe',true)">PEIXE + TAKE</button>
-<button class="veg" onclick="novoPedido('VEG','#43a047','veg',false)">VEG</button>
-<button class="veg take" onclick="novoPedido('VEG + TAKE','#43a047','veg',true)">VEG + TAKE</button>
-<button class="opcao" onclick="novoPedido('OPÇÕES','#000','opcao',false)">OPÇÕES</button>
-<button class="opcao take" onclick="novoPedido('OPÇÕES + TAKE','#000','opcao',true)">OPÇÕES + TAKE</button>
+<button class="carne" onclick="novoPedido('carne', false)">CARNE</button>
+<button class="carne take" onclick="novoPedido('carne', true)">CARNE + TAKE</button>
+
+<button class="peixe" onclick="novoPedido('peixe', false)">PEIXE</button>
+<button class="peixe take" onclick="novoPedido('peixe', true)">PEIXE + TAKE</button>
+
+<button class="veg" onclick="novoPedido('veg', false)">VEG</button>
+<button class="veg take" onclick="novoPedido('veg', true)">VEG + TAKE</button>
+
+<button class="opcao" onclick="novoPedido('opcao', false)">OPÇÕES</button>
+<button class="opcao take" onclick="novoPedido('opcao', true)">OPÇÕES + TAKE</button>
 </div>
 
 <div class="painel">
@@ -240,13 +243,10 @@ function atualizar(){
   cOpcao.innerText=cont.opcao;
 }
 
-function novoPedido(txt, cor, tipo, take) {
-
-  // 🔥 Firebase é a única fonte da verdade
+function novoPedido(tipo, take) {
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
     window.firebaseDB.criarPedido(tipo, take);
   }
-
 }
 
 function renderPedido(id, pedido) {
@@ -267,7 +267,7 @@ function renderPedido(id, pedido) {
   };
 
   const p = document.createElement('div');
-  p.className = 'pedido' + (take ? ' take' : '');
+  p.className = 'pedido ' + pedido.modo + (take ? ' take' : '');
   p.style.setProperty('--base-color', cores[tipo]);
   p.dataset.id = id;
   p.innerText = nomes[tipo] + (take ? ' + TAKE' : '');
@@ -347,6 +347,7 @@ if ('serviceWorker' in navigator) {
   set(novoPedidoRef, {
     tipo,
     take,
+    modo, // 👈 salva fila / encomenda / senha
     status: 'preparo',
     criadoEm: Date.now()
   });
