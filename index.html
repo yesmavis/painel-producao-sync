@@ -240,45 +240,13 @@ function atualizar(){
   cOpcao.innerText=cont.opcao;
 }
 
-function novoPedido(txt,cor,tipo,take){
+function novoPedido(txt, cor, tipo, take) {
 
-  // 🔥 Firebase (não interfere no funcionamento local)
+  // 🔥 Firebase é a única fonte da verdade
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
     window.firebaseDB.criarPedido(tipo, take);
   }
 
-  // logica local
-  cont[tipo]++;
-  atualizar();
-  numero++;
-
-  const p=document.createElement('div');
-  p.className=`pedido ${modo}`+(take?' take':'');
-  p.style.setProperty('--base-color',cor);
-  p.dataset.estado='preparo';
-  p.innerText=`#${numero} ${txt}`;
-
-  const del=document.createElement('span');
-  del.className='excluir';
-  del.innerText='❌';
-  del.onclick=e=>{
-    e.stopPropagation();
-    cont[tipo]--; atualizar();
-    p.remove();
-  };
-
-  p.appendChild(del);
-
-  p.onclick=()=>{
-    if(p.dataset.estado==='preparo'){
-      p.dataset.estado='pronto';
-      pronto.appendChild(p);
-    }else{
-      p.remove();
-    }
-  };
-
-  preparo.appendChild(p);
 }
 
 function renderPedido(id, pedido) {
