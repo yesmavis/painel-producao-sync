@@ -386,7 +386,28 @@ if ('serviceWorker' in navigator) {
 
   //passo 3 - sincronizacao
   onValue(pedidosRef, (snapshot) => {
-    console.log('🔥 Firebase atualizado:', snapshot.val());
+  preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
+  pronto.innerHTML = '<h2>✅ PRONTO</h2>';
+
+  cont.carne = 0;
+  cont.peixe = 0;
+  cont.veg = 0;
+  cont.opcao = 0;
+
+  const dados = snapshot.val();
+  if (!dados) {
+    atualizar();
+    return;
+  }
+
+  Object.entries(dados).forEach(([id, pedido]) => {
+    cont[pedido.tipo]++;
+    renderPedido(id, pedido);
+  });
+
+  atualizar();
+});
+
 });
   
   // 🔧 Expor para uso global (importante)
