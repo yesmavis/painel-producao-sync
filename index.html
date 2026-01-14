@@ -285,6 +285,44 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
 }
 </script>
+<script type="module">
+  // Firebase core
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+
+  // Realtime Database
+  import {
+    getDatabase,
+    ref,
+    set,
+    push,
+    onValue,
+    remove
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCms7tcWbslK-d0WZ6g8lFr_eicNaz4Dp4",
+    authDomain: "painel-producao-sync.firebaseapp.com",
+    databaseURL: "https://painel-producao-sync-default-rtdb.firebaseio.com",
+    projectId: "painel-producao-sync",
+    storageBucket: "painel-producao-sync.firebasestorage.app",
+    messagingSenderId: "563084163424",
+    appId: "1:563084163424:web:274866215bb7b2faf7c605"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // 🔧 Expor para uso global (importante)
+  window.firebaseDB = {
+    db,
+    ref,
+    set,
+    push,
+    onValue,
+    remove
+  };
+</script>
+
 
 </body>
 </html>
