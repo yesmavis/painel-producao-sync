@@ -243,6 +243,8 @@ function atualizar(){
 function novoPedido(txt,cor,tipo,take){
   cont[tipo]++; atualizar(); numero++;
 
+  criarPedido(tipo, take);
+
   const p=document.createElement('div');
   p.className=`pedido ${modo}`+(take?' take':'');
   p.style.setProperty('--base-color',cor);
