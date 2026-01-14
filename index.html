@@ -281,6 +281,53 @@ function novoPedido(txt,cor,tipo,take){
   preparo.appendChild(p);
 }
 
+function renderPedido(id, pedido) {
+  const { tipo, take, status } = pedido;
+
+  const cores = {
+    carne: '#e53935',
+    peixe: '#1e88e5',
+    veg: '#43a047',
+    opcao: '#000'
+  };
+
+  const nomes = {
+    carne: 'CARNE',
+    peixe: 'PEIXE',
+    veg: 'VEG',
+    opcao: 'OPÇÕES'
+  };
+
+  const p = document.createElement('div');
+  p.className = 'pedido' + (take ? ' take' : '');
+  p.style.setProperty('--base-color', cores[tipo]);
+  p.dataset.id = id;
+  p.innerText = nomes[tipo] + (take ? ' + TAKE' : '');
+
+  const del = document.createElement('span');
+  del.className = 'excluir';
+  del.innerText = '❌';
+  del.onclick = (e) => {
+    e.stopPropagation();
+    const pedidoRef = ref(window.firebaseDB.db, 'pedidos/' + id);
+    remove(pedidoRef);
+  };
+
+  p.appendChild(del);
+
+  p.onclick = () => {
+    const novoStatus = status === 'preparo' ? 'pronto' : 'preparo';
+    const pedidoRef = ref(window.firebaseDB.db, 'pedidos/' + id);
+    set(pedidoRef, { ...pedido, status: novoStatus });
+  };
+
+  if (status === 'preparo') {
+    preparo.appendChild(p);
+  } else {
+    pronto.appendChild(p);
+  }
+}
+
 function fecharCozinha(){
   rCarne.innerText=cont.carne;
   rPeixe.innerText=cont.peixe;
