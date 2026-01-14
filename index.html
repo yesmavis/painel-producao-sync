@@ -1,1 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#111111">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Painel de Produção">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Painel de Produção</title>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#1b1b1b;
+  color:white;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+header {
+  background:#111;
+  padding:10px;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+  position:relative;
+}
+
+#fecharCozinha {
+  position:absolute;
+  right:10px;
+  top:10px;
+  border:1px solid #555;
+  background:transparent;
+  color:#bbb;
+  padding:6px 12px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.modos {
+  display:flex;
+  gap:6px;
+  padding:6px;
+  background:#222;
+}
+
+.modos button {
+  flex:1;
+  height:40px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  opacity:.5;
+}
+
+.modos .ativo { opacity:1; }
+
+.fila { background:#555; }
+.encomenda { background:#ffca28; color:#000; }
+.senha { background:#ab47bc; }
+
+.contadores {
+  display:flex;
+  justify-content:space-around;
+  background:#222;
+  padding:6px;
+  font-size:14px;
+}
+
+.botoes {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  padding:8px;
+}
+
+button {
+  height:50px;
+  font-size:14px;
+  font-weight:bold;
+  border-radius:12px;
+  border:none;
+  color:white;
+}
+
+.carne { background:#e53935; }
+.peixe { background:#1e88e5; }
+.veg { background:#43a047; }
+.opcao { background:#000; }
+
+.take {
+  border:2px dashed rgba(255,255,255,.6);
+}
+
+.painel {
+  flex:1;
+  display:flex;
+  gap:6px;
+  padding:6px;
+}
+
+.coluna {
+  flex:1;
+  background:#2a2a2a;
+  border-radius:10px;
+  padding:6px;
+}
+
+.coluna h2 {
+  text-align:center;
+  font-size:16px;
+  margin:4px 0;
+}
+
+.pedido {
+  height:38px;
+  margin-bottom:4px;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:bold;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  background:var(--base-color);
+}
+
+/* Faixas ENCOMENDA e SENHA */
+.pedido.encomenda {
+  background:
+    linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%),
+    var(--base-color);
+}
+
+.pedido.senha {
+  background:
+    linear-gradient(to right, #ab47bc 0%, #ab47bc 33%, transparent 33%),
+    var(--base-color);
+}
+
+.excluir {
+  position:absolute;
+  right:6px;
+  top:6px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+#resumo {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.85);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+#resumo .box {
+  background:#222;
+  padding:25px;
+  border-radius:15px;
+  width:320px;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+🍽️ PAINEL DE PRODUÇÃO
+<button id="fecharCozinha" onclick="fecharCozinha()">Fechar Cozinha</button>
+</header>
+
+<div class="modos">
+<button class="fila ativo" onclick="setModo('fila',this)">🧍 FILA</button>
+<button class="encomenda" onclick="setModo('encomenda',this)">📦 ENCOMENDA</button>
+<button class="senha" onclick="setModo('senha',this)">🎫 SENHA</button>
+</div>
+
+<div class="contadores">
+🔴 <span id="cCarne">0</span>
+🟦 <span id="cPeixe">0</span>
+🟩 <span id="cVeg">0</span>
+⚫ <span id="cOpcao">0</span>
+</div>
+
+<div class="botoes">
+<button class="carne" onclick="novoPedido('CARNE','#e53935','carne',false)">CARNE</button>
+<button class="carne take" onclick="novoPedido('CARNE + TAKE','#e53935','carne',true)">CARNE + TAKE</button>
+<button class="peixe" onclick="novoPedido('PEIXE','#1e88e5','peixe',false)">PEIXE</button>
+<button class="peixe take" onclick="novoPedido('PEIXE + TAKE','#1e88e5','peixe',true)">PEIXE + TAKE</button>
+<button class="veg" onclick="novoPedido('VEG','#43a047','veg',false)">VEG</button>
+<button class="veg take" onclick="novoPedido('VEG + TAKE','#43a047','veg',true)">VEG + TAKE</button>
+<button class="opcao" onclick="novoPedido('OPÇÕES','#000','opcao',false)">OPÇÕES</button>
+<button class="opcao take" onclick="novoPedido('OPÇÕES + TAKE','#000','opcao',true)">OPÇÕES + TAKE</button>
+</div>
+
+<div class="painel">
+  <div class="coluna" id="preparo"><h2>👨‍🍳 EM PREPARO</h2></div>
+  <div class="coluna" id="pronto"><h2>✅ PRONTO</h2></div>
+</div>
+
+<div id="resumo">
+  <div class="box">
+    <h2>📊 Resumo do Turno</h2>
+    <p>🔴 Carne: <strong id="rCarne"></strong></p>
+    <p>🟦 Peixe: <strong id="rPeixe"></strong></p>
+    <p>🟩 Veg: <strong id="rVeg"></strong></p>
+    <p>⚫ Opções: <strong id="rOpcao"></strong></p>
+    <p><strong>TOTAL: <span id="rTotal"></span></strong></p>
+    <button onclick="location.reload()">Encerrar e reiniciar</button>
+  </div>
+</div>
+
+<script>
+let modo='fila';
+let numero=0;
+const cont={carne:0,peixe:0,veg:0,opcao:0};
+
+function setModo(m,b){
+  modo=m;
+  document.querySelectorAll('.modos button').forEach(x=>x.classList.remove('ativo'));
+  b.classList.add('ativo');
+}
+
+function atualizar(){
+  cCarne.innerText=cont.carne;
+  cPeixe.innerText=cont.peixe;
+  cVeg.innerText=cont.veg;
+  cOpcao.innerText=cont.opcao;
+}
+
+function novoPedido(txt,cor,tipo,take){
+  cont[tipo]++; atualizar(); numero++;
+
+  const p=document.createElement('div');
+  p.className=`pedido ${modo}`+(take?' take':'');
+  p.style.setProperty('--base-color',cor);
+  p.dataset.estado='preparo';
+  p.innerText=`#${numero} ${txt}`;
+
+  const del=document.createElement('span');
+  del.className='excluir';
+  del.innerText='❌';
+  del.onclick=e=>{
+    e.stopPropagation();
+    cont[tipo]--; atualizar();
+    p.remove();
+  };
+
+  p.appendChild(del);
+
+  p.onclick=()=>{
+    if(p.dataset.estado==='preparo'){
+      p.dataset.estado='pronto';
+      pronto.appendChild(p);
+    }else{
+      p.remove();
+    }
+  };
+
+  preparo.appendChild(p);
+}
+
+function fecharCozinha(){
+  rCarne.innerText=cont.carne;
+  rPeixe.innerText=cont.peixe;
+  rVeg.innerText=cont.veg;
+  rOpcao.innerText=cont.opcao;
+  rTotal.innerText=cont.carne+cont.peixe+cont.veg+cont.opcao;
+  resumo.style.display='flex';
+}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
 
