@@ -226,6 +226,15 @@ button {
 </div>
 
 <script>
+/* ==========================
+   CONFIGURAÇÕES GERAIS
+========================== */
+const RESTAURANTE = 'Cafetaria Blend - Vila Real';
+const VERSAO_APP = '1.0.0';
+
+/* ==========================
+   ESTADO GLOBAL
+========================== */
 let modo='fila';
 let numero=0;
 const cont={carne:0,peixe:0,veg:0,opcao:0};
@@ -383,9 +392,9 @@ function gerarPDFResumo() {
   const doc = new jsPDF();
 
   const data = new Date().toLocaleString('pt-BR');
-
+  
   doc.setFontSize(16);
-  doc.text(`📊 Resumo do Turno - Painel de Produção`, 20, 20);
+  doc.text(`📊 Resumo do Turno - ${RESTAURANTE}`, 20, 20);
 
   doc.setFontSize(12);
   doc.text(`Encerrado em: ${data}`, 20, 30);
