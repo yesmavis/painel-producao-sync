@@ -290,27 +290,36 @@ function renderPedido(id, pedido) {
   p.appendChild(del);
 
   // 🔁 Fluxo: preparo → pronto → finalizado
-  p.onclick = () => {
-    let novoStatus;
+  function avancarStatus(e) {
+  e.preventDefault();
+  e.stopPropagation();
 
-    if (status === 'preparo') {
-      novoStatus = 'pronto';
-    } else if (status === 'pronto') {
-      novoStatus = 'finalizado';
-    } else {
-      return;
-    }
+  let novoStatus;
 
-    const pedidoRef = window.firebaseDB.ref(
-      window.firebaseDB.db,
-      'pedidos/' + id
-    );
+  if (pedido.status === 'preparo') {
+    novoStatus = 'pronto';
+  } else if (pedido.status === 'pronto') {
+    novoStatus = 'finalizado';
+  } else {
+    return;
+  }
 
-    window.firebaseDB.set(pedidoRef, {
-      ...pedido,
-      status: novoStatus
-    });
-  };
+  const pedidoRef = window.firebaseDB.ref(
+    window.firebaseDB.db,
+    'pedidos/' + id
+  );
+
+  window.firebaseDB.set(pedidoRef, {
+    ...pedido,
+    status: novoStatus
+  });
+}
+
+// Desktop / Android
+p.onclick = avancarStatus;
+
+// iOS (fundamental)
+p.addEventListener('touchend', avancarStatus, { passive: false });
 
   if (status === 'preparo') {
     preparo.appendChild(p);
