@@ -278,17 +278,27 @@ function renderPedido(id, pedido) {
   const del = document.createElement('span');
   del.className = 'excluir';
   del.innerText = '❌';
-  del.onclick = (e) => {
+
+  function excluirPedido(e) {
+    e.preventDefault();
     e.stopPropagation();
+
     const pedidoRef = window.firebaseDB.ref(
       window.firebaseDB.db,
       'pedidos/' + id
     );
+
     window.firebaseDB.remove(pedidoRef);
-  };
+}
+
+// Desktop / Android
+  del.onclick = excluirPedido;
+
+// iOS
+  del.addEventListener('touchend', excluirPedido, { passive: false });
 
   p.appendChild(del);
-
+  
   // 🔁 Fluxo: preparo → pronto → finalizado
   function avancarStatus(e) {
   e.preventDefault();
