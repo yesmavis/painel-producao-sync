@@ -438,31 +438,58 @@ function gerarPDFResumo() {
 
   const data = new Date().toLocaleString(LOCALE);
 
-  // Título
+  let y = 20; // controle vertical
+
+  // 🏷️ Nome do restaurante (centralizado)
   doc.setFontSize(18);
-  doc.text(RESTAURANTE, 105, 20, {align: 'center' });
-  
+  doc.setFont('helvetica', 'bold');
+  doc.text(RESTAURANTE, 105, y, { align: 'center' });
+
+  y += 10;
+
+  // 📊 Título
   doc.setFontSize(14);
-  doc.text('Resumo do Turno', 105, 30, {align: 'center' });
-  
-  // Informações
+  doc.setFont('helvetica', 'normal');
+  doc.text('Resumo do Turno', 105, y, { align: 'center' });
+
+  y += 10;
+
+  // 🕒 Data
+  doc.setFontSize(11);
+  doc.text(`Encerrado em: ${data}`, 105, y, { align: 'center' });
+
+  y += 15;
+
+  // 🔹 Linha separadora
+  doc.setDrawColor(200);
+  doc.line(20, y, 190, y);
+
+  y += 12;
+
+  // 📦 Dados
   doc.setFontSize(12);
-  doc.text(`Encerrado em: ${data}`, 20, 45);
 
-  doc.text(`Carne: ${cont.carne}`, 20, 60);
-  doc.text(`Peixe: ${cont.peixe}`, 20, 70);
-  doc.text(`Veg: ${cont.veg}`, 20, 80);
-  doc.text(`Opções: ${cont.opcao}`, 20, 90);
+  doc.text(`Carne: ${cont.carne}`, 30, y); y += 8;
+  doc.text(`Peixe: ${cont.peixe}`, 30, y); y += 8;
+  doc.text(`Veg: ${cont.veg}`, 30, y); y += 8;
+  doc.text(`Opções: ${cont.opcao}`, 30, y); y += 12;
 
+  // 🔹 Linha separadora
+  doc.line(20, y, 190, y);
+
+  y += 12;
+
+  // 🔢 Total
   doc.setFontSize(14);
-  doc.text(
-    `TOTAL: ${cont.carne + cont.peixe + cont.veg + cont.opcao}`,
-    20,
-    110
-  );
+  doc.setFont('helvetica', 'bold');
+  doc.text(`TOTAL: ${cont.carne + cont.peixe + cont.veg + cont.opcao}`, 105, y, {
+    align: 'center'
+  });
 
+  // 💾 Salvar
   doc.save(`resumo-turno-${Date.now()}.pdf`);
 }
+
 
 </script>
 
