@@ -282,6 +282,8 @@ const LOCALE = 'en-US' // ou 'pt-BR'
 let modo='fila';
 let numero=0;
 const cont={carne:0,peixe:0,veg:0,opcao:0};
+let ultimoResumoTurno = null;
+
 
 function setModo(m,b){
   modo=m;
@@ -397,7 +399,7 @@ p.addEventListener('touchend', avancarStatus, { passive: false });
 <script>  
 async function fecharCozinha() {
   // 1️⃣ Montar resumo
-  const resumoTurno = {
+  ultimoResumoTurno = {
     carne: cont.carne,
     peixe: cont.peixe,
     veg: cont.veg,
@@ -433,14 +435,17 @@ async function fecharCozinha() {
 }
 
 function gerarPDFResumo() {
+  if (!ultimoResumoTurno) {
+    alert('Resumo ainda não disponível.');
+    return;
+  }
+
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  const data = new Date().toLocaleString(LOCALE);
+  let y = 20;
 
-  let y = 20; // controle vertical
-
-  // 🏷️ Nome do restaurante (centralizado)
+  // 🏷️ Restaurante
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text(RESTAURANTE, 105, y, { align: 'center' });
@@ -456,37 +461,41 @@ function gerarPDFResumo() {
 
   // 🕒 Data
   doc.setFontSize(11);
-  doc.text(`Encerrado em: ${data}`, 105, y, { align: 'center' });
+  doc.text(
+    `Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`,
+    105,
+    y,
+    { align: 'center' }
+  );
 
   y += 15;
 
-  // 🔹 Linha separadora
+  // Linha
   doc.setDrawColor(200);
   doc.line(20, y, 190, y);
 
   y += 12;
 
-  // 📦 Dados
+  // Dados
   doc.setFontSize(12);
+  doc.text(`Carne: ${ultimoResumoTurno.carne}`, 30, y); y += 8;
+  doc.text(`Peixe: ${ultimoResumoTurno.peixe}`, 30, y); y += 8;
+  doc.text(`Veg: ${ultimoResumoTurno.veg}`, 30, y); y += 8;
+  doc.text(`Opções: ${ultimoResumoTurno.opcao}`, 30, y); y += 12;
 
-  doc.text(`Carne: ${cont.carne}`, 30, y); y += 8;
-  doc.text(`Peixe: ${cont.peixe}`, 30, y); y += 8;
-  doc.text(`Veg: ${cont.veg}`, 30, y); y += 8;
-  doc.text(`Opções: ${cont.opcao}`, 30, y); y += 12;
-
-  // 🔹 Linha separadora
   doc.line(20, y, 190, y);
-
   y += 12;
 
-  // 🔢 Total
+  // Total
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text(`TOTAL: ${cont.carne + cont.peixe + cont.veg + cont.opcao}`, 105, y, {
-    align: 'center'
-  });
+  doc.text(
+    `TOTAL: ${ultimoResumoTurno.total}`,
+    105,
+    y,
+    { align: 'center' }
+  );
 
-  // 💾 Salvar
   doc.save(`resumo-turno-${Date.now()}.pdf`);
 }
 
