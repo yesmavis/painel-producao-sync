@@ -410,11 +410,11 @@ async function fecharCozinha() {
   };
 
   // 2️⃣ Mostrar resumo na tela
-  rCarne.innerText = resumoTurno.carne;
-  rPeixe.innerText = resumoTurno.peixe;
-  rVeg.innerText = resumoTurno.veg;
-  rOpcao.innerText = resumoTurno.opcao;
-  rTotal.innerText = resumoTurno.total;
+  rCarne.innerText = ultimoResumoTurno.carne;
+  rPeixe.innerText = ultimoResumoTurno.peixe;
+  rVeg.innerText = ultimoResumoTurno.veg;
+  rOpcao.innerText = ultimoResumoTurno.opcao;
+  rTotal.innerText = ultimoResumoTurno.total;
   resumo.style.display = 'flex';
 
   // 3️⃣ Salvar relatório no Firebase (histórico)
@@ -423,7 +423,7 @@ async function fecharCozinha() {
     'relatorios'
   );
 
-  await window.firebaseDB.push(relatorioRef, resumoTurno);
+  await window.firebaseDB.push(relatorioRef, ultimoResumoTurno);
 
   // 4️⃣ Limpar pedidos ativos
   const pedidosRef = window.firebaseDB.ref(
