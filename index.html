@@ -225,7 +225,7 @@ button {
 
 <header>
 🍽️ PAINEL DE PRODUÇÃO
-<button id="fecharCozinha" onclick="fecharCozinha()">Fechar Cozinha</button>
+<button id="fecharCozinha" onclick="confirmarFecho()">Fechar Cozinha</button>
 </header>
 
 <div class="modos">
@@ -280,6 +280,9 @@ button {
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
 const VERSAO_APP = '1.0.0';
 const LOCALE = 'en-US' // ou 'pt-BR'
+
+// 🔐 SENHA DE FECHO
+const SENHA_FECHO = '1234'; // Defina aqui a senha do fecho
 
 /* ==========================
    ESTADO GLOBAL
@@ -437,6 +440,20 @@ async function fecharCozinha() {
   );
 
   await window.firebaseDB.remove(pedidosRef);
+}
+
+function confirmarFecho() {
+  const senha = prompt('🔐 Digite a senha para fechar a cozinha:');
+
+  if (senha === null) return; // cancelado
+
+  if (senha !== SENHA_FECHO) {
+    alert('❌ Senha incorreta!');
+    return;
+  }
+
+  // ✅ Senha correta
+  fecharCozinha();
 }
 
 function gerarPDFResumo() {
