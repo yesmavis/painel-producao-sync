@@ -221,7 +221,7 @@ button {
     <p>🟩 Veg: <strong id="rVeg"></strong></p>
     <p>⚫ Opções: <strong id="rOpcao"></strong></p>
     <p><strong>TOTAL: <span id="rTotal"></span></strong></p>
-    <button onclick="gerarPDFResumo()">📄 Baixar PDF</button>
+    <button onclick="gerarPDFResumo()">Baixar PDF</button>
     <button onclick="location.reload()">Encerrar e reiniciar</button>
   </div>
 </div>
@@ -401,7 +401,7 @@ function gerarPDFResumo() {
   doc.text(RESTAURANTE, 20, 15);
   
   doc.setFontSize(14);
-  doc.text('📊 Resumo do Turno', 20, 25);
+  doc.text('Resumo do Turno', 20, 25);
   
   // Informações
   doc.setFontSize(12);
