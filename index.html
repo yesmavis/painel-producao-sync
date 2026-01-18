@@ -398,25 +398,25 @@ function gerarPDFResumo() {
 
   // Título
   doc.setFontSize(18);
-  doc.text(RESTAURANTE, 20, 15);
+  doc.text(RESTAURANTE, 105, 20, {align: 'center' });
   
   doc.setFontSize(14);
-  doc.text('Resumo do Turno', 20, 25);
+  doc.text('Resumo do Turno', 105, 30, {align: 'center' });
   
   // Informações
   doc.setFontSize(12);
-  doc.text(`Encerrado em: ${data}`, 20, 35);
+  doc.text(`Encerrado em: ${data}`, 20, 45);
 
-  doc.text(`Carne: ${cont.carne}`, 20, 50);
-  doc.text(`Peixe: ${cont.peixe}`, 20, 60);
-  doc.text(`Veg: ${cont.veg}`, 20, 70);
-  doc.text(`Opções: ${cont.opcao}`, 20, 80);
+  doc.text(`Carne: ${cont.carne}`, 20, 60);
+  doc.text(`Peixe: ${cont.peixe}`, 20, 70);
+  doc.text(`Veg: ${cont.veg}`, 20, 80);
+  doc.text(`Opções: ${cont.opcao}`, 20, 90);
 
   doc.setFontSize(14);
   doc.text(
     `TOTAL: ${cont.carne + cont.peixe + cont.veg + cont.opcao}`,
     20,
-    100
+    110
   );
 
   doc.save(`resumo-turno-${Date.now()}.pdf`);
