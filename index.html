@@ -221,6 +221,7 @@ button {
     <p>🟩 Veg: <strong id="rVeg"></strong></p>
     <p>⚫ Opções: <strong id="rOpcao"></strong></p>
     <p><strong>TOTAL: <span id="rTotal"></span></strong></p>
+    <button onclick="gerarPDFResumo()">📄 Baixar PDF</button>
     <button onclick="location.reload()">Encerrar e reiniciar</button>
   </div>
 </div>
@@ -231,6 +232,7 @@ button {
 ========================== */
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
 const VERSAO_APP = '1.0.0';
+const LOCALE = 'en-US' // ou 'pt-BR'
 
 /* ==========================
    ESTADO GLOBAL
@@ -359,7 +361,8 @@ async function fecharCozinha() {
     veg: cont.veg,
     opcao: cont.opcao,
     total: cont.carne + cont.peixe + cont.veg + cont.opcao,
-    encerradoEm: Date.now()
+    encerradoEm: Date.now(),
+    encerradoEmTexto: new Date().toLocaleString(LOCALE)
   };
 
   // 2️⃣ Mostrar resumo na tela
@@ -391,24 +394,29 @@ function gerarPDFResumo() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  const data = new Date().toLocaleString('pt-BR');
+  const data = new Date().toLocaleString(LOCALE);
+
+  // Título
+  doc.setFontSize(18);
+  doc.text(RESTAURANTE, 20, 15);
   
-  doc.setFontSize(16);
-  doc.text(`📊 Resumo do Turno - ${RESTAURANTE}`, 20, 20);
-
+  doc.setFontSize(14);
+  doc.text('📊 Resumo do Turno', 20, 25);
+  
+  // Informações
   doc.setFontSize(12);
-  doc.text(`Encerrado em: ${data}`, 20, 30);
+  doc.text(`Encerrado em: ${data}`, 20, 35);
 
-  doc.text(`Carne: ${cont.carne}`, 20, 45);
-  doc.text(`Peixe: ${cont.peixe}`, 20, 55);
-  doc.text(`Veg: ${cont.veg}`, 20, 65);
-  doc.text(`Opções: ${cont.opcao}`, 20, 75);
+  doc.text(`Carne: ${cont.carne}`, 20, 50);
+  doc.text(`Peixe: ${cont.peixe}`, 20, 60);
+  doc.text(`Veg: ${cont.veg}`, 20, 70);
+  doc.text(`Opções: ${cont.opcao}`, 20, 80);
 
   doc.setFontSize(14);
   doc.text(
     `TOTAL: ${cont.carne + cont.peixe + cont.veg + cont.opcao}`,
     20,
-    95
+    100
   );
 
   doc.save(`resumo-turno-${Date.now()}.pdf`);
