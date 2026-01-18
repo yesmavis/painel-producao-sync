@@ -338,18 +338,40 @@ p.addEventListener('touchend', avancarStatus, { passive: false });
   }
 }
 
-function fecharCozinha(){
-  rCarne.innerText=cont.carne;
-  rPeixe.innerText=cont.peixe;
-  rVeg.innerText=cont.veg;
-  rOpcao.innerText=cont.opcao;
-  rTotal.innerText=cont.carne+cont.peixe+cont.veg+cont.opcao;
-  resumo.style.display='flex';
-}
-</script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+async function fecharCozinha() {
+  // 1️⃣ Montar resumo
+  const resumoTurno = {
+    carne: cont.carne,
+    peixe: cont.peixe,
+    veg: cont.veg,
+    opcao: cont.opcao,
+    total: cont.carne + cont.peixe + cont.veg + cont.opcao,
+    encerradoEm: Date.now()
+  };
+
+  // 2️⃣ Mostrar resumo na tela
+  rCarne.innerText = resumoTurno.carne;
+  rPeixe.innerText = resumoTurno.peixe;
+  rVeg.innerText = resumoTurno.veg;
+  rOpcao.innerText = resumoTurno.opcao;
+  rTotal.innerText = resumoTurno.total;
+  resumo.style.display = 'flex';
+
+  // 3️⃣ Salvar relatório no Firebase (histórico)
+  const relatorioRef = window.firebaseDB.ref(
+    window.firebaseDB.db,
+    'relatorios'
+  );
+
+  await window.firebaseDB.push(relatorioRef, resumoTurno);
+
+  // 4️⃣ Limpar pedidos ativos
+  const pedidosRef = window.firebaseDB.ref(
+    window.firebaseDB.db,
+    'pedidos'
+  );
+
+  await window.firebaseDB.remove(pedidosRef);
 }
 </script>
 <script type="module">
