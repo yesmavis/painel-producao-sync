@@ -325,7 +325,7 @@ function renderPedido(id, pedido) {
   };
 
   const p = document.createElement('div');
-  p.className = 'pedido' + (take ? ' take' : '');
+  p.className = `pedido ${pedido.modo}` + (take ? ' take' : '');
   p.style.setProperty('--base-color', cores[tipo]);
   p.dataset.id = id;
   p.innerText = nomes[tipo] + (take ? ' + TAKE' : '');
