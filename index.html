@@ -252,6 +252,9 @@ function novoPedido(tipo, take) {
 function renderPedido(id, pedido) {
   const { tipo, take, status } = pedido;
 
+  // 🚫 Não renderiza pedidos finalizados
+  if (status === 'finalizado') return;
+
   const cores = {
     carne: '#e53935',
     peixe: '#1e88e5',
@@ -286,32 +289,34 @@ function renderPedido(id, pedido) {
 
   p.appendChild(del);
 
- p.onclick = () => {
-  let novoStatus;
+  // 🔁 Fluxo: preparo → pronto → finalizado
+  p.onclick = () => {
+    let novoStatus;
 
-  if (pedido.status === 'preparo') {
-    novoStatus = 'pronto';
-  } else if (pedido.status === 'pronto') {
-    novoStatus = 'finalizado';
-  } else {
-    return;
+    if (status === 'preparo') {
+      novoStatus = 'pronto';
+    } else if (status === 'pronto') {
+      novoStatus = 'finalizado';
+    } else {
+      return;
+    }
+
+    const pedidoRef = window.firebaseDB.ref(
+      window.firebaseDB.db,
+      'pedidos/' + id
+    );
+
+    window.firebaseDB.set(pedidoRef, {
+      ...pedido,
+      status: novoStatus
+    });
+  };
+
+  if (status === 'preparo') {
+    preparo.appendChild(p);
+  } else if (status === 'pronto') {
+    pronto.appendChild(p);
   }
-
-  const pedidoRef = window.firebaseDB.ref(
-    window.firebaseDB.db,
-    'pedidos/' + id
-  );
-
-  window.firebaseDB.set(pedidoRef, {
-    ...pedido,
-    status: novoStatus
-  });
-};
-
-if (status === 'preparo') {
-  preparo.appendChild(p);
-} else {
-  pronto.appendChild(p);
 }
 
 function fecharCozinha(){
