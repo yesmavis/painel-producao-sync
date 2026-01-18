@@ -287,23 +287,26 @@ function renderPedido(id, pedido) {
   p.appendChild(del);
 
   p.onclick = () => {
-    const novoStatus = status === 'preparo' ? 'pronto' : 'preparo';
-    const pedidoRef = window.firebaseDB.ref(
-      window.firebaseDB.db,
-      'pedidos/' + id
-    );
-    window.firebaseDB.set(pedidoRef, {
-      ...pedido,
-      status: novoStatus
-    });
-  };
+  let novoStatus;
 
   if (status === 'preparo') {
-    preparo.appendChild(p);
+    novoStatus = 'pronto';
+  } else if (status === 'pronto') {
+    novoStatus = 'finalizado';
   } else {
-    pronto.appendChild(p);
+    return;
   }
-}
+
+  const pedidoRef = window.firebaseDB.ref(
+    window.firebaseDB.db,
+    'pedidos/' + id
+  );
+
+  window.firebaseDB.set(pedidoRef, {
+    ...pedido,
+    status: novoStatus
+  });
+};
 
 function fecharCozinha(){
   rCarne.innerText=cont.carne;
