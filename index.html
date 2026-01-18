@@ -286,12 +286,12 @@ function renderPedido(id, pedido) {
 
   p.appendChild(del);
 
-  p.onclick = () => {
+ p.onclick = () => {
   let novoStatus;
 
-  if (status === 'preparo') {
+  if (pedido.status === 'preparo') {
     novoStatus = 'pronto';
-  } else if (status === 'pronto') {
+  } else if (pedido.status === 'pronto') {
     novoStatus = 'finalizado';
   } else {
     return;
@@ -307,6 +307,12 @@ function renderPedido(id, pedido) {
     status: novoStatus
   });
 };
+
+if (status === 'preparo') {
+  preparo.appendChild(p);
+} else {
+  pronto.appendChild(p);
+}
 
 function fecharCozinha(){
   rCarne.innerText=cont.carne;
