@@ -171,6 +171,48 @@ button {
   width:320px;
   text-align:center;
 }
+
+/* =========================
+   BOTÕES DO RESUMO
+========================= */
+
+#resumo .box button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+/* Botão PDF */
+#resumo .btn-pdf {
+  background: #1e88e5;
+  color: #fff;
+}
+
+#resumo .btn-pdf:hover {
+  background: #1565c0;
+}
+
+/* Botão Encerrar */
+#resumo .btn-encerrar {
+  background: #e53935;
+  color: #fff;
+}
+
+#resumo .btn-encerrar:hover {
+  background: #c62828;
+}
+
+/* Clique */
+#resumo .box button:active {
+  transform: scale(0.97);
+}
+
 </style>
 </head>
 
@@ -221,8 +263,8 @@ button {
     <p>🟩 Veg: <strong id="rVeg"></strong></p>
     <p>⚫ Opções: <strong id="rOpcao"></strong></p>
     <p><strong>TOTAL: <span id="rTotal"></span></strong></p>
-    <button onclick="gerarPDFResumo()">Baixar PDF</button>
-    <button onclick="location.reload()">Encerrar e reiniciar</button>
+    <button class="btn-pdf" onclick="gerarPDFResumo()">📄 Baixar PDF</button>
+    <button class="btn-encerrar" onclick="location.reload()">⏹ Encerrar e reiniciar</button>
   </div>
 </div>
 
