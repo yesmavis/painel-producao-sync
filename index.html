@@ -337,7 +337,11 @@ p.addEventListener('touchend', avancarStatus, { passive: false });
     pronto.appendChild(p);
   }
 }
+</script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>  
 async function fecharCozinha() {
   // 1️⃣ Montar resumo
   const resumoTurno = {
@@ -373,7 +377,36 @@ async function fecharCozinha() {
 
   await window.firebaseDB.remove(pedidosRef);
 }
+
+function gerarPDFResumo() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const data = new Date().toLocaleString('pt-BR');
+
+  doc.setFontSize(16);
+  doc.text(`📊 Resumo do Turno - Painel de Produção`, 20, 20);
+
+  doc.setFontSize(12);
+  doc.text(`Encerrado em: ${data}`, 20, 30);
+
+  doc.text(`Carne: ${cont.carne}`, 20, 45);
+  doc.text(`Peixe: ${cont.peixe}`, 20, 55);
+  doc.text(`Veg: ${cont.veg}`, 20, 65);
+  doc.text(`Opções: ${cont.opcao}`, 20, 75);
+
+  doc.setFontSize(14);
+  doc.text(
+    `TOTAL: ${cont.carne + cont.peixe + cont.veg + cont.opcao}`,
+    20,
+    95
+  );
+
+  doc.save(`resumo-turno-${Date.now()}.pdf`);
+}
+
 </script>
+
 <script type="module">
   // Firebase core
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -472,7 +505,6 @@ async function fecharCozinha() {
   });
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </body>
 </html>
