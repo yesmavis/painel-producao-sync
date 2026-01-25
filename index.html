@@ -461,6 +461,9 @@ function logout() {
   document.getElementById('loginSenha').value = '';
   document.getElementById('loginErro').innerText = '';
 
+  document.querySelectorAll('.usuarios button')
+  .forEach(b => b.classList.remove('ativo'));
+
   // Mostra login novamente
   document.getElementById('loginOverlay').style.display = 'flex';
 
