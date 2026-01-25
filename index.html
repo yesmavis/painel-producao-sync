@@ -121,6 +121,22 @@ header {
   cursor:pointer;
 }
 
+#logoutBtn {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  border: 1px solid #555;
+  background: transparent;
+  color: #bbb;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#logoutBtn:hover {
+  background: #333;
+}
+
 .modos {
   display:flex;
   gap:6px;
@@ -322,6 +338,7 @@ button {
 
 <header>
 🍽️ PAINEL DE PRODUÇÃO
+<button id="logoutBtn" onclick="logout()">🚪 Sair</button>
 <button id="fecharCozinha" onclick="confirmarFecho()">Fechar Cozinha</button>
 </header>
 
@@ -426,10 +443,31 @@ function aplicarPermissoes() {
   // 🔒 Apenas cozinha pode fechar
   if (role !== 'cozinha') {
     document.getElementById('fecharCozinha').style.display = 'none';
+  } else {
+    document.getElementById('fecharCozinha').style.display = 'block';
   }
+  
+  // 🚪 Logout só aparece se estiver logado
+  document.getElementById('logoutBtn').style.display = role ? 'block' : 'none';
 }
 
-// Auto login
+function logout() {
+  if (!confirm('Deseja sair do sistema?')) return;
+
+  localStorage.removeItem('usuario_role');
+
+  // Limpa estado
+  usuarioSelecionado = null;
+  document.getElementById('loginSenha').value = '';
+  document.getElementById('loginErro').innerText = '';
+
+  // Mostra login novamente
+  document.getElementById('loginOverlay').style.display = 'flex';
+
+  aplicarPermissoes();
+}
+
+// 🔁 Auto login
 document.addEventListener('DOMContentLoaded', () => {
   const role = localStorage.getItem('usuario_role');
   if (role) {
