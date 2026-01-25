@@ -441,14 +441,16 @@ function aplicarPermissoes() {
   const role = localStorage.getItem('usuario_role');
 
   // 🔒 Apenas cozinha pode fechar
-  if (role !== 'cozinha') {
-    document.getElementById('fecharCozinha').style.display = 'none';
-  } else {
-    document.getElementById('fecharCozinha').style.display = 'block';
+  const btnFechar = document.getElementById('fecharCozinha');
+  if (btnFechar) {
+    btnFechar.style.display = role === 'cozinha' ? 'block' : 'none';
   }
-  
+
   // 🚪 Logout só aparece se estiver logado
-  document.getElementById('logoutBtn').style.display = role ? 'block' : 'none';
+  const btnLogout = document.getElementById('logoutBtn');
+  if (btnLogout) {
+    btnLogout.style.display = role ? 'block' : 'none';
+  }
 }
 
 function logout() {
