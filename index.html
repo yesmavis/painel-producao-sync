@@ -379,6 +379,63 @@ const LOCALE = 'en-US' // ou 'pt-BR'
 // 🔐 SENHA DE FECHO
 const SENHA_FECHO = '1234'; // Defina aqui a senha do fecho
 
+/* =========================
+   LOGIN / PERMISSÕES
+========================= */
+const SENHAS = {
+  balcao: '1111',
+  cozinha: '2222'
+};
+
+let usuarioSelecionado = null;
+
+function selecionarUsuario(role) {
+  usuarioSelecionado = role;
+  document.querySelectorAll('.usuarios button')
+    .forEach(b => b.classList.remove('ativo'));
+
+  event.target.classList.add('ativo');
+}
+
+function fazerLogin() {
+  const senha = document.getElementById('loginSenha').value;
+  const erro = document.getElementById('loginErro');
+
+  if (!usuarioSelecionado) {
+    erro.innerText = 'Selecione um usuário';
+    return;
+  }
+
+  if (senha !== SENHAS[usuarioSelecionado]) {
+    erro.innerText = 'Senha incorreta';
+    return;
+  }
+
+  // ✅ Login OK
+  localStorage.setItem('usuario_role', usuarioSelecionado);
+  document.getElementById('loginOverlay').style.display = 'none';
+
+  aplicarPermissoes();
+}
+
+function aplicarPermissoes() {
+  const role = localStorage.getItem('usuario_role');
+
+  // 🔒 Apenas cozinha pode fechar
+  if (role !== 'cozinha') {
+    document.getElementById('fecharCozinha').style.display = 'none';
+  }
+}
+
+// Auto login
+document.addEventListener('DOMContentLoaded', () => {
+  const role = localStorage.getItem('usuario_role');
+  if (role) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    aplicarPermissoes();
+  }
+});
+
 /* ==========================
    ESTADO GLOBAL
 ========================== */
