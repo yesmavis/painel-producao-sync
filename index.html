@@ -364,6 +364,7 @@ button {
     <div class="usuarios">
       <button onclick="selecionarUsuario('balcao')">🧾 Balcão</button>
       <button onclick="selecionarUsuario('cozinha')">👨‍🍳 Cozinha</button>
+      <button onclick="selecionarUsuario('admin')">🛠 Admin</button>
     </div>
 
     <div class="pin">
@@ -474,7 +475,10 @@ document.querySelectorAll('.keypad button').forEach(btn => {
 
     if (v === 'C') {
       pin = [];
-    } else if (v !== '✔' && pin.length < 4) {
+    } else if (v === '✔') {
+      fazerLogin();
+      return;
+    } else if (pin.length < 4) {
       pin.push(v);
     }
 
@@ -523,13 +527,12 @@ function fazerLogin() {
 function aplicarPermissoes() {
   const role = localStorage.getItem('usuario_role');
 
-  // 🔒 Apenas cozinha pode fechar
   const btnFechar = document.getElementById('fecharCozinha');
   if (btnFechar) {
-    btnFechar.style.display = role === 'cozinha' ? 'block' : 'none';
+    btnFechar.style.display =
+      (role === 'cozinha' || role === 'admin') ? 'block' : 'none';
   }
 
-  // 🚪 Logout só aparece se estiver logado
   const btnLogout = document.getElementById('logoutBtn');
   if (btnLogout) {
     btnLogout.style.display = role ? 'block' : 'none';
@@ -543,11 +546,13 @@ function logout() {
 
   // Limpa estado
   usuarioSelecionado = null;
-  document.getElementById('loginSenha').value = '';
+  pin = [];
+  atualizarPin();
+
   document.getElementById('loginErro').innerText = '';
 
   document.querySelectorAll('.usuarios button')
-  .forEach(b => b.classList.remove('ativo'));
+    .forEach(b => b.classList.remove('ativo'));
 
   // Mostra login novamente
   document.getElementById('loginOverlay').style.display = 'flex';
@@ -644,6 +649,9 @@ function renderPedido(id, pedido) {
   
   // 🔁 Fluxo: preparo → pronto → finalizado
   function avancarStatus(e) {
+  const role = localStorage.getItem('usuario_role');
+  if (role !== 'cozinha' && role !== 'admin') return;
+
   e.preventDefault();
   e.stopPropagation();
 
