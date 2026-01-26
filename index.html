@@ -137,6 +137,49 @@ header {
   background: #333;
 }
 
+.pin {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.pin span {
+  width: 14px;
+  height: 14px;
+  background: #555;
+  border-radius: 50%;
+}
+
+.pin span.filled {
+  background: #fff;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.keypad button {
+  height: 48px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  background: #333;
+  color: white;
+  font-weight: bold;
+}
+
+.keypad .clear {
+  background: #c62828;
+}
+
+.keypad .ok {
+  background: #2e7d32;
+}
+
 .modos {
   display:flex;
   gap:6px;
@@ -323,12 +366,18 @@ button {
       <button onclick="selecionarUsuario('cozinha')">👨‍🍳 Cozinha</button>
     </div>
 
-    <input
-      type="password"
-      id="loginSenha"
-      placeholder="Digite a senha"
-      inputmode="numeric"
-    />
+    <div class="pin">
+      <span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="keypad">
+      <button>1</button><button>2</button><button>3</button>
+      <button>4</button><button>5</button><button>6</button>
+      <button>7</button><button>8</button><button>9</button>
+      <button class="clear">C</button>
+      <button>0</button>
+      <button class="ok">✔</button>
+    </div>
 
     <button class="btn-login" onclick="fazerLogin()">Entrar</button>
 
@@ -403,7 +452,8 @@ const SENHA_FECHO = '1234'; // Defina aqui a senha do fecho
 ========================= */
 const SENHAS = {
   balcao: '1111',
-  cozinha: '2222'
+  cozinha: '2222',
+  admin: '9999'
 };
 
 let usuarioSelecionado = null;
@@ -416,23 +466,56 @@ function selecionarUsuario(role) {
   event.target.classList.add('ativo');
 }
 
+let pin = [];
+
+document.querySelectorAll('.keypad button').forEach(btn => {
+  btn.onclick = () => {
+    const v = btn.textContent;
+
+    if (v === 'C') {
+      pin = [];
+    } else if (v !== '✔' && pin.length < 4) {
+      pin.push(v);
+    }
+
+    atualizarPin();
+  };
+});
+
+function atualizarPin() {
+  document.querySelectorAll('.pin span').forEach((dot, i) => {
+    dot.classList.toggle('filled', !!pin[i]);
+  });
+}
+
 function fazerLogin() {
-  const senha = document.getElementById('loginSenha').value;
   const erro = document.getElementById('loginErro');
+  const senha = pin.join('');
 
   if (!usuarioSelecionado) {
     erro.innerText = 'Selecione um usuário';
     return;
   }
 
-  if (senha !== SENHAS[usuarioSelecionado]) {
-    erro.innerText = 'Senha incorreta';
+  if (senha.length !== 4) {
+    erro.innerText = 'Digite os 4 números';
     return;
   }
 
-  // ✅ Login OK
+  if (senha !== SENHAS[usuarioSelecionado]) {
+    erro.innerText = 'Senha incorreta';
+    pin = [];
+    atualizarPin();
+    return;
+  }
+
+  // ✅ LOGIN OK
   localStorage.setItem('usuario_role', usuarioSelecionado);
   document.getElementById('loginOverlay').style.display = 'none';
+
+  pin = [];
+  atualizarPin();
+  erro.innerText = '';
 
   aplicarPermissoes();
 }
