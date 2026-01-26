@@ -447,6 +447,31 @@ const SENHAS = {
 
 let usuarioSelecionado = null;
 
+function getRole() {
+  return localStorage.getItem('usuario_role');
+}
+
+function isAdmin() {
+  return getRole() === 'admin';
+}
+
+function podeCriarPedido() {
+  return getRole() === 'balcao' || isAdmin();
+}
+
+function podeMoverPedido() {
+  return getRole() === 'cozinha' || isAdmin();
+}
+
+function podeFinalizarPedido() {
+  const role = getRole();
+  return role === 'balcao' || role === 'admin';
+}
+
+function podeFecharCozinha() {
+  return getRole() === 'cozinha' || isAdmin();
+}
+
 function selecionarUsuario(role) {
   usuarioSelecionado = role;
   document.querySelectorAll('.usuarios button')
@@ -580,6 +605,11 @@ function atualizar(){
 }
 
 function novoPedido(tipo, take) {
+  if (!podeCriarPedido()) {
+    alert('🚫 Você não tem permissão para criar pedidos.');
+    return;
+  }
+
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
     window.firebaseDB.criarPedido(tipo, take);
   }
@@ -637,21 +667,28 @@ function renderPedido(id, pedido) {
   
   // 🔁 Fluxo: preparo → pronto → finalizado
   function avancarStatus(e) {
-  const role = localStorage.getItem('usuario_role');
-  if (role !== 'cozinha' && role !== 'admin') return;
-
   e.preventDefault();
   e.stopPropagation();
 
-  let novoStatus;
+  const role = getRole();
 
+  // ⛔ Balcão não move pedidos
+  if (!podeMoverPedido()) return;
+
+  let novoStatus = null;
+
+  // Preparo → Pronto (cozinha + admin)
   if (pedido.status === 'preparo') {
     novoStatus = 'pronto';
-  } else if (pedido.status === 'pronto') {
-    novoStatus = 'finalizado';
-  } else {
-    return;
   }
+
+  // Pronto → Finalizado (APENAS admin)
+  else if (pedido.status === 'pronto') {
+    if (!podeFinalizarPedido()) return;
+    novoStatus = 'finalizado';
+  }
+
+  if (!novoStatus) return;
 
   const pedidoRef = window.firebaseDB.ref(
     window.firebaseDB.db,
