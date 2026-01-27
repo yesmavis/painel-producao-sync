@@ -456,11 +456,13 @@ function isAdmin() {
 }
 
 function podeCriarPedido() {
-  return getRole() === 'balcao' || isAdmin();
+  const role = getRole();
+  return role === 'balcao' || role === 'admin';
 }
 
 function podeMoverPedido() {
-  return getRole() === 'cozinha' || isAdmin();
+  const role = getRole();
+  return role === 'cozinha' || role === 'admin';
 }
 
 function podeFinalizarPedido() {
@@ -468,8 +470,14 @@ function podeFinalizarPedido() {
   return role === 'balcao' || role === 'admin';
 }
 
+function podeExcluirPedido() {
+  const role = getRole();
+  return role === 'balcao' || role === 'admin';
+}
+
 function podeFecharCozinha() {
-  return getRole() === 'cozinha' || isAdmin();
+  const role = getRole();
+  return role === 'cozinha' || role === 'admin';
 }
 
 function selecionarUsuario(role) {
@@ -641,6 +649,7 @@ function renderPedido(id, pedido) {
   p.dataset.id = id;
   p.innerText = nomes[tipo] + (take ? ' + TAKE' : '');
 
+  if (podeExcluirPedido()) {
   const del = document.createElement('span');
   del.className = 'excluir';
   del.innerText = '❌';
@@ -655,15 +664,13 @@ function renderPedido(id, pedido) {
     );
 
     window.firebaseDB.remove(pedidoRef);
-}
+  }
 
-// Desktop / Android
   del.onclick = excluirPedido;
-
-// iOS
   del.addEventListener('touchend', excluirPedido, { passive: false });
 
   p.appendChild(del);
+}
   
   // 🔁 Fluxo: preparo → pronto → finalizado
   function avancarStatus(e) {
