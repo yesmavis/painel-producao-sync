@@ -680,16 +680,15 @@ function renderPedido(id, pedido) {
   const role = getRole();
 
   // ⛔ Balcão não move pedidos
-  if (!podeMoverPedido()) return;
-
-  let novoStatus = null;
+    let novoStatus = null;
 
   // Preparo → Pronto (cozinha + admin)
   if (pedido.status === 'preparo') {
+    if (!podeMoverPedido)) return;
     novoStatus = 'pronto';
   }
 
-  // Pronto → Finalizado (APENAS admin)
+  // Pronto → Finalizado (balcao e admin)
   else if (pedido.status === 'pronto') {
     if (!podeFinalizarPedido()) return;
     novoStatus = 'finalizado';
