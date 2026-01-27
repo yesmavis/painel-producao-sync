@@ -40,81 +40,19 @@ header {
 #loginOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.75);
+  background: #111;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* ===== USUÁRIOS COM AVATAR ===== */
-.usuarios {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.usuario {
-  flex: 1;
-  background: #2b2b2b;
-  border-radius: 16px;
-  padding: 14px 8px;
-  text-align: center;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: all 0.2s ease;
-}
-
-.usuario:hover {
-  opacity: 0.9;
-}
-
-.usuario.ativo {
-  opacity: 1;
-  outline: 2px solid #ffca28;
-}
-
-.avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  margin: 0 auto 8px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  color: #fff;
-}
-
-/* Cores por perfil */
-.avatar-balcao {
-  background: #1e88e5;
-}
-
-.avatar-cozinha {
-  background: #43a047;
-}
-
-.avatar-admin {
-  background: #ab47bc;
-}
-
-.usuario span {
-  display: block;
-  font-size: 14px;
-  font-weight: bold;
-  color: #eee;
+  z-index: 9999;
 }
 
 .login-box {
-  background: #1f1f1f;
-  padding: 24px;
+  background: #222;
+  padding: 25px;
   border-radius: 16px;
-  width: 360px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
+  width: 300px;
+  text-align: center;
 }
 
 .login-box h2 {
@@ -192,7 +130,7 @@ header {
 .pin {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 15px;
 }
 
@@ -210,7 +148,7 @@ header {
 .keypad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
@@ -414,22 +352,10 @@ button {
     <h2>🔐 Acesso ao Sistema</h2>
 
     <div class="usuarios">
-      <div class="usuario" onclick="selecionarUsuario('balcao', this)">
-        <div class="avatar avatar-balcao">🧾</div>
-        <span>Balcão</span>
-      </div>
-
-      <div class="usuario" onclick="selecionarUsuario('cozinha', this)">
-        <div class="avatar avatar-cozinha">👨‍🍳</div>
-        <span>Cozinha</span>
-      </div>
-
-      <div class="usuario" onclick="selecionarUsuario('admin', this)">
-        <div class="avatar avatar-admin">🛠</div>
-        <span>Admin</span>
-      </div>
+      <button onclick="selecionarUsuario('balcao')">🧾 Balcão</button>
+      <button onclick="selecionarUsuario('cozinha')">👨‍🍳 Cozinha</button>
+      <button onclick="selecionarUsuario('admin')">🛠 Admin</button>
     </div>
-  </div>
 
     <div class="pin">
       <span></span><span></span><span></span><span></span>
@@ -554,13 +480,12 @@ function podeFecharCozinha() {
   return role === 'cozinha' || role === 'admin';
 }
 
-function selecionarUsuario(role, el) {
+function selecionarUsuario(role) {
   usuarioSelecionado = role;
+  document.querySelectorAll('.usuarios button')
+    .forEach(b => b.classList.remove('ativo'));
 
-  document.querySelectorAll('.usuario')
-    .forEach(u => u.classList.remove('ativo'));
-
-  el.classList.add('ativo');
+  event.target.classList.add('ativo');
 }
 
 let pin = [];
@@ -755,15 +680,16 @@ function renderPedido(id, pedido) {
   const role = getRole();
 
   // ⛔ Balcão não move pedidos
-    let novoStatus = null;
+  if (!podeMoverPedido()) return;
+
+  let novoStatus = null;
 
   // Preparo → Pronto (cozinha + admin)
   if (pedido.status === 'preparo') {
-    if (!podeMoverPedido()) return;
     novoStatus = 'pronto';
   }
 
-  // Pronto → Finalizado (balcao e admin)
+  // Pronto → Finalizado (APENAS admin)
   else if (pedido.status === 'pronto') {
     if (!podeFinalizarPedido()) return;
     novoStatus = 'finalizado';
@@ -1019,4 +945,3 @@ function gerarPDFResumo() {
 
 </body>
 </html>
-
