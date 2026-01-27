@@ -47,6 +47,66 @@ header {
   z-index: 9999;
 }
 
+/* ===== USUÁRIOS COM AVATAR ===== */
+.usuarios {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.usuario {
+  flex: 1;
+  background: #2b2b2b;
+  border-radius: 16px;
+  padding: 14px 8px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.usuario:hover {
+  opacity: 0.9;
+}
+
+.usuario.ativo {
+  opacity: 1;
+  outline: 2px solid #ffca28;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 8px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+}
+
+/* Cores por perfil */
+.avatar-balcao {
+  background: #1e88e5;
+}
+
+.avatar-cozinha {
+  background: #43a047;
+}
+
+.avatar-admin {
+  background: #ab47bc;
+}
+
+.usuario span {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  color: #eee;
+}
+
 .login-box {
   background: #222;
   padding: 25px;
@@ -352,10 +412,22 @@ button {
     <h2>🔐 Acesso ao Sistema</h2>
 
     <div class="usuarios">
-      <button onclick="selecionarUsuario('balcao')">🧾 Balcão</button>
-      <button onclick="selecionarUsuario('cozinha')">👨‍🍳 Cozinha</button>
-      <button onclick="selecionarUsuario('admin')">🛠 Admin</button>
+      <div class="usuario" onclick="selecionarUsuario('balcao', this)">
+        <div class="avatar avatar-balcao">🧾</div>
+        <span>Balcão</span>
+      </div>
+
+      <div class="usuario" onclick="selecionarUsuario('cozinha', this)">
+        <div class="avatar avatar-cozinha">👨‍🍳</div>
+        <span>Cozinha</span>
+      </div>
+
+      <div class="usuario" onclick="selecionarUsuario('admin', this)">
+        <div class="avatar avatar-admin">🛠</div>
+        <span>Admin</span>
+      </div>
     </div>
+  </div>
 
     <div class="pin">
       <span></span><span></span><span></span><span></span>
@@ -480,12 +552,13 @@ function podeFecharCozinha() {
   return role === 'cozinha' || role === 'admin';
 }
 
-function selecionarUsuario(role) {
+function selecionarUsuario(role, el) {
   usuarioSelecionado = role;
-  document.querySelectorAll('.usuarios button')
-    .forEach(b => b.classList.remove('ativo'));
 
-  event.target.classList.add('ativo');
+  document.querySelectorAll('.usuario')
+    .forEach(u => u.classList.remove('ativo'));
+
+  el.classList.add('ativo');
 }
 
 let pin = [];
