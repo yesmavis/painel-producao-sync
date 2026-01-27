@@ -684,7 +684,7 @@ function renderPedido(id, pedido) {
 
   // Preparo → Pronto (cozinha + admin)
   if (pedido.status === 'preparo') {
-    if (!podeMoverPedido)) return;
+    if (!podeMoverPedido()) return;
     novoStatus = 'pronto';
   }
 
