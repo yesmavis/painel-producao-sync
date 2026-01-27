@@ -352,10 +352,21 @@ button {
     <h2>🔐 Acesso ao Sistema</h2>
 
     <div class="usuarios">
-      <button onclick="selecionarUsuario('balcao')">🧾 Balcão</button>
-      <button onclick="selecionarUsuario('cozinha')">👨‍🍳 Cozinha</button>
-      <button onclick="selecionarUsuario('admin')">🛠 Admin</button>
-    </div>
+      <div class="usuario" onclick="selecionarUsuario('balcao', this)">
+        <div class="avatar avatar-balcao">💁🏼‍♀️</div>
+        <span>Balcão</span>
+      </div>
+
+      <div class="usuario" onclick="selecionarUsuario('cozinha', this)">
+        <div class="avatar avatar-cozinha">👨‍🍳</div>
+        <span>Cozinha</span>
+      </div>
+
+      <div class="usuario" onclick="selecionarUsuario('admin', this)">
+        <div class="avatar avatar-admin">🤵🏼‍♀️</div>
+        <span>Admin</span>
+      </div>
+  </div>
 
     <div class="pin">
       <span></span><span></span><span></span><span></span>
