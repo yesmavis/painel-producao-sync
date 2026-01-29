@@ -342,6 +342,45 @@ button {
   transform: scale(0.97);
 }
 
+/* =========================
+   AVATARES LOGIN
+========================= */
+.usuarios.avatars {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  flex: 1;
+  background: #333;
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+}
+
+.avatar img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin-bottom: 6px;
+}
+
+.avatar span {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.avatar.ativo {
+  opacity: 1;
+  outline: 2px solid #ffca28;
+}
+
 </style>
 </head>
 
@@ -351,10 +390,21 @@ button {
   <div class="login-box">
     <h2>🔐 Acesso ao Sistema</h2>
 
-    <div class="usuarios">
-      <button onclick="selecionarUsuario('balcao')">🧾 Balcão</button>
-      <button onclick="selecionarUsuario('cozinha')">👨‍🍳 Cozinha</button>
-      <button onclick="selecionarUsuario('admin')">🛠 Admin</button>
+    <div class="usuarios avatars">
+      <div class="avatar" onclick="selecionarUsuario('balcao', this)">
+        <img src="avatars/balcao.png" alt="Balcão">
+        <span>Balcão</span>
+      </div>
+
+      <div class="avatar" onclick="selecionarUsuario('cozinha', this)">
+        <img src="avatars/cozinha.png" alt="Cozinha">
+        <span>Cozinha</span>
+      </div>
+
+      <div class="avatar" onclick="selecionarUsuario('admin', this)">
+        <img src="avatars/admin.png" alt="Admin">
+        <span>Admin</span>
+      </div>
     </div>
 
     <div class="pin">
@@ -480,12 +530,13 @@ function podeFecharCozinha() {
   return role === 'cozinha' || role === 'admin';
 }
 
-function selecionarUsuario(role) {
+function selecionarUsuario(role, el) {
   usuarioSelecionado = role;
-  document.querySelectorAll('.usuarios button')
-    .forEach(b => b.classList.remove('ativo'));
 
-  event.target.classList.add('ativo');
+  document.querySelectorAll('.avatar')
+    .forEach(a => a.classList.remove('ativo'));
+
+  el.classList.add('ativo');
 }
 
 let pin = [];
