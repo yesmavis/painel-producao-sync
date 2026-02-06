@@ -829,6 +829,8 @@ async function fecharCozinha() {
       opcao: cont.take.opcao
     },
 
+    origem: cont.origem,
+
     total: cont.carne + cont.peixe + cont.veg + cont.opcao,
     encerradoEm: Date.now(),
     encerradoEmTexto: new Date().toLocaleString(LOCALE)
@@ -922,11 +924,73 @@ function gerarPDFResumo() {
   y += 12;
 
   // Dados
-  doc.setFontSize(12);
-  doc.text(`Carne: ${ultimoResumoTurno.carne}`, 30, y); y += 8;
-  doc.text(`Peixe: ${ultimoResumoTurno.peixe}`, 30, y); y += 8;
-  doc.text(`Veg: ${ultimoResumoTurno.veg}`, 30, y); y += 8;
-  doc.text(`Opções: ${ultimoResumoTurno.opcao}`, 30, y); y += 12;
+  function blocoPrato(nome, total, take, origem) {
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${nome}: ${total}`, 30, y);
+    y += 6;
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Take: ${take}`, 40, y);
+    y += 6;
+
+    doc.setFontSize(10);
+    doc.text(
+      `Fila: ${origem.fila} | Encomenda: ${origem.encomenda} | Senha: ${origem.senha}`,
+      40,
+      y
+    );
+
+    y += 10;
+    doc.setFontSize(12);
+  }
+
+  // 🔴 Carne
+  blocoPrato(
+    'Carne',
+    ultimoResumoTurno.carne,
+    ultimoResumoTurno.take.carne,
+    {
+      fila: ultimoResumoTurno.origem.fila.carne,
+      encomenda: ultimoResumoTurno.origem.encomenda.carne,
+      senha: ultimoResumoTurno.origem.senha.carne
+    }
+  );
+
+  // 🟦 Peixe
+  blocoPrato(
+    'Peixe',
+    ultimoResumoTurno.peixe,
+    ultimoResumoTurno.take.peixe,
+    {
+      fila: ultimoResumoTurno.origem.fila.peixe,
+      encomenda: ultimoResumoTurno.origem.encomenda.peixe,
+      senha: ultimoResumoTurno.origem.senha.peixe
+    }
+  );
+
+  // 🟩 Veg
+  blocoPrato(
+    'Veg',
+    ultimoResumoTurno.veg,
+    ultimoResumoTurno.take.veg,
+    {
+      fila: ultimoResumoTurno.origem.fila.veg,
+      encomenda: ultimoResumoTurno.origem.encomenda.veg,
+      senha: ultimoResumoTurno.origem.senha.veg
+    }
+  );
+
+  // ⚫ Opções
+  blocoPrato(
+    'Opções',
+    ultimoResumoTurno.opcao,
+    ultimoResumoTurno.take.opcao,
+    {
+      fila: ultimoResumoTurno.origem.fila.opcao,
+      encomenda: ultimoResumoTurno.origem.encomenda.opcao,
+      senha: ultimoResumoTurno.origem.senha.opcao
+    }
+  );
 
   doc.line(20, y, 190, y);
   y += 12;
