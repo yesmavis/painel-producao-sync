@@ -658,11 +658,33 @@ const cont = {
   peixe: 0,
   veg: 0,
   opcao: 0,
+
   take: {
     carne: 0,
     peixe: 0,
     veg: 0,
     opcao: 0
+  },
+
+  origem: {
+    fila: {
+      carne: 0,
+      peixe: 0,
+      veg: 0,
+      opcao: 0
+    },
+    encomenda: {
+      carne: 0,
+      peixe: 0,
+      veg: 0,
+      opcao: 0
+    },
+    senha: {
+      carne: 0,
+      peixe: 0,
+      veg: 0,
+      opcao: 0
+    }
   }
 };
 let ultimoResumoTurno = null;
@@ -983,6 +1005,14 @@ function gerarPDFResumo() {
   cont.take.veg = 0;
   cont.take.opcao = 0;
 
+  // 🆕 limpa contadores de origem
+  Object.keys(cont.origem).forEach(origem => {
+    Object.keys(cont.origem[origem]).forEach(tipo => {
+      cont.origem[origem][tipo] = 0;r
+    });
+  });
+
+
   const dados = snapshot.val();
   if (!dados) {
     atualizar();
@@ -996,8 +1026,13 @@ function gerarPDFResumo() {
       cont.take[pedido.tipo]++;
     }
 
+    if (pedido.modo && cont.origem[pedido.modo]) {
+      cont.origem[pedido.modo][pedido.tipo]++;
+    }
+
     renderPedido(id, pedido);
   });
+
 
   atualizar();
 });
