@@ -829,7 +829,7 @@ async function fecharCozinha() {
       opcao: cont.take.opcao
     },
 
-    origem: cont.origem,
+    origem: JSON.parse(JSON.stringify(cont.origem)),
 
     total: cont.carne + cont.peixe + cont.veg + cont.opcao,
     encerradoEm: Date.now(),
