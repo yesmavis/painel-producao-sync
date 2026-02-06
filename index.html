@@ -465,10 +465,17 @@ button {
 <div id="resumo">
   <div class="box">
     <h2>📊 Resumo do Turno</h2>
-    <p>🔴 Carne: <strong id="rCarne"></strong></p>
-    <p>🟦 Peixe: <strong id="rPeixe"></strong></p>
-    <p>🟩 Veg: <strong id="rVeg"></strong></p>
-    <p>⚫ Opções: <strong id="rOpcao"></strong></p>
+    <p>🔴 Carne: <strong id="rCarne"></strong><br>
+    <small>Take: <strong id="rCarneTake"></strong></small></p>
+
+    <p>🟦 Peixe: <strong id="rPeixe"></strong><br>
+    <small>Take: <strong id="rPeixeTake"></strong></small></p>
+
+    <p>🟩 Veg: <strong id="rVeg"></strong><br>
+    <small>Take: <strong id="rVegTake"></strong></small></p>
+
+    <p>⚫ Opções: <strong id="rOpcao"></strong><br>
+    <small>Take: <strong id="rOpcaoTake"></strong></small></p>
     <p><strong>TOTAL: <span id="rTotal"></span></strong></p>
     <button class="btn-pdf" onclick="gerarPDFResumo()">📄 Baixar PDF</button>
     <button class="btn-encerrar" onclick="location.reload()">⏹ Encerrar e reiniciar</button>
@@ -646,7 +653,18 @@ document.addEventListener('DOMContentLoaded', () => {
 ========================== */
 let modo='fila';
 let numero=0;
-const cont={carne:0,peixe:0,veg:0,opcao:0};
+const cont = {
+  carne: 0,
+  peixe: 0,
+  veg: 0,
+  opcao: 0,
+  take: {
+    carne: 0,
+    peixe: 0,
+    veg: 0,
+    opcao: 0
+  }
+};
 let ultimoResumoTurno = null;
 
 
@@ -781,6 +799,14 @@ async function fecharCozinha() {
     peixe: cont.peixe,
     veg: cont.veg,
     opcao: cont.opcao,
+
+    take: {
+      carne: cont.take.carne,
+      peixe: cont.take.peixe,
+      veg: cont.take.veg,
+      opcao: cont.take.opcao
+    },
+
     total: cont.carne + cont.peixe + cont.veg + cont.opcao,
     encerradoEm: Date.now(),
     encerradoEmTexto: new Date().toLocaleString(LOCALE)
@@ -791,6 +817,12 @@ async function fecharCozinha() {
   rPeixe.innerText = ultimoResumoTurno.peixe;
   rVeg.innerText = ultimoResumoTurno.veg;
   rOpcao.innerText = ultimoResumoTurno.opcao;
+
+  rCarneTake.innerText = ultimoResumoTurno.take.carne;
+  rPeixeTake.innerText = ultimoResumoTurno.take.peixe;
+  rVegTake.innerText = ultimoResumoTurno.take.veg;
+  rOpcaoTake.innerText = ultimoResumoTurno.take.opcao;
+
   rTotal.innerText = ultimoResumoTurno.total;
   resumo.style.display = 'flex';
 
@@ -946,6 +978,11 @@ function gerarPDFResumo() {
   cont.veg = 0;
   cont.opcao = 0;
 
+  cont.take.carne = 0;
+  cont.take.peixe = 0;
+  cont.take.veg = 0;
+  cont.take.opcao = 0;
+
   const dados = snapshot.val();
   if (!dados) {
     atualizar();
@@ -954,6 +991,11 @@ function gerarPDFResumo() {
 
   Object.entries(dados).forEach(([id, pedido]) => {
     cont[pedido.tipo]++;
+
+    if (pedido.take) {
+      cont.take[pedido.tipo]++;
+    }
+
     renderPedido(id, pedido);
   });
 
