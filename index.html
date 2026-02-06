@@ -781,9 +781,21 @@ function renderPedido(id, pedido) {
   // Pronto → Finalizado (balcao e admin)
   else if (pedido.status === 'pronto') {
     if (!podeFinalizarPedido()) return;
+
+    // ✅ CONTABILIZA ORIGEM NO FECHO REAL
+    cont[pedido.tipo]++;
+
+    if (pedido.take) {
+      cont.take[pedido.tipo]++;
+    }
+
+    if (pedido.modo && cont.origem[pedido.modo]) {
+      cont.origem[pedido.modo][pedido.tipo]++;
+    }
+
     novoStatus = 'finalizado';
   }
-
+    
   if (!novoStatus) return;
 
   const pedidoRef = window.firebaseDB.ref(
