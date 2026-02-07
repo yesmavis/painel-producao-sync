@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -905,7 +905,9 @@ function gerarPDFResumo() {
   // Configurações de dimensão
   const pageWidth = 210;
   const marginX = 10;
-  const contentWidth = pageWidth - (marginX * 2);
+  // Largura total disponível
+  const totalContentWidth = pageWidth - (marginX * 2); 
+  
   let currentY = 0;
 
   // Cores (RGB)
@@ -927,35 +929,39 @@ function gerarPDFResumo() {
   /* =========================
      1. CABEÇALHO (HEADER)
   ========================= */
-  // Fundo escuro
   doc.setFillColor(...colors.bgHeader);
   doc.rect(0, 0, pageWidth, 45, 'F');
 
-  // Texto: Nome do Restaurante
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.text(RESTAURANTE, pageWidth / 2, 18, { align: 'center' });
 
-  // Texto: Resumo do Turno
   doc.setFontSize(16);
   doc.setFont('helvetica', 'normal');
   doc.text("Resumo do Turno", pageWidth / 2, 28, { align: 'center' });
 
-  // Texto: Data
   doc.setFontSize(10);
   doc.setTextColor(200, 200, 200);
   doc.text(`Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`, pageWidth / 2, 38, { align: 'center' });
 
-  currentY = 55; // Posição inicial dos cards
+  currentY = 55; 
 
   /* =========================
      2. FUNÇÃO DESENHAR CARD
   ========================= */
   function drawCard(label, typeKey, colorRGB) {
-    const cardHeight = 35; // Altura total do bloco
-    const headerHeight = 12; // Altura da barra colorida
-    const rowHeight = 11.5; // Altura das linhas de dados
+    const cardHeight = 35; 
+    const headerHeight = 12; 
+    const rowHeight = 11.5; 
+    
+    // Configurações da Barra Vertical
+    const barWidth = 5;  // Largura da barra colorida
+    const gap = 3;       // Espaço entre a barra e o cartão
+    
+    // O cartão começa DEPOIS da barra e do gap
+    const cardStartX = marginX + barWidth + gap;
+    const cardWidth = totalContentWidth - barWidth - gap;
 
     // Dados
     const total = ultimoResumoTurno[typeKey];
@@ -964,60 +970,63 @@ function gerarPDFResumo() {
     const enc = ultimoResumoTurno.origem.encomenda[typeKey];
     const senha = ultimoResumoTurno.origem.senha[typeKey];
 
-    // --- Fundo Geral do Card (Sombra leve simulada com cinza claro atrás) ---
-    doc.setFillColor(230, 230, 230);
-    doc.rect(marginX + 1, currentY + 1, contentWidth, cardHeight, 'F');
-    doc.setFillColor(255, 255, 255);
-    doc.rect(marginX, currentY, contentWidth, cardHeight, 'F');
+    // --- 1. BARRA VERTICAL LATERAL ---
+    doc.setFillColor(...colorRGB);
+    doc.rect(marginX, currentY, barWidth, cardHeight, 'F');
 
-    // --- Barra Colorida (Título) ---
-    // A imagem tem um corte inclinado. Vamos simular desenhando um poligono.
+    // --- 2. FUNDO DO CARTÃO (Sombra leve + Branco) ---
+    // Sombra
+    doc.setFillColor(230, 230, 230);
+    doc.rect(cardStartX + 1, currentY + 1, cardWidth, cardHeight, 'F');
+    // Branco
+    doc.setFillColor(255, 255, 255);
+    doc.rect(cardStartX, currentY, cardWidth, cardHeight, 'F');
+
+    // --- 3. CABEÇALHO INCLINADO (Dentro do cartão) ---
     doc.setFillColor(...colorRGB);
     
-    // Largura da faixa colorida (aprox 35% do card)
+    // Largura da faixa colorida no topo
     const ribbonWidth = 70; 
     
-    // Desenha a forma da fita com ponta inclinada
+    // Polígono inclinado começando em cardStartX
     doc.lines([
-      [ribbonWidth, 0],         // Topo
-      [-10, headerHeight],      // Inclinação para baixo/esquerda
-      [-(ribbonWidth - 10), 0], // Base volta para esquerda
-      [0, -headerHeight]        // Fecha no topo
-    ], marginX, currentY, [1, 1], 'F', true);
+      [ribbonWidth, 0],         
+      [-10, headerHeight],      
+      [-(ribbonWidth - 10), 0], 
+      [0, -headerHeight]        
+    ], cardStartX, currentY, [1, 1], 'F', true);
 
-    // Texto do Título (CARNE, PEIXE...)
+    // Texto do Título
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text(`${label.toUpperCase()}: ${total}`, marginX + 5, currentY + 8);
+    doc.text(`${label.toUpperCase()}: ${total}`, cardStartX + 5, currentY + 8);
 
-    // Totalzação no canto direito (Número grande)
+    // Totalzação no canto direito
     doc.setTextColor(40, 40, 40);
     doc.setFontSize(16);
-    doc.text(total.toString(), pageWidth - marginX - 5, currentY + 8, { align: 'right' });
+    doc.text(total.toString(), cardStartX + cardWidth - 5, currentY + 8, { align: 'right' });
 
-    // --- Linha 1: Take (Fundo Branco) ---
+    // --- 4. Linha Take ---
     const row1Y = currentY + headerHeight;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
     doc.setTextColor(50, 50, 50);
-    doc.text(`Take: ${take}`, marginX + 5, row1Y + 8);
+    doc.text(`Take: ${take}`, cardStartX + 5, row1Y + 8);
 
-    // --- Linha 2: Detalhes (Fundo Cinza) ---
+    // --- 5. Linha Detalhes (Fundo Cinza) ---
     const row2Y = row1Y + rowHeight;
     
-    // Retângulo cinza de fundo
     doc.setFillColor(...colors.bgRowGray);
-    doc.rect(marginX, row2Y, contentWidth, rowHeight, 'F');
+    doc.rect(cardStartX, row2Y, cardWidth, rowHeight, 'F');
 
-    // Texto dos detalhes com separadores
     doc.setFontSize(11);
     doc.setTextColor(80, 80, 80);
     const detailText = `Fila: ${fila}    |    Encomenda: ${enc}    |    Senha: ${senha}`;
-    doc.text(detailText, marginX + 5, row2Y + 8);
+    doc.text(detailText, cardStartX + 5, row2Y + 8);
 
-    // Avança o cursor Y para o próximo card
-    currentY += cardHeight + 8; // +8 é o espaçamento entre cards
+    // Avança Y
+    currentY += cardHeight + 8; 
   }
 
   /* =========================
@@ -1031,13 +1040,8 @@ function gerarPDFResumo() {
   /* =========================
      4. RODAPÉ (TOTAL)
   ========================= */
-  // Posiciona no final da página (estilo fixo na base ou logo após os cards)
-  // Vamos colocar logo após os cards para ficar coeso, ou no final da folha.
-  // Na imagem parece ser uma barra inferior. Vamos fixar na parte inferior da área de conteúdo.
-  
   const footerY = currentY + 5; 
 
-  // Gradiente simulado (cor sólida vibrante fica melhor no PDF impresso)
   doc.setFillColor(...colors.bgFooter);
   doc.rect(0, footerY, pageWidth, 15, 'F');
 
@@ -1045,13 +1049,9 @@ function gerarPDFResumo() {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   
-  // Texto TOTAL: [Valor]
-  // Alinhado a direita conforme imagem, ou centralizado? Na imagem é uma barra cheia.
-  // Vou colocar o texto "TOTAL:" à esquerda e o valor à direita para ficar elegante.
   doc.text('TOTAL:', marginX + 5, footerY + 10);
   doc.text(ultimoResumoTurno.total.toString(), pageWidth - marginX - 5, footerY + 10, { align: 'right' });
 
-  // Salvar
   doc.save(`Resumo_Turno_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
