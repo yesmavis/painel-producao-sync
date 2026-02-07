@@ -904,9 +904,6 @@ function gerarPDFResumo() {
 
   let y = 0;
 
-  /* =========================
-     🎨 CORES OFICIAIS
-  ========================= */
   const CORES = {
     header: [30, 30, 30],
     carne: [229, 57, 53],
@@ -917,65 +914,53 @@ function gerarPDFResumo() {
     texto: [40, 40, 40]
   };
 
-  /* =========================
-     🏷️ HEADER
-  ========================= */
   doc.setFillColor(...CORES.header);
-  doc.rect(0, 0, 210, 35, 'F');
+  doc.rect(0, 0, 210, 45, 'F');
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(18);
+  doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text(RESTAURANTE, 105, 18, { align: 'center' });
+  doc.text(RESTAURANTE, 105, 20, { align: 'center' });
 
-  doc.setFontSize(11);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
   doc.text(
     `Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`,
     105,
-    28,
+    32,
     { align: 'center' }
   );
 
-  y = 45;
+  y = 55;
   doc.setTextColor(...CORES.texto);
 
-  /* =========================
-     🧩 FUNÇÃO BLOCO
-  ========================= */
   function blocoPrato(nome, cor, dados) {
-    // Fundo do bloco
+    const ALTURA = 40;
+
     doc.setFillColor(...CORES.cinza);
-    doc.roundedRect(15, y, 180, 28, 4, 4, 'F');
+    doc.roundedRect(15, y, 180, ALTURA, 5, 5, 'F');
 
-    // Barra lateral colorida
     doc.setFillColor(...cor);
-    doc.rect(15, y, 6, 28, 'F');
+    doc.rect(15, y, 10, ALTURA, 'F');
 
-    // Título
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.text(`${nome}: ${dados.total}`, 28, y + 9);
+    doc.setFontSize(15);
+    doc.text(`${nome}: ${dados.total}`, 30, y + 12);
 
-    // Take
-    doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Take: ${dados.take}`, 28, y + 16);
+    doc.setFontSize(12);
+    doc.text(`Take: ${dados.take}`, 30, y + 20);
 
-    // Origem
-    doc.setFontSize(10);
+    doc.setFontSize(11);
     doc.text(
-      `Fila: ${dados.fila}   |   Encomenda: ${dados.encomenda}   |   Senha: ${dados.senha}`,
-      28,
-      y + 23
+      `Fila: ${dados.fila}  |  Encomenda: ${dados.encomenda}  |  Senha: ${dados.senha}`,
+      30,
+      y + 28
     );
 
-    y += 36;
+    y += ALTURA + 10;
   }
 
-  /* =========================
-     📊 BLOCOS
-  ========================= */
   blocoPrato('Carne', CORES.carne, {
     total: ultimoResumoTurno.carne,
     take: ultimoResumoTurno.take.carne,
@@ -1008,25 +993,21 @@ function gerarPDFResumo() {
     senha: ultimoResumoTurno.origem.senha.opcao
   });
 
-  /* =========================
-     🔵 TOTAL FINAL (BARRA)
-  ========================= */
   doc.setFillColor(33, 150, 243);
-  doc.rect(0, y + 5, 210, 20, 'F');
+  doc.rect(0, y + 5, 210, 28, 'F');
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16);
+  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
   doc.text(
     `TOTAL DE PRATOS: ${ultimoResumoTurno.total}`,
     105,
-    y + 18,
+    y + 22,
     { align: 'center' }
   );
 
   doc.save(`resumo-turno-${Date.now()}.pdf`);
 }
-
 
 </script>
 
