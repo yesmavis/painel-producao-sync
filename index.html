@@ -873,7 +873,7 @@ async function fecharCozinha() {
   // 4️⃣ Limpar pedidos ativos
   const pedidosRef = window.firebaseDB.ref(
     window.firebaseDB.db,
-    'pedidos''
+    'pedidos'
   );
 
   await window.firebaseDB.remove(pedidosRef);
