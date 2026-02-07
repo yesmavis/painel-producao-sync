@@ -873,7 +873,7 @@ async function fecharCozinha() {
   // 4️⃣ Limpar pedidos ativos
   const pedidosRef = window.firebaseDB.ref(
     window.firebaseDB.db,
-    'pedidos'
+    'pedidos''
   );
 
   await window.firebaseDB.remove(pedidosRef);
@@ -902,118 +902,125 @@ function gerarPDFResumo() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
-  let y = 20;
+  let y = 0;
 
-  // 🏷️ Restaurante
+  /* =========================
+     🎨 CORES OFICIAIS
+  ========================= */
+  const CORES = {
+    header: [30, 30, 30],
+    carne: [229, 57, 53],
+    peixe: [30, 136, 229],
+    veg: [67, 160, 71],
+    opcao: [0, 0, 0],
+    cinza: [245, 245, 245],
+    texto: [40, 40, 40]
+  };
+
+  /* =========================
+     🏷️ HEADER
+  ========================= */
+  doc.setFillColor(...CORES.header);
+  doc.rect(0, 0, 210, 35, 'F');
+
+  doc.setTextColor(255, 255, 255);
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text(RESTAURANTE, 105, y, { align: 'center' });
+  doc.text(RESTAURANTE, 105, 18, { align: 'center' });
 
-  y += 10;
-
-  // 📊 Título
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Resumo do Turno', 105, y, { align: 'center' });
-
-  y += 10;
-
-  // 🕒 Data
   doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
   doc.text(
     `Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`,
     105,
-    y,
+    28,
     { align: 'center' }
   );
 
-  y += 15;
+  y = 45;
+  doc.setTextColor(...CORES.texto);
 
-  // Linha
-  doc.setDrawColor(200);
-  doc.line(20, y, 190, y);
+  /* =========================
+     🧩 FUNÇÃO BLOCO
+  ========================= */
+  function blocoPrato(nome, cor, dados) {
+    // Fundo do bloco
+    doc.setFillColor(...CORES.cinza);
+    doc.roundedRect(15, y, 180, 28, 4, 4, 'F');
 
-  y += 12;
+    // Barra lateral colorida
+    doc.setFillColor(...cor);
+    doc.rect(15, y, 6, 28, 'F');
 
-  // Dados
-  function blocoPrato(nome, total, take, origem) {
+    // Título
     doc.setFont('helvetica', 'bold');
-    doc.text(`${nome}: ${total}`, 30, y);
-    y += 6;
+    doc.setFontSize(13);
+    doc.text(`${nome}: ${dados.total}`, 28, y + 9);
 
+    // Take
+    doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Take: ${take}`, 40, y);
-    y += 6;
+    doc.text(`Take: ${dados.take}`, 28, y + 16);
 
+    // Origem
     doc.setFontSize(10);
     doc.text(
-      `Fila: ${origem.fila} | Encomenda: ${origem.encomenda} | Senha: ${origem.senha}`,
-      40,
-      y
+      `Fila: ${dados.fila}   |   Encomenda: ${dados.encomenda}   |   Senha: ${dados.senha}`,
+      28,
+      y + 23
     );
 
-    y += 10;
-    doc.setFontSize(12);
+    y += 36;
   }
 
-  // 🔴 Carne
-  blocoPrato(
-    'Carne',
-    ultimoResumoTurno.carne,
-    ultimoResumoTurno.take.carne,
-    {
-      fila: ultimoResumoTurno.origem.fila.carne,
-      encomenda: ultimoResumoTurno.origem.encomenda.carne,
-      senha: ultimoResumoTurno.origem.senha.carne
-    }
-  );
+  /* =========================
+     📊 BLOCOS
+  ========================= */
+  blocoPrato('Carne', CORES.carne, {
+    total: ultimoResumoTurno.carne,
+    take: ultimoResumoTurno.take.carne,
+    fila: ultimoResumoTurno.origem.fila.carne,
+    encomenda: ultimoResumoTurno.origem.encomenda.carne,
+    senha: ultimoResumoTurno.origem.senha.carne
+  });
 
-  // 🟦 Peixe
-  blocoPrato(
-    'Peixe',
-    ultimoResumoTurno.peixe,
-    ultimoResumoTurno.take.peixe,
-    {
-      fila: ultimoResumoTurno.origem.fila.peixe,
-      encomenda: ultimoResumoTurno.origem.encomenda.peixe,
-      senha: ultimoResumoTurno.origem.senha.peixe
-    }
-  );
+  blocoPrato('Peixe', CORES.peixe, {
+    total: ultimoResumoTurno.peixe,
+    take: ultimoResumoTurno.take.peixe,
+    fila: ultimoResumoTurno.origem.fila.peixe,
+    encomenda: ultimoResumoTurno.origem.encomenda.peixe,
+    senha: ultimoResumoTurno.origem.senha.peixe
+  });
 
-  // 🟩 Veg
-  blocoPrato(
-    'Veg',
-    ultimoResumoTurno.veg,
-    ultimoResumoTurno.take.veg,
-    {
-      fila: ultimoResumoTurno.origem.fila.veg,
-      encomenda: ultimoResumoTurno.origem.encomenda.veg,
-      senha: ultimoResumoTurno.origem.senha.veg
-    }
-  );
+  blocoPrato('Veg', CORES.veg, {
+    total: ultimoResumoTurno.veg,
+    take: ultimoResumoTurno.take.veg,
+    fila: ultimoResumoTurno.origem.fila.veg,
+    encomenda: ultimoResumoTurno.origem.encomenda.veg,
+    senha: ultimoResumoTurno.origem.senha.veg
+  });
 
-  // ⚫ Opções
-  blocoPrato(
-    'Opções',
-    ultimoResumoTurno.opcao,
-    ultimoResumoTurno.take.opcao,
-    {
-      fila: ultimoResumoTurno.origem.fila.opcao,
-      encomenda: ultimoResumoTurno.origem.encomenda.opcao,
-      senha: ultimoResumoTurno.origem.senha.opcao
-    }
-  );
+  blocoPrato('Opções', CORES.opcao, {
+    total: ultimoResumoTurno.opcao,
+    take: ultimoResumoTurno.take.opcao,
+    fila: ultimoResumoTurno.origem.fila.opcao,
+    encomenda: ultimoResumoTurno.origem.encomenda.opcao,
+    senha: ultimoResumoTurno.origem.senha.opcao
+  });
 
-  doc.line(20, y, 190, y);
-  y += 12;
+  /* =========================
+     🔵 TOTAL FINAL (BARRA)
+  ========================= */
+  doc.setFillColor(33, 150, 243);
+  doc.rect(0, y + 5, 210, 20, 'F');
 
-  // Total
-  doc.setFontSize(14);
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
   doc.text(
-    `TOTAL: ${ultimoResumoTurno.total}`,
+    `TOTAL DE PRATOS: ${ultimoResumoTurno.total}`,
     105,
-    y,
+    y + 18,
     { align: 'center' }
   );
 
