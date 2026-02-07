@@ -901,130 +901,158 @@ function gerarPDFResumo() {
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  
+  // Configurações de dimensão
+  const pageWidth = 210;
+  const marginX = 10;
+  const contentWidth = pageWidth - (marginX * 2);
+  let currentY = 0;
 
-  let y = 0;
-
-  /* =========================
-     🎨 CORES OFICIAIS
-  ========================= */
-  const CORES = {
-    header: [30, 30, 30],
-    carne: [229, 57, 53],
-    peixe: [30, 136, 229],
-    veg: [67, 160, 71],
-    opcao: [0, 0, 0],
-    cinza: [245, 245, 245],
-    texto: [40, 40, 40]
+  // Cores (RGB)
+  const colors = {
+    bgHeader: [50, 55, 65],     // Cinza escuro do topo
+    bgFooter: [230, 81, 0],     // Laranja do rodapé
+    bgCard: [255, 255, 255],    // Fundo branco
+    bgRowGray: [240, 240, 240], // Fundo cinza da linha de detalhes
+    textDark: [50, 50, 50],
+    textLight: [255, 255, 255],
+    types: {
+      carne: [211, 47, 47],     // Vermelho
+      peixe: [25, 118, 210],    // Azul
+      veg: [56, 142, 60],       // Verde
+      opcao: [69, 90, 100]      // Cinza Azulado Escuro
+    }
   };
 
   /* =========================
-     🏷️ HEADER
+     1. CABEÇALHO (HEADER)
   ========================= */
-  doc.setFillColor(...CORES.header);
-  doc.rect(0, 0, 210, 35, 'F');
+  // Fundo escuro
+  doc.setFillColor(...colors.bgHeader);
+  doc.rect(0, 0, pageWidth, 45, 'F');
 
+  // Texto: Nome do Restaurante
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text(RESTAURANTE, 105, 18, { align: 'center' });
+  doc.setFontSize(22);
+  doc.text(RESTAURANTE, pageWidth / 2, 18, { align: 'center' });
 
-  doc.setFontSize(11);
+  // Texto: Resumo do Turno
+  doc.setFontSize(16);
   doc.setFont('helvetica', 'normal');
-  doc.text(
-    `Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`,
-    105,
-    28,
-    { align: 'center' }
-  );
+  doc.text("Resumo do Turno", pageWidth / 2, 28, { align: 'center' });
 
-  y = 45;
-  doc.setTextColor(...CORES.texto);
+  // Texto: Data
+  doc.setFontSize(10);
+  doc.setTextColor(200, 200, 200);
+  doc.text(`Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`, pageWidth / 2, 38, { align: 'center' });
+
+  currentY = 55; // Posição inicial dos cards
 
   /* =========================
-     🧩 FUNÇÃO BLOCO
+     2. FUNÇÃO DESENHAR CARD
   ========================= */
-  function blocoPrato(nome, cor, dados) {
-    // Fundo do bloco
-    doc.setFillColor(...CORES.cinza);
-    doc.roundedRect(15, y, 180, 28, 4, 4, 'F');
+  function drawCard(label, typeKey, colorRGB) {
+    const cardHeight = 35; // Altura total do bloco
+    const headerHeight = 12; // Altura da barra colorida
+    const rowHeight = 11.5; // Altura das linhas de dados
 
-    // Barra lateral colorida
-    doc.setFillColor(...cor);
-    doc.rect(15, y, 6, 28, 'F');
+    // Dados
+    const total = ultimoResumoTurno[typeKey];
+    const take = ultimoResumoTurno.take[typeKey];
+    const fila = ultimoResumoTurno.origem.fila[typeKey];
+    const enc = ultimoResumoTurno.origem.encomenda[typeKey];
+    const senha = ultimoResumoTurno.origem.senha[typeKey];
 
-    // Título
+    // --- Fundo Geral do Card (Sombra leve simulada com cinza claro atrás) ---
+    doc.setFillColor(230, 230, 230);
+    doc.rect(marginX + 1, currentY + 1, contentWidth, cardHeight, 'F');
+    doc.setFillColor(255, 255, 255);
+    doc.rect(marginX, currentY, contentWidth, cardHeight, 'F');
+
+    // --- Barra Colorida (Título) ---
+    // A imagem tem um corte inclinado. Vamos simular desenhando um poligono.
+    doc.setFillColor(...colorRGB);
+    
+    // Largura da faixa colorida (aprox 35% do card)
+    const ribbonWidth = 70; 
+    
+    // Desenha a forma da fita com ponta inclinada
+    doc.lines([
+      [ribbonWidth, 0],         // Topo
+      [-10, headerHeight],      // Inclinação para baixo/esquerda
+      [-(ribbonWidth - 10), 0], // Base volta para esquerda
+      [0, -headerHeight]        // Fecha no topo
+    ], marginX, currentY, [1, 1], 'F', true);
+
+    // Texto do Título (CARNE, PEIXE...)
+    doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.text(`${nome}: ${dados.total}`, 28, y + 9);
+    doc.setFontSize(14);
+    doc.text(`${label.toUpperCase()}: ${total}`, marginX + 5, currentY + 8);
 
-    // Take
-    doc.setFontSize(11);
+    // Totalzação no canto direito (Número grande)
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(16);
+    doc.text(total.toString(), pageWidth - marginX - 5, currentY + 8, { align: 'right' });
+
+    // --- Linha 1: Take (Fundo Branco) ---
+    const row1Y = currentY + headerHeight;
     doc.setFont('helvetica', 'normal');
-    doc.text(`Take: ${dados.take}`, 28, y + 16);
+    doc.setFontSize(12);
+    doc.setTextColor(50, 50, 50);
+    doc.text(`Take: ${take}`, marginX + 5, row1Y + 8);
 
-    // Origem
-    doc.setFontSize(10);
-    doc.text(
-      `Fila: ${dados.fila}   |   Encomenda: ${dados.encomenda}   |   Senha: ${dados.senha}`,
-      28,
-      y + 23
-    );
+    // --- Linha 2: Detalhes (Fundo Cinza) ---
+    const row2Y = row1Y + rowHeight;
+    
+    // Retângulo cinza de fundo
+    doc.setFillColor(...colors.bgRowGray);
+    doc.rect(marginX, row2Y, contentWidth, rowHeight, 'F');
 
-    y += 36;
+    // Texto dos detalhes com separadores
+    doc.setFontSize(11);
+    doc.setTextColor(80, 80, 80);
+    const detailText = `Fila: ${fila}    |    Encomenda: ${enc}    |    Senha: ${senha}`;
+    doc.text(detailText, marginX + 5, row2Y + 8);
+
+    // Avança o cursor Y para o próximo card
+    currentY += cardHeight + 8; // +8 é o espaçamento entre cards
   }
 
   /* =========================
-     📊 BLOCOS
+     3. GERAÇÃO DOS CARDS
   ========================= */
-  blocoPrato('Carne', CORES.carne, {
-    total: ultimoResumoTurno.carne,
-    take: ultimoResumoTurno.take.carne,
-    fila: ultimoResumoTurno.origem.fila.carne,
-    encomenda: ultimoResumoTurno.origem.encomenda.carne,
-    senha: ultimoResumoTurno.origem.senha.carne
-  });
-
-  blocoPrato('Peixe', CORES.peixe, {
-    total: ultimoResumoTurno.peixe,
-    take: ultimoResumoTurno.take.peixe,
-    fila: ultimoResumoTurno.origem.fila.peixe,
-    encomenda: ultimoResumoTurno.origem.encomenda.peixe,
-    senha: ultimoResumoTurno.origem.senha.peixe
-  });
-
-  blocoPrato('Veg', CORES.veg, {
-    total: ultimoResumoTurno.veg,
-    take: ultimoResumoTurno.take.veg,
-    fila: ultimoResumoTurno.origem.fila.veg,
-    encomenda: ultimoResumoTurno.origem.encomenda.veg,
-    senha: ultimoResumoTurno.origem.senha.veg
-  });
-
-  blocoPrato('Opções', CORES.opcao, {
-    total: ultimoResumoTurno.opcao,
-    take: ultimoResumoTurno.take.opcao,
-    fila: ultimoResumoTurno.origem.fila.opcao,
-    encomenda: ultimoResumoTurno.origem.encomenda.opcao,
-    senha: ultimoResumoTurno.origem.senha.opcao
-  });
+  drawCard('Carne', 'carne', colors.types.carne);
+  drawCard('Peixe', 'peixe', colors.types.peixe);
+  drawCard('Veg', 'veg', colors.types.veg);
+  drawCard('Opções', 'opcao', colors.types.opcao);
 
   /* =========================
-     🔵 TOTAL FINAL (BARRA)
+     4. RODAPÉ (TOTAL)
   ========================= */
-  doc.setFillColor(33, 150, 243);
-  doc.rect(0, y + 5, 210, 20, 'F');
+  // Posiciona no final da página (estilo fixo na base ou logo após os cards)
+  // Vamos colocar logo após os cards para ficar coeso, ou no final da folha.
+  // Na imagem parece ser uma barra inferior. Vamos fixar na parte inferior da área de conteúdo.
+  
+  const footerY = currentY + 5; 
+
+  // Gradiente simulado (cor sólida vibrante fica melhor no PDF impresso)
+  doc.setFillColor(...colors.bgFooter);
+  doc.rect(0, footerY, pageWidth, 15, 'F');
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16);
   doc.setFont('helvetica', 'bold');
-  doc.text(
-    `TOTAL DE PRATOS: ${ultimoResumoTurno.total}`,
-    105,
-    y + 18,
-    { align: 'center' }
-  );
+  doc.setFontSize(16);
+  
+  // Texto TOTAL: [Valor]
+  // Alinhado a direita conforme imagem, ou centralizado? Na imagem é uma barra cheia.
+  // Vou colocar o texto "TOTAL:" à esquerda e o valor à direita para ficar elegante.
+  doc.text('TOTAL:', marginX + 5, footerY + 10);
+  doc.text(ultimoResumoTurno.total.toString(), pageWidth - marginX - 5, footerY + 10, { align: 'right' });
 
-  doc.save(`resumo-turno-${Date.now()}.pdf`);
+  // Salvar
+  doc.save(`Resumo_Turno_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
 
