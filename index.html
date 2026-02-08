@@ -216,6 +216,27 @@ button {
   color:white;
 }
 
+.opcao-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 12px;
+  border: none;
+  background: #000;
+  color: #fff;
+  font-weight: bold;
+}
+
+.cancelar {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+}
+
 .carne { background:#e53935; }
 .peixe { background:#1e88e5; }
 .veg { background:#43a047; }
@@ -453,8 +474,8 @@ button {
 <button class="veg" onclick="novoPedido('veg', false)">VEG</button>
 <button class="veg take" onclick="novoPedido('veg', true)">VEG + TAKE</button>
 
-<button class="opcao" onclick="novoPedido('opcao', false)">OPÇÕES</button>
-<button class="opcao take" onclick="novoPedido('opcao', true)">OPÇÕES + TAKE</button>
+<button class="opcao" onclick="abrirModalOpcoes(false)">OPÇÕES</button>
+<button class="opcao take" onclick="abrirModalOpcoes(true)">OPÇÕES + TAKE</button>
 </div>
 
 <div class="painel">
@@ -703,19 +724,35 @@ function atualizar(){
   cOpcao.innerText=cont.opcao;
 }
 
-function novoPedido(tipo, take) {
+let opcaoTakeSelecionado = false;
+
+function abrirModalOpcoes(isTake) {
+  opcaoTakeSelecionado = isTake;
+  document.getElementById('modalOpcoes').style.display = 'flex';
+}
+
+function fecharModalOpcoes() {
+  document.getElementById('modalOpcoes').style.display = 'none';
+}
+
+function confirmarOpcao(nome) {
+  fecharModalOpcoes();
+  novoPedido('opcao', opcaoTakeSelecionado, nome);
+}
+
+function novoPedido(tipo, take, opcaoTipo = null) {
   if (!podeCriarPedido()) {
     alert('🚫 Você não tem permissão para criar pedidos.');
     return;
   }
 
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
-    window.firebaseDB.criarPedido(tipo, take);
+    window.firebaseDB.criarPedido(tipo, take, opcaoTipo);
   }
 }
 
 function renderPedido(id, pedido) {
-  const { tipo, take, status } = pedido;
+  const { tipo, take, status, opcaoTipo } = pedido;
 
   // 🚫 Não renderiza pedidos finalizados
   if (status === 'finalizado') return;
@@ -738,8 +775,19 @@ function renderPedido(id, pedido) {
   p.className = `pedido ${pedido.modo} ${tipo}` + (take ? ' take' : '');
   p.style.setProperty('--base-color', cores[tipo]);
   p.dataset.id = id;
-  p.innerText = nomes[tipo] + (take ? ' + TAKE' : '');
+  let texto = nomes[tipo];
 
+  if (tipo === 'opcao' && opcaoTipo) {
+    texto += ` (${opcaoTipo})`;
+  }
+
+  if (take) {
+    texto += ' + TAKE';
+  }
+
+  p.innerText = texto;
+
+ 
   if (podeExcluirPedido()) {
   const del = document.createElement('span');
   del.className = 'excluir';
@@ -1089,13 +1137,14 @@ function gerarPDFResumo() {
   const pedidosRef = ref(db, 'pedidos');
 
   //passo 2 - funcao para criar pedido
-  function criarPedido(tipo, take = false) {
+ function criarPedido(tipo, take = false, opcaoTipo = null) {
   const novoPedidoRef = push(pedidosRef);
 
   set(novoPedidoRef, {
     tipo,
     take,
-    modo, // 👈 salva fila / encomenda / senha
+    opcaoTipo, // 👈 SALVA O DETALHE
+    modo, // SALVA FILA / ENCOMENDA / SENHA
     status: 'preparo',
     criadoEm: Date.now()
   });
@@ -1178,7 +1227,32 @@ function gerarPDFResumo() {
     console.log('🔥 Firebase conectado:', snapshot.val());
   });
 </script>
+<!-- MODAL OPÇÕES -->
+<div id="modalOpcoes" style="
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.75);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+">
+  <div style="
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 16px;
+    width: 280px;
+    text-align: center;
+  ">
+    <h3>Escolha a opção</h3>
 
+    <button class="opcao-btn" onclick="confirmarOpcao('Frango')">🍗 Frango</button>
+    <button class="opcao-btn" onclick="confirmarOpcao('Omelete')">🍳 Omelete</button>
+    <button class="opcao-btn" onclick="confirmarOpcao('Hambúrguer')">🍔 Hambúrguer</button>
+
+    <button onclick="fecharModalOpcoes()" class="cancelar">Cancelar</button>
+  </div>
+</div>
 
 </body>
 </html>
