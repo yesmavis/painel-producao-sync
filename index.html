@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -15,6 +15,9 @@
 <title>Painel de Produção</title>
 
 <style>
+/* =========================
+   BASE
+========================= */
 body {
   margin:0;
   font-family:Arial, sans-serif;
@@ -25,6 +28,9 @@ body {
   flex-direction:column;
 }
 
+/* =========================
+   HEADER
+========================= */
 header {
   background:#111;
   padding:10px;
@@ -55,128 +61,86 @@ header {
   text-align: center;
 }
 
-.login-box h2 {
-  margin-bottom: 15px;
+.usuarios.avatars {
+  display:flex;
+  gap:14px;
+  margin-bottom:20px;
 }
 
-.usuarios {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.usuarios button {
-  flex: 1;
-  height: 45px;
-  border-radius: 10px;
-  border: none;
-  font-weight: bold;
-  cursor: pointer;
-  background: #444;
-  color: #fff;
-  opacity: .6;
-}
-
-.usuarios button.ativo {
-  opacity: 1;
-  outline: 2px solid #ffca28;
-}
-
-.login-box input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  margin: 0 auto 12px auto;
-  font-size: 16px;
-  text-align: center;
-  display: block;
-  box-sizing: border-box;
-}
-
-#loginErro {
-  color: #ff5252;
-  margin-top: 10px;
-}
-
-#fecharCozinha {
-  position:absolute;
-  right:10px;
-  top:10px;
-  border:1px solid #555;
-  background:transparent;
-  color:#bbb;
-  padding:6px 12px;
-  border-radius:10px;
+.avatar {
+  flex:1;
+  background:#333;
+  border-radius:14px;
+  padding:12px 8px;
+  text-align:center;
   cursor:pointer;
+  opacity:.5;
 }
 
-#logoutBtn {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  border: 1px solid #555;
-  background: transparent;
-  color: #bbb;
-  padding: 6px 12px;
-  border-radius: 10px;
-  cursor: pointer;
+.avatar img {
+  width:56px;
+  height:56px;
+  border-radius:50%;
 }
 
-#logoutBtn:hover {
-  background: #333;
+.avatar span {
+  display:block;
+  margin-top:6px;
+  font-weight:bold;
+  font-size:13px;
 }
 
+.avatar.ativo {
+  opacity:1;
+  outline:2px solid #ffca28;
+}
+
+/* =========================
+   PIN
+========================= */
 .pin {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 15px;
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:15px;
 }
-
 .pin span {
-  width: 14px;
-  height: 14px;
-  background: #555;
-  border-radius: 50%;
+  width:14px;
+  height:14px;
+  background:#555;
+  border-radius:50%;
 }
+.pin span.filled { background:#fff; }
 
-.pin span.filled {
-  background: #fff;
-}
-
+/* =========================
+   KEYPAD
+========================= */
 .keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 10px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
 }
-
 .keypad button {
-  height: 48px;
-  font-size: 18px;
-  border-radius: 10px;
-  border: none;
-  background: #333;
-  color: white;
-  font-weight: bold;
+  height:48px;
+  font-size:18px;
+  border-radius:10px;
+  border:none;
+  background:#333;
+  color:white;
+  font-weight:bold;
 }
+.keypad .clear { background:#c62828; }
+.keypad .ok { background:#2e7d32; }
 
-.keypad .clear {
-  background: #c62828;
-}
-
-.keypad .ok {
-  background: #2e7d32;
-}
-
+/* =========================
+   MODOS
+========================= */
 .modos {
   display:flex;
   gap:6px;
   padding:6px;
   background:#222;
 }
-
 .modos button {
   flex:1;
   height:40px;
@@ -185,28 +149,20 @@ header {
   font-weight:bold;
   opacity:.5;
 }
-
 .modos .ativo { opacity:1; }
-
 .fila { background:#555; }
 .encomenda { background:#ffca28; color:#000; }
 .senha { background:#ab47bc; }
 
-.contadores {
-  display:flex;
-  justify-content:space-around;
-  background:#222;
-  padding:6px;
-  font-size:14px;
-}
-
+/* =========================
+   BOTÕES
+========================= */
 .botoes {
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:8px;
   padding:8px;
 }
-
 button {
   height:50px;
   font-size:14px;
@@ -215,36 +171,31 @@ button {
   border:none;
   color:white;
 }
-
 .carne { background:#e53935; }
 .peixe { background:#1e88e5; }
 .veg { background:#43a047; }
 .opcao { background:#000; }
+.take { border:2px dashed rgba(255,255,255,.6); }
 
-.take {
-  border:2px dashed rgba(255,255,255,.6);
-}
-
+/* =========================
+   PAINEL
+========================= */
 .painel {
   flex:1;
   display:flex;
   gap:6px;
   padding:6px;
 }
-
 .coluna {
   flex:1;
   background:#2a2a2a;
   border-radius:10px;
   padding:6px;
 }
-
 .coluna h2 {
   text-align:center;
   font-size:16px;
-  margin:4px 0;
 }
-
 .pedido {
   height:38px;
   margin-bottom:4px;
@@ -255,155 +206,72 @@ button {
   align-items:center;
   justify-content:center;
   position:relative;
-  background:var(--base-color);
 }
 
-/* Faixas ENCOMENDA e SENHA */
-.pedido.encomenda {
-  background:
-    linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%),
-    var(--base-color);
-}
-
-.pedido.senha {
-  background:
-    linear-gradient(to right, #ab47bc 0%, #ab47bc 33%, transparent 33%),
-    var(--base-color);
-}
-
-/* 🛑 Correção de contraste: OPÇÕES + ENCOMENDA */
-.pedido.encomenda.opcao {
-  color: #fff;
-}
-
+/* =========================
+   EXCLUIR
+========================= */
 .excluir {
   position:absolute;
   right:6px;
   top:6px;
-  font-size:16px;
   cursor:pointer;
 }
 
-#resumo {
+/* =========================
+   MODAL OPÇÕES
+========================= */
+#modalOpcao {
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.85);
+  background:rgba(0,0,0,.8);
   display:none;
   align-items:center;
   justify-content:center;
+  z-index:9999;
 }
 
-#resumo .box {
+#modalOpcao .box {
   background:#222;
-  padding:25px;
-  border-radius:15px;
-  width:320px;
+  padding:20px;
+  border-radius:14px;
+  width:260px;
   text-align:center;
 }
 
-/* =========================
-   BOTÕES DO RESUMO
-========================= */
-
-#resumo .box button {
-  width: 100%;
-  margin-top: 12px;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+#modalOpcao button {
+  width:100%;
+  margin-top:10px;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
 }
 
-/* Botão PDF */
-#resumo .btn-pdf {
-  background: #1e88e5;
-  color: #fff;
-}
-
-#resumo .btn-pdf:hover {
-  background: #1565c0;
-}
-
-/* Botão Encerrar */
-#resumo .btn-encerrar {
-  background: #e53935;
-  color: #fff;
-}
-
-#resumo .btn-encerrar:hover {
-  background: #c62828;
-}
-
-/* Clique */
-#resumo .box button:active {
-  transform: scale(0.97);
-}
-
-/* =========================
-   AVATARES LOGIN
-========================= */
-.usuarios.avatars {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.avatar {
-  flex: 1;
-  background: #333;
-  border-radius: 14px;
-  padding: 12px 8px;
-  text-align: center;
-  cursor: pointer;
-  opacity: 0.5;
-  transition: all 0.2s ease;
-}
-
-.avatar img {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  margin-bottom: 6px;
-}
-
-.avatar span {
-  display: block;
-  font-size: 13px;
-  font-weight: bold;
-}
-
-.avatar.ativo {
-  opacity: 1;
-  outline: 2px solid #ffca28;
-}
-
+.btn-frango { background:#ff7043; }
+.btn-omelete { background:#ffd54f; color:#000; }
+.btn-hamb { background:#8d6e63; }
+.btn-cancelar { background:#555; }
 </style>
 </head>
 
 <body>
-<!-- 🔐 LOGIN OVERLAY -->
+
+<!-- 🔐 LOGIN -->
 <div id="loginOverlay">
   <div class="login-box">
-    <h2>🔐 Acesso ao Sistema</h2>
+    <h2>🔐 Acesso</h2>
 
     <div class="usuarios avatars">
-      <div class="avatar" onclick="selecionarUsuario('balcao', this)">
-        <img src="avatars/balcao.png" alt="Balcão">
-        <span>Balcão</span>
+      <div class="avatar" onclick="selecionarUsuario('balcao',this)">
+        <img src="avatars/balcao.png"><span>Balcão</span>
       </div>
-
-      <div class="avatar" onclick="selecionarUsuario('cozinha', this)">
-        <img src="avatars/cozinha.png" alt="Cozinha">
-        <span>Cozinha</span>
+      <div class="avatar" onclick="selecionarUsuario('cozinha',this)">
+        <img src="avatars/cozinha.png"><span>Cozinha</span>
       </div>
-
-      <div class="avatar" onclick="selecionarUsuario('admin', this)">
-        <img src="avatars/admin.png" alt="Admin">
-        <span>Admin</span>
+      <div class="avatar" onclick="selecionarUsuario('admin',this)">
+        <img src="avatars/admin.png"><span>Admin</span>
       </div>
     </div>
 
@@ -419,42 +287,32 @@ button {
       <button>0</button>
       <button class="ok">✔</button>
     </div>
-
     <p id="loginErro"></p>
   </div>
 </div>
 
 <header>
 🍽️ PAINEL DE PRODUÇÃO
-<button id="logoutBtn" onclick="logout()">🚪 Sair</button>
-<button id="fecharCozinha" onclick="confirmarFecho()">Fechar Cozinha</button>
 </header>
 
 <div class="modos">
-<button class="fila ativo" onclick="setModo('fila',this)">🧍 FILA</button>
-<button class="encomenda" onclick="setModo('encomenda',this)">📦 ENCOMENDA</button>
-<button class="senha" onclick="setModo('senha',this)">🎫 SENHA</button>
-</div>
-
-<div class="contadores">
-🔴 <span id="cCarne">0</span>
-🟦 <span id="cPeixe">0</span>
-🟩 <span id="cVeg">0</span>
-⚫ <span id="cOpcao">0</span>
+<button class="fila ativo" onclick="setModo('fila',this)">FILA</button>
+<button class="encomenda" onclick="setModo('encomenda',this)">ENCOMENDA</button>
+<button class="senha" onclick="setModo('senha',this)">SENHA</button>
 </div>
 
 <div class="botoes">
-<button class="carne" onclick="novoPedido('carne', false)">CARNE</button>
-<button class="carne take" onclick="novoPedido('carne', true)">CARNE + TAKE</button>
+<button class="carne" onclick="novoPedido('carne',false)">CARNE</button>
+<button class="carne take" onclick="novoPedido('carne',true)">CARNE + TAKE</button>
 
-<button class="peixe" onclick="novoPedido('peixe', false)">PEIXE</button>
-<button class="peixe take" onclick="novoPedido('peixe', true)">PEIXE + TAKE</button>
+<button class="peixe" onclick="novoPedido('peixe',false)">PEIXE</button>
+<button class="peixe take" onclick="novoPedido('peixe',true)">PEIXE + TAKE</button>
 
-<button class="veg" onclick="novoPedido('veg', false)">VEG</button>
-<button class="veg take" onclick="novoPedido('veg', true)">VEG + TAKE</button>
+<button class="veg" onclick="novoPedido('veg',false)">VEG</button>
+<button class="veg take" onclick="novoPedido('veg',true)">VEG + TAKE</button>
 
-<button class="opcao" onclick="novoPedido('opcao', false)">OPÇÕES</button>
-<button class="opcao take" onclick="novoPedido('opcao', true)">OPÇÕES + TAKE</button>
+<button class="opcao" onclick="abrirModalOpcao(false)">OPÇÕES</button>
+<button class="opcao take" onclick="abrirModalOpcao(true)">OPÇÕES + TAKE</button>
 </div>
 
 <div class="painel">
@@ -462,233 +320,41 @@ button {
   <div class="coluna" id="pronto"><h2>✅ PRONTO</h2></div>
 </div>
 
-<div id="resumo">
+<!-- MODAL OPÇÕES -->
+<div id="modalOpcao">
   <div class="box">
-    <h2>📊 Resumo do Turno</h2>
-    <p>🔴 Carne: <strong id="rCarne"></strong><br>
-    <small>Take: <strong id="rCarneTake"></strong></small></p>
-
-    <p>🟦 Peixe: <strong id="rPeixe"></strong><br>
-    <small>Take: <strong id="rPeixeTake"></strong></small></p>
-
-    <p>🟩 Veg: <strong id="rVeg"></strong><br>
-    <small>Take: <strong id="rVegTake"></strong></small></p>
-
-    <p>⚫ Opções: <strong id="rOpcao"></strong><br>
-    <small>Take: <strong id="rOpcaoTake"></strong></small></p>
-    <p><strong>TOTAL: <span id="rTotal"></span></strong></p>
-    <button class="btn-pdf" onclick="gerarPDFResumo()">📄 Baixar PDF</button>
-    <button class="btn-encerrar" onclick="location.reload()">⏹ Encerrar e reiniciar</button>
+    <h3>Escolha a opção</h3>
+    <button class="btn-frango" onclick="confirmarOpcao('frango')">Frango</button>
+    <button class="btn-omelete" onclick="confirmarOpcao('omelete')">Omelete</button>
+    <button class="btn-hamb" onclick="confirmarOpcao('hamburguer')">Hambúrguer</button>
+    <button class="btn-cancelar" onclick="fecharModalOpcao()">Cancelar</button>
   </div>
 </div>
 
 <script>
-/* ==========================
-   CONFIGURAÇÕES GERAIS
-========================== */
-const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.0.1';
-const LOCALE = 'en-US' // ou 'pt-BR'
+/* =========================
+   MODAL OPÇÕES
+========================= */
+let opcaoTakeTemp = false;
 
-// 🔐 SENHA DE FECHO
-const SENHA_FECHO = '0001'; // Defina aqui a senha do fecho
+function abrirModalOpcao(take) {
+  opcaoTakeTemp = take;
+  document.getElementById('modalOpcao').style.display='flex';
+}
+
+function fecharModalOpcao() {
+  document.getElementById('modalOpcao').style.display='none';
+}
+
+function confirmarOpcao(tipoOpcao) {
+  novoPedido('opcao', opcaoTakeTemp, tipoOpcao);
+  fecharModalOpcao();
+}
 
 /* =========================
-   LOGIN / PERMISSÕES
+   PEDIDOS
 ========================= */
-const SENHAS = {
-  balcao: '1111',
-  cozinha: '2222',
-  admin: '9999'
-};
-
-let usuarioSelecionado = null;
-
-function getRole() {
-  return localStorage.getItem('usuario_role');
-}
-
-function isAdmin() {
-  return getRole() === 'admin';
-}
-
-function podeCriarPedido() {
-  const role = getRole();
-  return role === 'balcao' || role === 'admin';
-}
-
-function podeMoverPedido() {
-  const role = getRole();
-  return role === 'cozinha' || role === 'admin';
-}
-
-function podeFinalizarPedido() {
-  const role = getRole();
-  return role === 'balcao' || role === 'admin';
-}
-
-function podeExcluirPedido() {
-  const role = getRole();
-  return role === 'balcao' || role === 'admin';
-}
-
-function podeFecharCozinha() {
-  const role = getRole();
-  return role === 'cozinha' || role === 'admin';
-}
-
-function selecionarUsuario(role, el) {
-  usuarioSelecionado = role;
-
-  document.querySelectorAll('.avatar')
-    .forEach(a => a.classList.remove('ativo'));
-
-  el.classList.add('ativo');
-}
-
-let pin = [];
-
-document.querySelectorAll('.keypad button').forEach(btn => {
-  btn.onclick = () => {
-    const v = btn.textContent;
-
-    if (v === 'C') {
-      pin = [];
-    } else if (v === '✔') {
-      fazerLogin();
-      return;
-    } else if (pin.length < 4) {
-      pin.push(v);
-    }
-
-    atualizarPin();
-  };
-});
-
-function atualizarPin() {
-  document.querySelectorAll('.pin span').forEach((dot, i) => {
-    dot.classList.toggle('filled', !!pin[i]);
-  });
-}
-
-function fazerLogin() {
-  const erro = document.getElementById('loginErro');
-  const senha = pin.join('');
-
-  if (!usuarioSelecionado) {
-    erro.innerText = 'Selecione um usuário';
-    return;
-  }
-
-  if (senha.length !== 4) {
-    erro.innerText = 'Digite os 4 números';
-    return;
-  }
-
-  if (senha !== SENHAS[usuarioSelecionado]) {
-    erro.innerText = 'Senha incorreta';
-    pin = [];
-    atualizarPin();
-    return;
-  }
-
-  // ✅ LOGIN OK
-  localStorage.setItem('usuario_role', usuarioSelecionado);
-  document.getElementById('loginOverlay').style.display = 'none';
-
-  pin = [];
-  atualizarPin();
-  erro.innerText = '';
-
-  aplicarPermissoes();
-}
-
-function aplicarPermissoes() {
-  const role = localStorage.getItem('usuario_role');
-
-  const btnFechar = document.getElementById('fecharCozinha');
-  if (btnFechar) {
-    btnFechar.style.display =
-      (role === 'cozinha' || role === 'admin') ? 'block' : 'none';
-  }
-
-  const btnLogout = document.getElementById('logoutBtn');
-  if (btnLogout) {
-    btnLogout.style.display = role ? 'block' : 'none';
-  }
-}
-
-function logout() {
-  if (!confirm('Deseja sair do sistema?')) return;
-
-  localStorage.removeItem('usuario_role');
-
-  // Limpa estado
-  usuarioSelecionado = null;
-  pin = [];
-  atualizarPin();
-
-  document.getElementById('loginErro').innerText = '';
-
-  document.querySelectorAll('.usuarios button')
-    .forEach(b => b.classList.remove('ativo'));
-
-  // Mostra login novamente
-  document.getElementById('loginOverlay').style.display = 'flex';
-
-  aplicarPermissoes();
-}
-
-// 🔁 Auto login
-document.addEventListener('DOMContentLoaded', () => {
-  const role = localStorage.getItem('usuario_role');
-  if (role) {
-    document.getElementById('loginOverlay').style.display = 'none';
-    aplicarPermissoes();
-  }
-});
-
-/* ==========================
-   ESTADO GLOBAL
-========================== */
 let modo='fila';
-let numero=0;
-const cont = {
-  carne: 0,
-  peixe: 0,
-  veg: 0,
-  opcao: 0,
-
-  take: {
-    carne: 0,
-    peixe: 0,
-    veg: 0,
-    opcao: 0
-  },
-
-  origem: {
-    fila: {
-      carne: 0,
-      peixe: 0,
-      veg: 0,
-      opcao: 0
-    },
-    encomenda: {
-      carne: 0,
-      peixe: 0,
-      veg: 0,
-      opcao: 0
-    },
-    senha: {
-      carne: 0,
-      peixe: 0,
-      veg: 0,
-      opcao: 0
-    }
-  }
-};
-let ultimoResumoTurno = null;
-
 
 function setModo(m,b){
   modo=m;
@@ -696,489 +362,51 @@ function setModo(m,b){
   b.classList.add('ativo');
 }
 
-function atualizar(){
-  cCarne.innerText=cont.carne;
-  cPeixe.innerText=cont.peixe;
-  cVeg.innerText=cont.veg;
-  cOpcao.innerText=cont.opcao;
-}
-
-function novoPedido(tipo, take) {
-  if (!podeCriarPedido()) {
-    alert('🚫 Você não tem permissão para criar pedidos.');
-    return;
-  }
-
-  if (window.firebaseDB && window.firebaseDB.criarPedido) {
-    window.firebaseDB.criarPedido(tipo, take);
+function novoPedido(tipo, take, opcaoTipo=null) {
+  if (window.firebaseDB) {
+    window.firebaseDB.criarPedido(tipo, take, opcaoTipo);
   }
 }
-
-function renderPedido(id, pedido) {
-  const { tipo, take, status } = pedido;
-
-  // 🚫 Não renderiza pedidos finalizados
-  if (status === 'finalizado') return;
-
-  const cores = {
-    carne: '#e53935',
-    peixe: '#1e88e5',
-    veg: '#43a047',
-    opcao: '#000'
-  };
-
-  const nomes = {
-    carne: 'CARNE',
-    peixe: 'PEIXE',
-    veg: 'VEG',
-    opcao: 'OPÇÕES'
-  };
-
-  const p = document.createElement('div');
-  p.className = `pedido ${pedido.modo} ${tipo}` + (take ? ' take' : '');
-  p.style.setProperty('--base-color', cores[tipo]);
-  p.dataset.id = id;
-  p.innerText = nomes[tipo] + (take ? ' + TAKE' : '');
-
-  if (podeExcluirPedido()) {
-  const del = document.createElement('span');
-  del.className = 'excluir';
-  del.innerText = '❌';
-
-  function excluirPedido(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const pedidoRef = window.firebaseDB.ref(
-      window.firebaseDB.db,
-      'pedidos/' + id
-    );
-
-    window.firebaseDB.remove(pedidoRef);
-  }
-
-  del.onclick = excluirPedido;
-  del.addEventListener('touchend', excluirPedido, { passive: false });
-
-  p.appendChild(del);
-}
-  
-  // 🔁 Fluxo: preparo → pronto → finalizado
-  function avancarStatus(e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const role = getRole();
-
-  let novoStatus = null;
-
-  // Preparo → Pronto (cozinha + admin)
-  if (pedido.status === 'preparo') {
-    if (!podeMoverPedido()) return;
-    novoStatus = 'pronto';
-  }
-
-  // Pronto → Finalizado (balcao e admin)
-  else if (pedido.status === 'pronto') {
-    if (!podeFinalizarPedido()) return;
-
-    // ✅ CONTABILIZA ORIGEM NO FECHO REAL
-    cont[pedido.tipo]++;
-
-    if (pedido.take) {
-      cont.take[pedido.tipo]++;
-    }
-
-    if (pedido.modo && cont.origem[pedido.modo]) {
-      cont.origem[pedido.modo][pedido.tipo]++;
-    }
-
-    novoStatus = 'finalizado';
-  }
-    
-  if (!novoStatus) return;
-
-  const pedidoRef = window.firebaseDB.ref(
-    window.firebaseDB.db,
-    'pedidos/' + id
-  );
-
-  window.firebaseDB.set(pedidoRef, {
-    ...pedido,
-    status: novoStatus
-  });
-}
-
-// Desktop / Android
-p.onclick = avancarStatus;
-
-// iOS (fundamental)
-p.addEventListener('touchend', avancarStatus, { passive: false });
-
-  if (status === 'preparo') {
-    preparo.appendChild(p);
-  } else if (status === 'pronto') {
-    pronto.appendChild(p);
-  }
-}
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script>  
-async function fecharCozinha() {
-  // 1️⃣ Montar resumo
-  ultimoResumoTurno = {
-    carne: cont.carne,
-    peixe: cont.peixe,
-    veg: cont.veg,
-    opcao: cont.opcao,
-
-    take: {
-      carne: cont.take.carne,
-      peixe: cont.take.peixe,
-      veg: cont.take.veg,
-      opcao: cont.take.opcao
-    },
-
-    origem: JSON.parse(JSON.stringify(cont.origem)),
-
-    total: cont.carne + cont.peixe + cont.veg + cont.opcao,
-    encerradoEm: Date.now(),
-    encerradoEmTexto: new Date().toLocaleString(LOCALE)
-  };
-
-  // 2️⃣ Mostrar resumo na tela
-  rCarne.innerText = ultimoResumoTurno.carne;
-  rPeixe.innerText = ultimoResumoTurno.peixe;
-  rVeg.innerText = ultimoResumoTurno.veg;
-  rOpcao.innerText = ultimoResumoTurno.opcao;
-
-  rCarneTake.innerText = ultimoResumoTurno.take.carne;
-  rPeixeTake.innerText = ultimoResumoTurno.take.peixe;
-  rVegTake.innerText = ultimoResumoTurno.take.veg;
-  rOpcaoTake.innerText = ultimoResumoTurno.take.opcao;
-
-  rTotal.innerText = ultimoResumoTurno.total;
-  resumo.style.display = 'flex';
-
-  // 3️⃣ Salvar relatório no Firebase (histórico)
-  const relatorioRef = window.firebaseDB.ref(
-    window.firebaseDB.db,
-    'relatorios'
-  );
-
-  await window.firebaseDB.push(relatorioRef, ultimoResumoTurno);
-
-  // 4️⃣ Limpar pedidos ativos
-  const pedidosRef = window.firebaseDB.ref(
-    window.firebaseDB.db,
-    'pedidos'
-  );
-
-  await window.firebaseDB.remove(pedidosRef);
-}
-
-function confirmarFecho() {
-  const senha = prompt('🔐 Digite a senha para fechar a cozinha:');
-
-  if (senha === null) return; // cancelado
-
-  if (senha !== SENHA_FECHO) {
-    alert('❌ Senha incorreta!');
-    return;
-  }
-
-  // ✅ Senha correta
-  fecharCozinha();
-}
-
-function gerarPDFResumo() {
-  if (!ultimoResumoTurno) {
-    alert('Resumo ainda não disponível.');
-    return;
-  }
-
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  
-  // Configurações de dimensão
-  const pageWidth = 210;
-  const marginX = 10;
-  // Largura total disponível
-  const totalContentWidth = pageWidth - (marginX * 2); 
-  
-  let currentY = 0;
-
-  // Cores (RGB)
-  const colors = {
-    bgHeader: [40, 40, 45],     // Cinza escuro do topo
-    bgFooter: [230, 81, 0],     // Laranja do rodapé
-    bgCard: [255, 255, 255],    // Fundo branco
-    bgRowGray: [240, 240, 240], // Fundo cinza da linha de detalhes
-    textDark: [50, 50, 50],
-    textLight: [255, 255, 255],
-    types: {
-      carne: [211, 47, 47],     // Vermelho
-      peixe: [25, 118, 210],    // Azul
-      veg: [56, 142, 60],       // Verde
-      opcao: [40, 40, 45]      // Cinza Azulado Escuro
-    }
-  };
-
-  /* =========================
-     1. CABEÇALHO (HEADER)
-  ========================= */
-  doc.setFillColor(...colors.bgHeader);
-  doc.rect(0, 0, pageWidth, 45, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.text(RESTAURANTE, pageWidth / 2, 18, { align: 'center' });
-
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'normal');
-  doc.text("Resumo do Turno", pageWidth / 2, 28, { align: 'center' });
-
-  doc.setFontSize(10);
-  doc.setTextColor(200, 200, 200);
-  doc.text(`Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`, pageWidth / 2, 38, { align: 'center' });
-
-  currentY = 55; 
-
-  /* =========================
-     2. FUNÇÃO DESENHAR CARD
-  ========================= */
-  function drawCard(label, typeKey, colorRGB) {
-    const cardHeight = 35; 
-    const headerHeight = 12; 
-    const rowHeight = 11.5; 
-    
-    // Configurações da Barra Vertical
-    const barWidth = 5;  // Largura da barra colorida
-    const gap = 3;       // Espaço entre a barra e o cartão
-    
-    // O cartão começa DEPOIS da barra e do gap
-    const cardStartX = marginX + barWidth + gap;
-    const cardWidth = totalContentWidth - barWidth - gap;
-
-    // Dados
-    const total = ultimoResumoTurno[typeKey];
-    const take = ultimoResumoTurno.take[typeKey];
-    const fila = ultimoResumoTurno.origem.fila[typeKey];
-    const enc = ultimoResumoTurno.origem.encomenda[typeKey];
-    const senha = ultimoResumoTurno.origem.senha[typeKey];
-
-    // --- 1. BARRA VERTICAL LATERAL ---
-    doc.setFillColor(...colorRGB);
-    doc.rect(marginX, currentY, barWidth, cardHeight, 'F');
-
-    // --- 2. FUNDO DO CARTÃO (Sombra leve + Branco) ---
-    // Sombra
-    doc.setFillColor(230, 230, 230);
-    doc.rect(cardStartX + 1, currentY + 1, cardWidth, cardHeight, 'F');
-    // Branco
-    doc.setFillColor(255, 255, 255);
-    doc.rect(cardStartX, currentY, cardWidth, cardHeight, 'F');
-
-    // --- 3. CABEÇALHO INCLINADO (Dentro do cartão) ---
-    doc.setFillColor(...colorRGB);
-    
-    // Largura da faixa colorida no topo
-    const ribbonWidth = 70; 
-    
-    // Polígono inclinado começando em cardStartX
-    doc.lines([
-      [ribbonWidth, 0],         
-      [-10, headerHeight],      
-      [-(ribbonWidth - 10), 0], 
-      [0, -headerHeight]        
-    ], cardStartX, currentY, [1, 1], 'F', true);
-
-    // Texto do Título
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text(`${label.toUpperCase()}: ${total}`, cardStartX + 5, currentY + 8);
-
-    // Totalzação no canto direito
-    doc.setTextColor(40, 40, 40);
-    doc.setFontSize(16);
-    doc.text(total.toString(), cardStartX + cardWidth - 5, currentY + 8, { align: 'right' });
-
-    // --- 4. Linha Take ---
-    const row1Y = currentY + headerHeight;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(12);
-    doc.setTextColor(50, 50, 50);
-    doc.text(`Take: ${take}`, cardStartX + 5, row1Y + 8);
-
-    // --- 5. Linha Detalhes (Fundo Cinza) ---
-    const row2Y = row1Y + rowHeight;
-    
-    doc.setFillColor(...colors.bgRowGray);
-    doc.rect(cardStartX, row2Y, cardWidth, rowHeight, 'F');
-
-    doc.setFontSize(11);
-    doc.setTextColor(80, 80, 80);
-    const detailText = `Fila: ${fila}    |    Encomenda: ${enc}    |    Senha: ${senha}`;
-    doc.text(detailText, cardStartX + 5, row2Y + 8);
-
-    // Avança Y
-    currentY += cardHeight + 8; 
-  }
-
-  /* =========================
-     3. GERAÇÃO DOS CARDS
-  ========================= */
-  drawCard('Carne', 'carne', colors.types.carne);
-  drawCard('Peixe', 'peixe', colors.types.peixe);
-  drawCard('Veg', 'veg', colors.types.veg);
-  drawCard('Opções', 'opcao', colors.types.opcao);
-
-  /* =========================
-     4. RODAPÉ (TOTAL)
-  ========================= */
-  const footerY = currentY + 5; 
-
-  doc.setFillColor(...colors.bgFooter);
-  doc.rect(0, footerY, pageWidth, 15, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  
-  doc.text('TOTAL:', marginX + 5, footerY + 10);
-  doc.text(ultimoResumoTurno.total.toString(), pageWidth - marginX - 5, footerY + 10, { align: 'right' });
-
-  doc.save(`Resumo_Turno_${new Date().toISOString().slice(0,10)}.pdf`);
-}
-
-
 </script>
 
 <script type="module">
-  // Firebase core
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
-  // Realtime Database
-  import {
-    getDatabase,
-    ref,
-    set,
-    push,
-    onValue,
-    remove
-  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+const firebaseConfig = { /* SEU CONFIG */ };
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const pedidosRef = ref(db,'pedidos');
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCms7tcWbslK-d0WZ6g8lFr_eicNaz4Dp4",
-    authDomain: "painel-producao-sync.firebaseapp.com",
-    databaseURL: "https://painel-producao-sync-default-rtdb.firebaseio.com",
-    projectId: "painel-producao-sync",
-    storageBucket: "painel-producao-sync.firebasestorage.app",
-    messagingSenderId: "563084163424",
-    appId: "1:563084163424:web:274866215bb7b2faf7c605"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // passo 1 - referencia principal dos pedidos
-  const pedidosRef = ref(db, 'pedidos');
-
-  //passo 2 - funcao para criar pedido
-  function criarPedido(tipo, take = false) {
-  const novoPedidoRef = push(pedidosRef);
-
-  set(novoPedidoRef, {
+function criarPedido(tipo,take,opcaoTipo){
+  const r = push(pedidosRef);
+  set(r,{
     tipo,
     take,
-    modo, // 👈 salva fila / encomenda / senha
-    status: 'preparo',
-    criadoEm: Date.now()
+    opcaoTipo,
+    modo,
+    status:'preparo',
+    criadoEm:Date.now()
   });
 }
 
-  //passo 3 - sincronizacao
-  onValue(pedidosRef, (snapshot) => {
-  preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
-  pronto.innerHTML = '<h2>✅ PRONTO</h2>';
-
-  cont.carne = 0;
-  cont.peixe = 0;
-  cont.veg = 0;
-  cont.opcao = 0;
-
-  cont.take.carne = 0;
-  cont.take.peixe = 0;
-  cont.take.veg = 0;
-  cont.take.opcao = 0;
-
-  // 🆕 limpa contadores de origem
-  Object.keys(cont.origem).forEach(origem => {
-    Object.keys(cont.origem[origem]).forEach(tipo => {
-      cont.origem[origem][tipo] = 0;
-    });
+onValue(pedidosRef,snap=>{
+  preparo.innerHTML='<h2>👨‍🍳 EM PREPARO</h2>';
+  pronto.innerHTML='<h2>✅ PRONTO</h2>';
+  snap.forEach(s=>{
+    const p=s.val();
+    const d=document.createElement('div');
+    d.className='pedido';
+    let label=p.tipo.toUpperCase();
+    if(p.opcaoTipo) label+=` (${p.opcaoTipo.toUpperCase()})`;
+    if(p.take) label+=' + TAKE';
+    d.innerText=label;
+    (p.status==='preparo'?preparo:pronto).appendChild(d);
   });
-
-
-  const dados = snapshot.val();
-  if (!dados) {
-    atualizar();
-    return;
-  }
-
-  Object.entries(dados).forEach(([id, pedido]) => {
-    cont[pedido.tipo]++;
-
-    if (pedido.take) {
-      cont.take[pedido.tipo]++;
-    }
-
-    if (pedido.modo && cont.origem[pedido.modo]) {
-      cont.origem[pedido.modo][pedido.tipo]++;
-    }
-
-    renderPedido(id, pedido);
-  });
-
-
-  atualizar();
 });
-  
-  // 🔧 Expor para uso global (importante)
-  window.firebaseDB = {
-    db,
-    ref,
-    set,
-    push,
-    onValue,
-    remove,
-    pedidosRef,
-    criarPedido
-  };
 
+window.firebaseDB={db,ref,set,push,remove,criarPedido};
 </script>
-<script type="module">
-  // 🔎 TESTE DE CONEXÃO COM FIREBASE (SEGURANÇA)
-  const { db, ref, set, onValue } = window.firebaseDB;
-
-  const testeRef = ref(db, 'testeConexao');
-
-  // Escreve algo no banco
-  set(testeRef, {
-    status: 'ok',
-    timestamp: Date.now()
-  });
-
-  // Lê de volta
-  onValue(testeRef, (snapshot) => {
-    console.log('🔥 Firebase conectado:', snapshot.val());
-  });
-</script>
-
 
 </body>
 </html>
