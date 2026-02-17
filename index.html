@@ -1110,6 +1110,13 @@ function gerarPDFResumo() {
   // Firebase core
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 
+ // Firebase auth
+ import {
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged
+ } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
   // Realtime Database
   import {
     getDatabase,
@@ -1132,6 +1139,16 @@ function gerarPDFResumo() {
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
+  const auth = getAuth(app);
+
+  // 🔐 Login anônimo automático (invisível)
+  signInAnonymously(auth)
+    .then(() => {
+      console.log("🔐 Autenticado anonimamente");
+    })
+    .catch((error) => {
+      console.error("Erro na autenticação:", error);
+    });
 
   // passo 1 - referencia principal dos pedidos
   const pedidosRef = ref(db, 'pedidos');
