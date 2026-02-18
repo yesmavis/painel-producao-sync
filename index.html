@@ -1137,84 +1137,86 @@ function gerarPDFResumo() {
     appId: "1:563084163424:web:274866215bb7b2faf7c605"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  const auth = getAuth(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-  // 🔐 Login anônimo automático (invisível)
-  signInAnonymously(auth)
-    .then(() => {
-      console.log("🔐 Autenticado anonimamente");
-    })
-    .catch((error) => {
-      console.error("Erro na autenticação:", error);
-    });
+// 🔐 Garante login anônimo
+signInAnonymously(auth).catch(console.error);
+
+// 🔐 Só inicia Firebase depois que autenticar
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("🔐 Autenticado:", user.uid);
+    iniciarFirebase();
+  }
+});
+
+function iniciarFirebase() {
 
   // passo 1 - referencia principal dos pedidos
   const pedidosRef = ref(db, 'pedidos');
 
-  //passo 2 - funcao para criar pedido
- function criarPedido(tipo, take = false, opcaoTipo = null) {
-  const novoPedidoRef = push(pedidosRef);
+  // passo 2 - funcao para criar pedido
+  function criarPedido(tipo, take = false, opcaoTipo = null) {
+    const novoPedidoRef = push(pedidosRef);
 
-  set(novoPedidoRef, {
-    tipo,
-    take,
-    opcaoTipo, // 👈 SALVA O DETALHE
-    modo, // SALVA FILA / ENCOMENDA / SENHA
-    status: 'preparo',
-    criadoEm: Date.now()
-  });
-}
-
-  //passo 3 - sincronizacao
-  onValue(pedidosRef, (snapshot) => {
-  preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
-  pronto.innerHTML = '<h2>✅ PRONTO</h2>';
-
-  cont.carne = 0;
-  cont.peixe = 0;
-  cont.veg = 0;
-  cont.opcao = 0;
-
-  cont.take.carne = 0;
-  cont.take.peixe = 0;
-  cont.take.veg = 0;
-  cont.take.opcao = 0;
-
-  // 🆕 limpa contadores de origem
-  Object.keys(cont.origem).forEach(origem => {
-    Object.keys(cont.origem[origem]).forEach(tipo => {
-      cont.origem[origem][tipo] = 0;
+    set(novoPedidoRef, {
+      tipo,
+      take,
+      opcaoTipo,
+      modo,
+      status: 'preparo',
+      criadoEm: Date.now()
     });
-  });
-
-
-  const dados = snapshot.val();
-  if (!dados) {
-    atualizar();
-    return;
   }
 
-  Object.entries(dados).forEach(([id, pedido]) => {
-    cont[pedido.tipo]++;
+  // passo 3 - sincronizacao
+  onValue(pedidosRef, (snapshot) => {
 
-    if (pedido.take) {
-      cont.take[pedido.tipo]++;
+    preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
+    pronto.innerHTML = '<h2>✅ PRONTO</h2>';
+
+    cont.carne = 0;
+    cont.peixe = 0;
+    cont.veg = 0;
+    cont.opcao = 0;
+
+    cont.take.carne = 0;
+    cont.take.peixe = 0;
+    cont.take.veg = 0;
+    cont.take.opcao = 0;
+
+    Object.keys(cont.origem).forEach(origem => {
+      Object.keys(cont.origem[origem]).forEach(tipo => {
+        cont.origem[origem][tipo] = 0;
+      });
+    });
+
+    const dados = snapshot.val();
+    if (!dados) {
+      atualizar();
+      return;
     }
 
-    if (pedido.modo && cont.origem[pedido.modo]) {
-      cont.origem[pedido.modo][pedido.tipo]++;
-    }
+    Object.entries(dados).forEach(([id, pedido]) => {
+      cont[pedido.tipo]++;
 
-    renderPedido(id, pedido);
+      if (pedido.take) {
+        cont.take[pedido.tipo]++;
+      }
+
+      if (pedido.modo && cont.origem[pedido.modo]) {
+        cont.origem[pedido.modo][pedido.tipo]++;
+      }
+
+      renderPedido(id, pedido);
+    });
+
+    atualizar();
   });
 
-
-  atualizar();
-});
-  
-  // 🔧 Expor para uso global (importante)
+  // 🔧 Expor para uso global
   window.firebaseDB = {
     db,
     ref,
@@ -1225,6 +1227,7 @@ function gerarPDFResumo() {
     pedidosRef,
     criarPedido
   };
+}
 
 </script>
 <script type="module">
