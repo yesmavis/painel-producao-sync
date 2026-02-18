@@ -1230,23 +1230,7 @@ function iniciarFirebase() {
 }
 
 </script>
-<script type="module">
-  // 🔎 TESTE DE CONEXÃO COM FIREBASE (SEGURANÇA)
-  const { db, ref, set, onValue } = window.firebaseDB;
 
-  const testeRef = ref(db, 'testeConexao');
-
-  // Escreve algo no banco
-  set(testeRef, {
-    status: 'ok',
-    timestamp: Date.now()
-  });
-
-  // Lê de volta
-  onValue(testeRef, (snapshot) => {
-    console.log('🔥 Firebase conectado:', snapshot.val());
-  });
-</script>
 <!-- MODAL OPÇÕES -->
 <div id="modalOpcoes" style="
   position: fixed;
