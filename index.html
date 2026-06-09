@@ -216,7 +216,6 @@ button {
   color:white;
 }
 
-/* Garante o efeito visual correto de botão desativado por falta de estoque */
 button:disabled {
   opacity: 0.3 !important;
   cursor: not-allowed !important;
@@ -407,7 +406,7 @@ button:disabled {
   outline: 2px solid #ffca28;
 }
 
-/* 📦 MODAL DEFINIR ESTOQUE INICIAL */
+/* 📦 MODAL DEFINIR ESTOQUE INICIAL PONTUAL */
 #modalEstoque {
   position: fixed;
   inset: 0;
@@ -495,7 +494,7 @@ button:disabled {
 <div id="modalEstoque">
   <div class="estoque-box">
     <h2>📦 Estoque do Turno</h2>
-    <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Insira a quantidade disponível (0 ou vazio = Sem Limite)</p>
+    <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Insira a quantidade disponível para o turno atual</p>
     
     <div class="estoque-field">
       <label>🔴 CARNE:</label>
@@ -762,22 +761,29 @@ function setModo(m,b){
   b.classList.add('ativo');
 }
 
-// 🔁 Atualizar expandido para dar suporte ao visual decrescente correto
+// 🔁 Atualiza o topo mostrando Restante / Total Inicial dinamizado
 function atualizar(){
   cCarne.innerText = (estoqueInicialRemoto && estoqueInicialRemoto.carne > 0) ? `${estoqueInicialRemoto.carne - cont.carne} / ${estoqueInicialRemoto.carne}` : cont.carne;
   cPeixe.innerText = (estoqueInicialRemoto && estoqueInicialRemoto.peixe > 0) ? `${estoqueInicialRemoto.peixe - cont.peixe} / ${estoqueInicialRemoto.peixe}` : cont.peixe;
   cVeg.innerText = (estoqueInicialRemoto && estoqueInicialRemoto.veg > 0) ? `${estoqueInicialRemoto.veg - cont.veg} / ${estoqueInicialRemoto.veg}` : cont.veg;
-  cOpcao.innerText = cont.opcao;
+  cOpcao.innerText = cont.opcao; // Opções continuam sem limites e incrementais normais
 
-  // Gerencia travas preventivas com base no estoque restante
-  document.getElementById('btn_carne').disabled = (estoqueInicialRemoto && estoqueInicialRemoto.carne > 0 && (estoqueInicialRemoto.carne - cont.carne) <= 0);
-  document.getElementById('btn_carne_take').disabled = (estoqueInicialRemoto && estoqueInicialRemoto.carne > 0 && (estoqueInicialRemoto.carne - cont.carne) <= 0);
-  
-  document.getElementById('btn_peixe').disabled = (estoqueInicialRemoto && estoqueInicialRemoto.peixe > 0 && (estoqueInicialRemoto.peixe - cont.peixe) <= 0);
-  document.getElementById('btn_peixe_take').disabled = (estoqueInicialRemoto && estoqueInicialRemoto.peixe > 0 && (estoqueInicialRemoto.peixe - cont.peixe) <= 0);
-
-  document.getElementById('btn_veg').disabled = (estoqueInicialRemoto && estoqueInicialRemoto.veg > 0 && (estoqueInicialRemoto.veg - cont.veg) <= 0);
-  document.getElementById('btn_veg_take').disabled = (estoqueInicialRemoto && estoqueInicialRemoto.veg > 0 && (estoqueInicialRemoto.veg - cont.veg) <= 0);
+  // Desativa os botões visualmente e operacionalmente caso o estoque chegue a zero
+  if(document.getElementById('btn_carne')) {
+    const disabledCarne = (estoqueInicialRemoto && estoqueInicialRemoto.carne > 0 && (estoqueInicialRemoto.carne - cont.carne) <= 0);
+    document.getElementById('btn_carne').disabled = disabledCarne;
+    document.getElementById('btn_carne_take').disabled = disabledCarne;
+  }
+  if(document.getElementById('btn_peixe')) {
+    const disabledPeixe = (estoqueInicialRemoto && estoqueInicialRemoto.peixe > 0 && (estoqueInicialRemoto.peixe - cont.peixe) <= 0);
+    document.getElementById('btn_peixe').disabled = disabledPeixe;
+    document.getElementById('btn_peixe_take').disabled = disabledPeixe;
+  }
+  if(document.getElementById('btn_veg')) {
+    const disabledVeg = (estoqueInicialRemoto && estoqueInicialRemoto.veg > 0 && (estoqueInicialRemoto.veg - cont.veg) <= 0);
+    document.getElementById('btn_veg').disabled = disabledVeg;
+    document.getElementById('btn_veg_take').disabled = disabledVeg;
+  }
 }
 
 let opcaoTakeSelecionado = false;
@@ -802,7 +808,7 @@ function novoPedido(tipo, take, opcaoTipo = null) {
     return;
   }
   
-  // Bloqueia preventivamente a criação na origem se o estoque local acabou
+  // Bloqueio operacional preventivo direto no clique do Balcão/Admin
   if (tipo !== 'opcao' && estoqueInicialRemoto && estoqueInicialRemoto[tipo] > 0 && (estoqueInicialRemoto[tipo] - cont[tipo]) <= 0) {
     alert('🚫 Estoque esgotado para esta opção!');
     return;
@@ -926,7 +932,7 @@ async function fecharCozinha() {
   const pedidosRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos');
   await window.firebaseDB.remove(pedidosRef);
 
-  // Limpa os metadados de controle de estoque ao encerrar turno
+  // Limpa o limite configurado do estoque ao finalizar a seção do dia
   const metaRef = window.firebaseDB.ref(window.firebaseDB.db, 'metaData');
   await window.firebaseDB.remove(metaRef);
 }
@@ -1085,7 +1091,7 @@ function gerarPDFResumo() {
       set(estoqueRef, { carne, peixe, veg });
     }
 
-    // Monitora modificações no estoque remoto em tempo real
+    // Ouvinte em tempo real para sincronizar o estoque estipulado em múltiplos dispositivos
     onValue(estoqueRef, (snapshot) => {
       const dadosEstoque = snapshot.val();
       if (dadosEstoque) {
@@ -1128,20 +1134,18 @@ function gerarPDFResumo() {
       }
 
       Object.entries(dados).forEach(([id, pedido]) => {
-        // Alinhado com o fluxo de contagem real do seu arquivo original
-        if (pedido.status !== 'finalizado') {
-          // Opcional: Se desejar contabilizar os itens ativos na tela no decrescente, 
-          // adicione a soma aqui. Caso queira decrescer apenas ao finalizar, remova a linha abaixo:
-          // cont[pedido.tipo]++;
-        } else {
-          cont[pedido.tipo]++;
-          if (pedido.take) {
-            cont.take[pedido.tipo]++;
-          }
-          if (pedido.modo && cont.origem[pedido.modo]) {
-            cont.origem[pedido.modo][pedido.tipo]++;
-          }
+        // Se você prefere abater o estoque assim que o pedido é criado (Em Preparo/Pronto), 
+        // mantivemos a soma contínua para o cálculo decrescente correto
+        cont[pedido.tipo]++;
+
+        if (pedido.take) {
+          cont.take[pedido.tipo]++;
         }
+
+        if (pedido.modo && cont.origem[pedido.modo]) {
+          cont.origem[pedido.modo][pedido.tipo]++;
+        }
+
         renderPedido(id, pedido);
       });
 
