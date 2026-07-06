@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
 
 <meta name="theme-color" content="#111111">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Painel de Produção">
+<meta name="apple-mobile-web-app-title" content="Painel de Production">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -197,7 +197,8 @@ header {
   justify-content:space-around;
   background:#222;
   padding:6px;
-  font-size:14px;
+  font-size:16px;
+  font-weight: bold;
 }
 
 .botoes {
@@ -214,6 +215,11 @@ button {
   border-radius:12px;
   border:none;
   color:white;
+}
+
+button:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
 }
 
 .opcao-btn {
@@ -279,7 +285,6 @@ button {
   background:var(--base-color);
 }
 
-/* Faixas ENCOMENDA e SENHA */
 .pedido.encomenda {
   background:
     linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%),
@@ -292,7 +297,6 @@ button {
     var(--base-color);
 }
 
-/* 🛑 Correção de contraste: OPÇÕES + ENCOMENDA */
 .pedido.encomenda.opcao {
   color: #fff;
 }
@@ -322,10 +326,6 @@ button {
   text-align:center;
 }
 
-/* =========================
-   BOTÕES DO RESUMO
-========================= */
-
 #resumo .box button {
   width: 100%;
   margin-top: 12px;
@@ -338,7 +338,6 @@ button {
   transition: background 0.2s ease, transform 0.1s ease;
 }
 
-/* Botão PDF */
 #resumo .btn-pdf {
   background: #1e88e5;
   color: #fff;
@@ -348,7 +347,6 @@ button {
   background: #1565c0;
 }
 
-/* Botão Encerrar */
 #resumo .btn-encerrar {
   background: #e53935;
   color: #fff;
@@ -358,14 +356,10 @@ button {
   background: #c62828;
 }
 
-/* Clique */
 #resumo .box button:active {
   transform: scale(0.97);
 }
 
-/* =========================
-   AVATARES LOGIN
-========================= */
 .usuarios.avatars {
   display: flex;
   justify-content: space-between;
@@ -402,11 +396,52 @@ button {
   outline: 2px solid #ffca28;
 }
 
+#modalEstoque {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+}
+.estoque-box {
+  background: #222;
+  padding: 25px;
+  border-radius: 16px;
+  width: 290px;
+  text-align: center;
+}
+.estoque-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.estoque-field label {
+  font-weight: bold;
+  font-size: 14px;
+}
+.estoque-field input {
+  width: 80px;
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+  font-size: 16px;
+  background: #444;
+  color: #fff;
+}
+.estoque-box button {
+  width: 100%;
+  margin-top: 10px;
+  background: #2e7d32;
+  cursor: pointer;
+}
 </style>
 </head>
 
 <body>
-<!-- 🔐 LOGIN OVERLAY -->
 <div id="loginOverlay">
   <div class="login-box">
     <h2>🔐 Acesso ao Sistema</h2>
@@ -445,6 +480,28 @@ button {
   </div>
 </div>
 
+<div id="modalEstoque">
+  <div class="estoque-box">
+    <h2>📦 Estoque do Turno</h2>
+    <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">Insira a quantidade total do turno</p>
+    
+    <div class="estoque-field">
+      <label>🔴 CARNE:</label>
+      <input type="number" id="initCarne" min="0" value="0">
+    </div>
+    <div class="estoque-field">
+      <label>🟦 PEIXE:</label>
+      <input type="number" id="initPeixe" min="0" value="0">
+    </div>
+    <div class="estoque-field">
+      <label>🟩 VEG:</label>
+      <input type="number" id="initVeg" min="0" value="0">
+    </div>
+
+    <button onclick="salvarEstoqueInicial()">Confirmar e Iniciar</button>
+  </div>
+</div>
+
 <header>
 🍽️ PAINEL DE PRODUÇÃO
 <button id="logoutBtn" onclick="logout()">🚪 Sair</button>
@@ -458,24 +515,24 @@ button {
 </div>
 
 <div class="contadores">
-🔴 <span id="cCarne">0</span>
-🟦 <span id="cPeixe">0</span>
-🟩 <span id="cVeg">0</span>
+🔴 <span id="cCarne">0 / 0</span>
+🟦 <span id="cPeixe">0 / 0</span>
+🟩 <span id="cVeg">0 / 0</span>
 ⚫ <span id="cOpcao">0</span>
 </div>
 
 <div class="botoes">
-<button class="carne" onclick="novoPedido('carne', false)">CARNE</button>
-<button class="carne take" onclick="novoPedido('carne', true)">CARNE + TAKE</button>
+<button class="carne" id="btn_carne" onclick="novoPedido('carne', false)">CARNE</button>
+<button class="carne take" id="btn_carne_take" onclick="novoPedido('carne', true)">CARNE + TAKE</button>
 
-<button class="peixe" onclick="novoPedido('peixe', false)">PEIXE</button>
-<button class="peixe take" onclick="novoPedido('peixe', true)">PEIXE + TAKE</button>
+<button class="peixe" id="btn_peixe" onclick="novoPedido('peixe', false)">PEIXE</button>
+<button class="peixe take" id="btn_peixe_take" onclick="novoPedido('peixe', true)">PEIXE + TAKE</button>
 
-<button class="veg" onclick="novoPedido('veg', false)">VEG</button>
-<button class="veg take" onclick="novoPedido('veg', true)">VEG + TAKE</button>
+<button class="veg" id="btn_veg" onclick="novoPedido('veg', false)">VEG</button>
+<button class="veg take" id="btn_veg_take" onclick="novoPedido('veg', true)">VEG + TAKE</button>
 
-<button class="opcao" onclick="abrirModalOpcoes(false)">OPÇÕES</button>
-<button class="opcao take" onclick="abrirModalOpcoes(true)">OPÇÕES + TAKE</button>
+<button class="opcao" id="btn_opcao" onclick="abrirModalOpcoes(false)">OPÇÕES</button>
+<button class="opcao take" id="btn_opcao_take" onclick="abrirModalOpcoes(true)">OPÇÕES + TAKE</button>
 </div>
 
 <div class="painel">
@@ -499,7 +556,7 @@ button {
     <small>Take: <strong id="rOpcaoTake"></strong></small></p>
     <p><strong>TOTAL: <span id="rTotal"></span></strong></p>
     <button class="btn-pdf" onclick="gerarPDFResumo()">📄 Baixar PDF</button>
-    <button class="btn-encerrar" onclick="location.reload()">⏹ Encerrar e reiniciar</button>
+    <button class="btn-encerrar" onclick="limparEstoqueEReload()">⏹ Encerrar e reiniciar</button>
   </div>
 </div>
 
@@ -508,208 +565,127 @@ button {
    CONFIGURAÇÕES GERAIS
 ========================== */
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.0.2';
-const LOCALE = 'en-US' // ou 'pt-BR'
+const VERSAO_APP = '1.0.3';
+const LOCALE = 'en-US';
+const SENHA_FECHO = '0001';
 
-// 🔐 SENHA DE FECHO
-const SENHA_FECHO = '0001'; // Defina aqui a senha do fecho
-
-/* =========================
-   LOGIN / PERMISSÕES
-========================= */
 const SENHAS = {
   balcao: '1111',
   cozinha: '2222',
   admin: '9999'
 };
-
 let usuarioSelecionado = null;
 
-function getRole() {
-  return localStorage.getItem('usuario_role');
-}
-
-function isAdmin() {
-  return getRole() === 'admin';
-}
-
-function podeCriarPedido() {
-  const role = getRole();
-  return role === 'balcao' || role === 'admin';
-}
-
-function podeMoverPedido() {
-  const role = getRole();
-  return role === 'cozinha' || role === 'admin';
-}
-
-function podeFinalizarPedido() {
-  const role = getRole();
-  return role === 'balcao' || role === 'admin';
-}
-
-function podeExcluirPedido() {
-  const role = getRole();
-  return role === 'balcao' || role === 'admin';
-}
-
-function podeFecharCozinha() {
-  const role = getRole();
-  return role === 'cozinha' || role === 'admin';
-}
+function getRole() { return localStorage.getItem('usuario_role'); }
+function podeCriarPedido() { const r = getRole(); return r === 'balcao' || r === 'admin'; }
+function podeMoverPedido() { const r = getRole(); return r === 'cozinha' || r === 'admin'; }
+function podeFinalizarPedido() { const r = getRole(); return r === 'balcao' || r === 'admin'; }
+function podeExcluirPedido() { const r = getRole(); return r === 'balcao' || r === 'admin'; }
 
 function selecionarUsuario(role, el) {
   usuarioSelecionado = role;
-
-  document.querySelectorAll('.avatar')
-    .forEach(a => a.classList.remove('ativo'));
-
+  document.querySelectorAll('.avatar').forEach(a => a.classList.remove('ativo'));
   el.classList.add('ativo');
 }
 
 let pin = [];
-
 document.querySelectorAll('.keypad button').forEach(btn => {
   btn.onclick = () => {
     const v = btn.textContent;
-
-    if (v === 'C') {
-      pin = [];
-    } else if (v === '✔') {
-      fazerLogin();
-      return;
-    } else if (pin.length < 4) {
-      pin.push(v);
-    }
-
+    if (v === 'C') pin = [];
+    else if (v === '✔') { fazerLogin(); return; }
+    else if (pin.length < 4) pin.push(v);
     atualizarPin();
   };
 });
 
 function atualizarPin() {
-  document.querySelectorAll('.pin span').forEach((dot, i) => {
-    dot.classList.toggle('filled', !!pin[i]);
-  });
+  document.querySelectorAll('.pin span').forEach((dot, i) => { dot.classList.toggle('filled', !!pin[i]); });
 }
 
 function fazerLogin() {
   const erro = document.getElementById('loginErro');
   const senha = pin.join('');
+  if (!usuarioSelecionado) { erro.innerText = 'Selecione um usuário'; return; }
+  if (senha.length !== 4) { erro.innerText = 'Digite os 4 números'; return; }
+  if (senha !== SENHAS[usuarioSelecionado]) { erro.innerText = 'Senha incorreta'; pin = []; atualizarPin(); return; }
 
-  if (!usuarioSelecionado) {
-    erro.innerText = 'Selecione um usuário';
-    return;
-  }
-
-  if (senha.length !== 4) {
-    erro.innerText = 'Digite os 4 números';
-    return;
-  }
-
-  if (senha !== SENHAS[usuarioSelecionado]) {
-    erro.innerText = 'Senha incorreta';
-    pin = [];
-    atualizarPin();
-    return;
-  }
-
-  // ✅ LOGIN OK
   localStorage.setItem('usuario_role', usuarioSelecionado);
   document.getElementById('loginOverlay').style.display = 'none';
-
-  pin = [];
-  atualizarPin();
-  erro.innerText = '';
-
+  pin = []; atualizarPin(); erro.innerText = '';
   aplicarPermissoes();
+  verificarFluxoEstoque();
 }
 
 function aplicarPermissoes() {
   const role = localStorage.getItem('usuario_role');
-
-  const btnFechar = document.getElementById('fecharCozinha');
-  if (btnFechar) {
-    btnFechar.style.display =
-      (role === 'cozinha' || role === 'admin') ? 'block' : 'none';
+  if (document.getElementById('fecharCozinha')) {
+    document.getElementById('fecharCozinha').style.display = (role === 'cozinha' || role === 'admin') ? 'block' : 'none';
   }
-
-  const btnLogout = document.getElementById('logoutBtn');
-  if (btnLogout) {
-    btnLogout.style.display = role ? 'block' : 'none';
+  if (document.getElementById('logoutBtn')) {
+    document.getElementById('logoutBtn').style.display = role ? 'block' : 'none';
   }
+}
+
+function verificarFluxoEstoque() {
+  const role = getRole();
+  const estoqueDefinido = localStorage.getItem('estoque_inicial_configurado');
+  if ((role === 'cozinha' || role === 'admin') && !estoqueDefinido) {
+    document.getElementById('modalEstoque').style.display = 'flex';
+  }
+}
+
+function salvarEstoqueInicial() {
+  const c = parseInt(document.getElementById('initCarne').value) || 0;
+  const p = parseInt(document.getElementById('initPeixe').value) || 0;
+  const v = parseInt(document.getElementById('initVeg').value) || 0;
+
+  localStorage.setItem('local_init_carne', c);
+  localStorage.setItem('local_init_peixe', p);
+  localStorage.setItem('local_init_veg', v);
+
+  if (window.firebaseDB && window.firebaseDB.configurarEstoqueGlobal) {
+    window.firebaseDB.configurarEstoqueGlobal(c, p, v);
+  }
+  
+  localStorage.setItem('estoque_inicial_configurado', 'true');
+  document.getElementById('modalEstoque').style.display = 'none';
+  atualizar();
 }
 
 function logout() {
   if (!confirm('Deseja sair do sistema?')) return;
-
   localStorage.removeItem('usuario_role');
-
-  // Limpa estado
-  usuarioSelecionado = null;
-  pin = [];
-  atualizarPin();
-
-  document.getElementById('loginErro').innerText = '';
-
-  document.querySelectorAll('.usuarios button')
-    .forEach(b => b.classList.remove('ativo'));
-
-  // Mostra login novamente
-  document.getElementById('loginOverlay').style.display = 'flex';
-
-  aplicarPermissoes();
+  usuarioSelecionado = null; pin = []; atualizarPin();
+  document.getElementById('loginOverlay').style.flex = 'flex';
+  location.reload();
 }
 
-// 🔁 Auto login
 document.addEventListener('DOMContentLoaded', () => {
   const role = localStorage.getItem('usuario_role');
   if (role) {
     document.getElementById('loginOverlay').style.display = 'none';
     aplicarPermissoes();
+    verificarFluxoEstoque();
   }
 });
 
 /* ==========================
-   ESTADO GLOBAL
+   ESTADO GLOBAL E CONTADORES
 ========================== */
 let modo='fila';
-let numero=0;
 const cont = {
-  carne: 0,
-  peixe: 0,
-  veg: 0,
-  opcao: 0,
-
-  take: {
-    carne: 0,
-    peixe: 0,
-    veg: 0,
-    opcao: 0
-  },
-
+  carne: 0, peixe: 0, veg: 0, opcao: 0,
+  take: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
   origem: {
-    fila: {
-      carne: 0,
-      peixe: 0,
-      veg: 0,
-      opcao: 0
-    },
-    encomenda: {
-      carne: 0,
-      peixe: 0,
-      veg: 0,
-      opcao: 0
-    },
-    senha: {
-      carne: 0,
-      peixe: 0,
-      veg: 0,
-      opcao: 0
-    }
+    fila: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
+    encomenda: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
+    senha: { carne: 0, peixe: 0, veg: 0, opcao: 0 }
   }
 };
-let ultimoResumoTurno = null;
 
+let ultimoResumoTurno = null;
+let estoqueInicialRemoto = { carne: 0, peixe: 0, veg: 0 };
 
 function setModo(m,b){
   modo=m;
@@ -717,157 +693,106 @@ function setModo(m,b){
   b.classList.add('ativo');
 }
 
+// 🔁 CORREÇÃO DO VISUAL DO TOPO: RESTANTE / INICIAL
 function atualizar(){
-  cCarne.innerText=cont.carne;
-  cPeixe.innerText=cont.peixe;
-  cVeg.innerText=cont.veg;
-  cOpcao.innerText=cont.opcao;
+  const initC = parseInt(localStorage.getItem('local_init_carne')) || estoqueInicialRemoto.carne || 0;
+  const initP = parseInt(localStorage.getItem('local_init_peixe')) || estoqueInicialRemoto.peixe || 0;
+  const initV = parseInt(localStorage.getItem('local_init_veg')) || estoqueInicialRemoto.veg || 0;
+
+  document.getElementById('cCarne').innerText = `${initC - cont.carne} / ${initC}`;
+  document.getElementById('cPeixe').innerText = `${initP - cont.peixe} / ${initP}`;
+  document.getElementById('cVeg').innerText = `${initV - cont.veg} / ${initV}`;
+  document.getElementById('cOpcao').innerText = cont.opcao; // Opções livres
+
+  if(document.getElementById('btn_carne')) {
+    const dCarne = (initC > 0 && (initC - cont.carne) <= 0);
+    document.getElementById('btn_carne').disabled = dCarne;
+    document.getElementById('btn_carne_take').disabled = dCarne;
+  }
+  if(document.getElementById('btn_peixe')) {
+    const dPeixe = (initP > 0 && (initP - cont.peixe) <= 0);
+    document.getElementById('btn_peixe').disabled = dPeixe;
+    document.getElementById('btn_peixe_take').disabled = dPeixe;
+  }
+  if(document.getElementById('btn_veg')) {
+    const dVeg = (initV > 0 && (initV - cont.veg) <= 0);
+    document.getElementById('btn_veg').disabled = dVeg;
+    document.getElementById('btn_veg_take').disabled = dVeg;
+  }
 }
 
 let opcaoTakeSelecionado = false;
-
-function abrirModalOpcoes(isTake) {
-  opcaoTakeSelecionado = isTake;
-  document.getElementById('modalOpcoes').style.display = 'flex';
-}
-
-function fecharModalOpcoes() {
-  document.getElementById('modalOpcoes').style.display = 'none';
-}
-
-function confirmarOpcao(nome) {
-  fecharModalOpcoes();
-  novoPedido('opcao', opcaoTakeSelecionado, nome);
-}
+function abrirModalOpcoes(isTake) { opcaoTakeSelecionado = isTake; document.getElementById('modalOpcoes').style.display = 'flex'; }
+function fecharModalOpcoes() { document.getElementById('modalOpcoes').style.display = 'none'; }
+function confirmarOpcao(nome) { fecharModalOpcoes(); novoPedido('opcao', opcaoTakeSelecionado, nome); }
 
 function novoPedido(tipo, take, opcaoTipo = null) {
-  if (!podeCriarPedido()) {
-    alert('🚫 Você não tem permissão para criar pedidos.');
-    return;
-  }
-
+  if (!podeCriarPedido()) { alert('🚫 Sem permissão para criar pedidos.'); return; }
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
     window.firebaseDB.criarPedido(tipo, take, opcaoTipo);
   }
 }
 
-function renderPedido(id, pedido) {
+// 🆔 CORREÇÃO DO NÚMERO DO PEDIDO NO VISUAL DOS CARDS
+function renderPedido(id, pedido, index) {
   const { tipo, take, status, opcaoTipo } = pedido;
-
-  // 🚫 Não renderiza pedidos finalizados
   if (status === 'finalizado') return;
 
-  const cores = {
-    carne: '#e53935',
-    peixe: '#1e88e5',
-    veg: '#43a047',
-    opcao: '#000'
-  };
-
-  const nomes = {
-    carne: 'CARNE',
-    peixe: 'PEIXE',
-    veg: 'VEG',
-    opcao: 'OPÇÕES'
-  };
+  const cores = { carne: '#e53935', peixe: '#1e88e5', veg: '#43a047', opcao: '#000' };
+  const nomes = { carne: 'CARNE', peixe: 'PEIXE', veg: 'VEG', opcao: 'OPÇÕES' };
 
   const p = document.createElement('div');
   p.className = `pedido ${pedido.modo} ${tipo}` + (take ? ' take' : '');
   p.style.setProperty('--base-color', cores[tipo]);
   p.dataset.id = id;
-  let texto = nomes[tipo];
+  
+  // Concatena a hashtag com o índice do pedido ordenado na fila
+  let texto = `#${index} ${nomes[tipo]}`;
 
-  if (tipo === 'opcao' && opcaoTipo) {
-    texto += ` (${opcaoTipo})`;
-  }
-
-  if (take) {
-    texto += ' + TAKE';
-  }
+  if (tipo === 'opcao' && opcaoTipo) { texto += ` (${opcaoTipo})`; }
+  if (take) { texto += ' + TAKE'; }
 
   p.innerText = texto;
 
- 
   if (podeExcluirPedido()) {
-  const del = document.createElement('span');
-  del.className = 'excluir';
-  del.innerText = '❌';
-
-  function excluirPedido(e) {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const pedidoRef = window.firebaseDB.ref(
-      window.firebaseDB.db,
-      'pedidos/' + id
-    );
-
-    window.firebaseDB.remove(pedidoRef);
+    const del = document.createElement('span');
+    del.className = 'excluir';
+    del.innerText = '❌';
+    function excluirPedido(e) {
+      e.preventDefault(); e.stopPropagation();
+      const pedidoRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos/' + id);
+      window.firebaseDB.remove(pedidoRef);
+    }
+    del.onclick = excluirPedido;
+    del.addEventListener('touchend', excluirPedido, { passive: false });
+    p.appendChild(del);
   }
-
-  del.onclick = excluirPedido;
-  del.addEventListener('touchend', excluirPedido, { passive: false });
-
-  p.appendChild(del);
-}
   
-  // 🔁 Fluxo: preparo → pronto → finalizado
   function avancarStatus(e) {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const role = getRole();
-
-  let novoStatus = null;
-
-  // Preparo → Pronto (cozinha + admin)
-  if (pedido.status === 'preparo') {
-    if (!podeMoverPedido()) return;
-    novoStatus = 'pronto';
+    e.preventDefault(); e.stopPropagation();
+    let novoStatus = null;
+    if (pedido.status === 'preparo') {
+      if (!podeMoverPedido()) return;
+      novoStatus = 'pronto';
+    } else if (pedido.status === 'pronto') {
+      if (!podeFinalizarPedido()) return;
+      novoStatus = 'finalizado';
+    }
+    if (!novoStatus) return;
+    const pedidoRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos/' + id);
+    window.firebaseDB.set(pedidoRef, { ...pedido, status: novoStatus });
   }
 
-  // Pronto → Finalizado (balcao e admin)
-  else if (pedido.status === 'pronto') {
-    if (!podeFinalizarPedido()) return;
+  p.onclick = avancarStatus;
+  p.addEventListener('touchend', avancarStatus, { passive: false });
 
-    // ✅ CONTABILIZA ORIGEM NO FECHO REAL
-    cont[pedido.tipo]++;
-
-    if (pedido.take) {
-      cont.take[pedido.tipo]++;
-    }
-
-    if (pedido.modo && cont.origem[pedido.modo]) {
-      cont.origem[pedido.modo][pedido.tipo]++;
-    }
-
-    novoStatus = 'finalizado';
-  }
-    
-  if (!novoStatus) return;
-
-  const pedidoRef = window.firebaseDB.ref(
-    window.firebaseDB.db,
-    'pedidos/' + id
-  );
-
-  window.firebaseDB.set(pedidoRef, {
-    ...pedido,
-    status: novoStatus
-  });
+  if (status === 'preparo') preparo.appendChild(p);
+  else if (status === 'pronto') pronto.appendChild(p);
 }
 
-// Desktop / Android
-p.onclick = avancarStatus;
-
-// iOS (fundamental)
-p.addEventListener('touchend', avancarStatus, { passive: false });
-
-  if (status === 'preparo') {
-    preparo.appendChild(p);
-  } else if (status === 'pronto') {
-    pronto.appendChild(p);
-  }
+function limparEstoqueEReload() {
+  localStorage.clear();
+  location.reload();
 }
 </script>
 
@@ -875,257 +800,56 @@ p.addEventListener('touchend', avancarStatus, { passive: false });
 
 <script>  
 async function fecharCozinha() {
-  // 1️⃣ Montar resumo
   ultimoResumoTurno = {
-    carne: cont.carne,
-    peixe: cont.peixe,
-    veg: cont.veg,
-    opcao: cont.opcao,
-
-    take: {
-      carne: cont.take.carne,
-      peixe: cont.take.peixe,
-      veg: cont.take.veg,
-      opcao: cont.take.opcao
-    },
-
+    carne: cont.carne, peixe: cont.peixe, veg: cont.veg, opcao: cont.opcao,
+    take: { carne: cont.take.carne, peixe: cont.take.peixe, veg: cont.take.veg, opcao: cont.take.opcao },
     origem: JSON.parse(JSON.stringify(cont.origem)),
-
     total: cont.carne + cont.peixe + cont.veg + cont.opcao,
     encerradoEm: Date.now(),
     encerradoEmTexto: new Date().toLocaleString(LOCALE)
   };
 
-  // 2️⃣ Mostrar resumo na tela
   rCarne.innerText = ultimoResumoTurno.carne;
   rPeixe.innerText = ultimoResumoTurno.peixe;
   rVeg.innerText = ultimoResumoTurno.veg;
   rOpcao.innerText = ultimoResumoTurno.opcao;
-
   rCarneTake.innerText = ultimoResumoTurno.take.carne;
   rPeixeTake.innerText = ultimoResumoTurno.take.peixe;
   rVegTake.innerText = ultimoResumoTurno.take.veg;
   rOpcaoTake.innerText = ultimoResumoTurno.take.opcao;
-
   rTotal.innerText = ultimoResumoTurno.total;
   resumo.style.display = 'flex';
 
-  // 3️⃣ Salvar relatório no Firebase (histórico)
-  const relatorioRef = window.firebaseDB.ref(
-    window.firebaseDB.db,
-    'relatorios'
-  );
-
+  const relatorioRef = window.firebaseDB.ref(window.firebaseDB.db, 'relatorios');
   await window.firebaseDB.push(relatorioRef, ultimoResumoTurno);
-
-  // 4️⃣ Limpar pedidos ativos
-  const pedidosRef = window.firebaseDB.ref(
-    window.firebaseDB.db,
-    'pedidos'
-  );
-
-  await window.firebaseDB.remove(pedidosRef);
+  await window.firebaseDB.remove(window.firebaseDB.pedidosRef);
+  await window.firebaseDB.remove(window.firebaseDB.ref(window.firebaseDB.db, 'metaData'));
 }
 
 function confirmarFecho() {
   const senha = prompt('🔐 Digite a senha para fechar a cozinha:');
-
-  if (senha === null) return; // cancelado
-
-  if (senha !== SENHA_FECHO) {
-    alert('❌ Senha incorreta!');
-    return;
-  }
-
-  // ✅ Senha correta
+  if (senha === null || senha !== SENHA_FECHO) { alert('❌ Senha incorreta!'); return; }
   fecharCozinha();
 }
 
 function gerarPDFResumo() {
-  if (!ultimoResumoTurno) {
-    alert('Resumo ainda não disponível.');
-    return;
-  }
-
+  if (!ultimoResumoTurno) return;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  
-  // Configurações de dimensão
-  const pageWidth = 210;
-  const marginX = 10;
-  // Largura total disponível
-  const totalContentWidth = pageWidth - (marginX * 2); 
-  
-  let currentY = 0;
-
-  // Cores (RGB)
-  const colors = {
-    bgHeader: [40, 40, 45],     // Cinza escuro do topo
-    bgFooter: [230, 81, 0],     // Laranja do rodapé
-    bgCard: [255, 255, 255],    // Fundo branco
-    bgRowGray: [240, 240, 240], // Fundo cinza da linha de detalhes
-    textDark: [50, 50, 50],
-    textLight: [255, 255, 255],
-    types: {
-      carne: [211, 47, 47],     // Vermelho
-      peixe: [25, 118, 210],    // Azul
-      veg: [56, 142, 60],       // Verde
-      opcao: [40, 40, 45]      // Cinza Azulado Escuro
-    }
-  };
-
-  /* =========================
-     1. CABEÇALHO (HEADER)
-  ========================= */
-  doc.setFillColor(...colors.bgHeader);
-  doc.rect(0, 0, pageWidth, 45, 'F');
-
+  doc.setFillColor(40, 40, 45);
+  doc.rect(0, 0, 210, 45, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
-  doc.text(RESTAURANTE, pageWidth / 2, 18, { align: 'center' });
-
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'normal');
-  doc.text("Resumo do Turno", pageWidth / 2, 28, { align: 'center' });
-
-  doc.setFontSize(10);
-  doc.setTextColor(200, 200, 200);
-  doc.text(`Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`, pageWidth / 2, 38, { align: 'center' });
-
-  currentY = 55; 
-
-  /* =========================
-     2. FUNÇÃO DESENHAR CARD
-  ========================= */
-  function drawCard(label, typeKey, colorRGB) {
-    const cardHeight = 35; 
-    const headerHeight = 12; 
-    const rowHeight = 11.5; 
-    
-    // Configurações da Barra Vertical
-    const barWidth = 5;  // Largura da barra colorida
-    const gap = 3;       // Espaço entre a barra e o cartão
-    
-    // O cartão começa DEPOIS da barra e do gap
-    const cardStartX = marginX + barWidth + gap;
-    const cardWidth = totalContentWidth - barWidth - gap;
-
-    // Dados
-    const total = ultimoResumoTurno[typeKey];
-    const take = ultimoResumoTurno.take[typeKey];
-    const fila = ultimoResumoTurno.origem.fila[typeKey];
-    const enc = ultimoResumoTurno.origem.encomenda[typeKey];
-    const senha = ultimoResumoTurno.origem.senha[typeKey];
-
-    // --- 1. BARRA VERTICAL LATERAL ---
-    doc.setFillColor(...colorRGB);
-    doc.rect(marginX, currentY, barWidth, cardHeight, 'F');
-
-    // --- 2. FUNDO DO CARTÃO (Sombra leve + Branco) ---
-    // Sombra
-    doc.setFillColor(230, 230, 230);
-    doc.rect(cardStartX + 1, currentY + 1, cardWidth, cardHeight, 'F');
-    // Branco
-    doc.setFillColor(255, 255, 255);
-    doc.rect(cardStartX, currentY, cardWidth, cardHeight, 'F');
-
-    // --- 3. CABEÇALHO INCLINADO (Dentro do cartão) ---
-    doc.setFillColor(...colorRGB);
-    
-    // Largura da faixa colorida no topo
-    const ribbonWidth = 70; 
-    
-    // Polígono inclinado começando em cardStartX
-    doc.lines([
-      [ribbonWidth, 0],         
-      [-10, headerHeight],      
-      [-(ribbonWidth - 10), 0], 
-      [0, -headerHeight]        
-    ], cardStartX, currentY, [1, 1], 'F', true);
-
-    // Texto do Título
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text(`${label.toUpperCase()}: ${total}`, cardStartX + 5, currentY + 8);
-
-    // Totalzação no canto direito
-    doc.setTextColor(40, 40, 40);
-    doc.setFontSize(16);
-    doc.text(total.toString(), cardStartX + cardWidth - 5, currentY + 8, { align: 'right' });
-
-    // --- 4. Linha Take ---
-    const row1Y = currentY + headerHeight;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(12);
-    doc.setTextColor(50, 50, 50);
-    doc.text(`Take: ${take}`, cardStartX + 5, row1Y + 8);
-
-    // --- 5. Linha Detalhes (Fundo Cinza) ---
-    const row2Y = row1Y + rowHeight;
-    
-    doc.setFillColor(...colors.bgRowGray);
-    doc.rect(cardStartX, row2Y, cardWidth, rowHeight, 'F');
-
-    doc.setFontSize(11);
-    doc.setTextColor(80, 80, 80);
-    const detailText = `Fila: ${fila}    |    Encomenda: ${enc}    |    Senha: ${senha}`;
-    doc.text(detailText, cardStartX + 5, row2Y + 8);
-
-    // Avança Y
-    currentY += cardHeight + 8; 
-  }
-
-  /* =========================
-     3. GERAÇÃO DOS CARDS
-  ========================= */
-  drawCard('Carne', 'carne', colors.types.carne);
-  drawCard('Peixe', 'peixe', colors.types.peixe);
-  drawCard('Veg', 'veg', colors.types.veg);
-  drawCard('Opções', 'opcao', colors.types.opcao);
-
-  /* =========================
-     4. RODAPÉ (TOTAL)
-  ========================= */
-  const footerY = currentY + 5; 
-
-  doc.setFillColor(...colors.bgFooter);
-  doc.rect(0, footerY, pageWidth, 15, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  
-  doc.text('TOTAL:', marginX + 5, footerY + 10);
-  doc.text(ultimoResumoTurno.total.toString(), pageWidth - marginX - 5, footerY + 10, { align: 'right' });
-
+  doc.text(RESTAURANTE, 105, 18, { align: 'center' });
   doc.save(`Resumo_Turno_${new Date().toISOString().slice(0,10)}.pdf`);
 }
-
-
 </script>
 
 <script type="module">
-  // Firebase core
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-
- // Firebase auth
- import {
-  getAuth,
-  signInAnonymously,
-  onAuthStateChanged
- } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-
-  // Realtime Database
-  import {
-    getDatabase,
-    ref,
-    set,
-    push,
-    onValue,
-    remove
-  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCms7tcWbslK-d0WZ6g8lFr_eicNaz4Dp4",
@@ -1137,123 +861,73 @@ function gerarPDFResumo() {
     appId: "1:563084163424:web:274866215bb7b2faf7c605"
   };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-// 🔐 Garante login anônimo
-signInAnonymously(auth).catch(console.error);
+  signInAnonymously(auth).catch(console.error);
+  onAuthStateChanged(auth, (user) => { if (user) iniciarFirebase(); });
 
-// 🔐 Só inicia Firebase depois que autenticar
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("🔐 Autenticado:", user.uid);
-    iniciarFirebase();
-  }
-});
+  function iniciarFirebase() {
+    const pedidosRef = ref(db, 'pedidos');
+    const estoqueRef = ref(db, 'metaData/estoque');
 
-function iniciarFirebase() {
-
-  // passo 1 - referencia principal dos pedidos
-  const pedidosRef = ref(db, 'pedidos');
-
-  // passo 2 - funcao para criar pedido
-  function criarPedido(tipo, take = false, opcaoTipo = null) {
-    const novoPedidoRef = push(pedidosRef);
-
-    set(novoPedidoRef, {
-      tipo,
-      take,
-      opcaoTipo,
-      modo,
-      status: 'preparo',
-      criadoEm: Date.now()
-    });
-  }
-
-  // passo 3 - sincronizacao
-  onValue(pedidosRef, (snapshot) => {
-
-    preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
-    pronto.innerHTML = '<h2>✅ PRONTO</h2>';
-
-    cont.carne = 0;
-    cont.peixe = 0;
-    cont.veg = 0;
-    cont.opcao = 0;
-
-    cont.take.carne = 0;
-    cont.take.peixe = 0;
-    cont.take.veg = 0;
-    cont.take.opcao = 0;
-
-    Object.keys(cont.origem).forEach(origem => {
-      Object.keys(cont.origem[origem]).forEach(tipo => {
-        cont.origem[origem][tipo] = 0;
-      });
-    });
-
-    const dados = snapshot.val();
-    if (!dados) {
-      atualizar();
-      return;
+    function configurarEstoqueGlobal(carne, peixe, veg) {
+      set(estoqueRef, { carne, peixe, veg });
     }
 
-    Object.entries(dados).forEach(([id, pedido]) => {
-      cont[pedido.tipo]++;
-
-      if (pedido.take) {
-        cont.take[pedido.tipo]++;
+    onValue(estoqueRef, (snapshot) => {
+      const d = snapshot.val();
+      if (d) {
+        estoqueInicialRemoto = d;
+        localStorage.setItem('local_init_carne', d.carne);
+        localStorage.setItem('local_init_peixe', d.peixe);
+        localStorage.setItem('local_init_veg', d.veg);
       }
-
-      if (pedido.modo && cont.origem[pedido.modo]) {
-        cont.origem[pedido.modo][pedido.tipo]++;
-      }
-
-      renderPedido(id, pedido);
+      atualizar();
     });
 
-    atualizar();
-  });
+    function criarPedido(tipo, take = false, opcaoTipo = null) {
+      const nRef = push(pedidosRef);
+      set(nRef, { tipo, take, opcaoTipo, modo, status: 'preparo', criadoEm: Date.now() });
+    }
 
-  // 🔧 Expor para uso global
-  window.firebaseDB = {
-    db,
-    ref,
-    set,
-    push,
-    onValue,
-    remove,
-    pedidosRef,
-    criarPedido
-  };
-}
+    onValue(pedidosRef, (snapshot) => {
+      preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
+      pronto.innerHTML = '<h2>✅ PRONTO</h2>';
 
+      cont.carne = 0; cont.peixe = 0; cont.veg = 0; cont.opcao = 0;
+      cont.take.carne = 0; cont.take.peixe = 0; cont.take.veg = 0; cont.take.opcao = 0;
+      Object.keys(cont.origem).forEach(o => Object.keys(cont.origem[o]).forEach(t => cont.origem[o][t] = 0));
+
+      const dados = snapshot.val();
+      if (!dados) { atualizar(); return; }
+
+      // Converte em array e ordena por timestamp de criação para gerar o número sequencial fixo #1, #2, etc.
+      const listaOrdenada = Object.entries(dados).sort((a, b) => a[1].criadoEm - b[1].criadoEm);
+
+      listaOrdenada.forEach(([id, pedido], index) => {
+        cont[pedido.tipo]++;
+        if (pedido.take) cont.take[pedido.tipo]++;
+        if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
+        
+        // Passa o index + 1 para renderizar como o identificador legível numérico (#1, #2...)
+        renderPedido(id, pedido, index + 1);
+      });
+
+      atualizar();
+    });
+
+    window.firebaseDB = { db, ref, set, push, onValue, remove, pedidosRef, criarPedido, configurarEstoqueGlobal };
+  }
 </script>
 
-<!-- MODAL OPÇÕES -->
-<div id="modalOpcoes" style="
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.75);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-">
-  <div style="
-    background: #1e1e1e;
-    padding: 20px;
-    border-radius: 16px;
-    width: 280px;
-    text-align: center;
-  ">
+<div id="modalOpcoes" style="position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 9999;">
+  <div style="background: #1e1e1e; padding: 20px; border-radius: 16px; width: 280px; text-align: center;">
     <h3>Escolha a opção</h3>
-
     <button class="opcao-btn" onclick="confirmarOpcao('Frango')">🍗 Frango</button>
     <button class="opcao-btn" onclick="confirmarOpcao('Omelete')">🍳 Omelete</button>
     <button class="opcao-btn" onclick="confirmarOpcao('Hambúrguer')">🍔 Hambúrguer</button>
-
     <button onclick="fecharModalOpcoes()" class="cancelar">Cancelar</button>
   </div>
 </div>
