@@ -564,7 +564,7 @@ button:disabled {
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.0.9';
+const VERSAO_APP = '1.0.10';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -680,13 +680,13 @@ function atualizar() {
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
 
-  // CORREÇÃO CRÍTICA: Bloqueia APENAS se houver stock total definido E a quantidade restante for de facto zero.
-  document.getElementById('btn_carne').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0);
-  document.getElementById('btn_carne_take').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0);
-  document.getElementById('btn_peixe').disabled = !podePedir || (estoqueInicial.peixe > 0 && restPeixe <= 0);
-  document.getElementById('btn_peixe_take').disabled = !podePedir || (estoqueInicial.peixe > 0 && restPeixe <= 0);
-  document.getElementById('btn_veg').disabled = !podePedir || (estoqueInicial.veg > 0 && restVeg <= 0);
-  document.getElementById('btn_veg_take').disabled = !podePedir || (estoqueInicial.veg > 0 && restVeg <= 0);
+  // Bloqueio inteligente: só desativa se o stock restante for zero E houver uma quantidade inicial definida.
+  document.getElementById('btn_carne').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0) || (estaConfiguradoFirebase && estoqueInicial.carne === 0);
+  document.getElementById('btn_carne_take').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0) || (estaConfiguradoFirebase && estoqueInicial.carne === 0);
+  document.getElementById('btn_peixe').disabled = !podePedir || (estoqueInicial.peixe > 0 && restPeixe <= 0) || (estaConfiguradoFirebase && estoqueInicial.peixe === 0);
+  document.getElementById('btn_peixe_take').disabled = !podePedir || (estoqueInicial.peixe > 0 && restPeixe <= 0) || (estaConfiguradoFirebase && estoqueInicial.peixe === 0);
+  document.getElementById('btn_veg').disabled = !podePedir || (estoqueInicial.veg > 0 && restVeg <= 0) || (estaConfiguradoFirebase && estoqueInicial.veg === 0);
+  document.getElementById('btn_veg_take').disabled = !podePedir || (estoqueInicial.veg > 0 && restVeg <= 0) || (estaConfiguradoFirebase && estoqueInicial.veg === 0);
   document.getElementById('btn_opcao').disabled = !podePedir;
   document.getElementById('btn_opcao_take').disabled = !podePedir;
 }
@@ -710,12 +710,9 @@ function adicionarDoseManual(tipo) {
     if (tipo === 'opcao') {
       window.firebaseDB.atualizarEstoqueFirebase(tipo, 9999); 
     } else {
-      // Incrementa primeiro no ecrã de forma instantânea para desbloquear o botão
       const valorAtual = estoqueInicial[tipo] || 0;
       estoqueInicial[tipo] = valorAtual + 1;
       atualizar();
-      
-      // Sincroniza a alteração diretamente no nó correto da Cloud
       window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
     }
   }
@@ -887,12 +884,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onValue(estoqueRef, (snapshot) => {
       const data = snapshot.val();
+      // CORREÇÃO CRÍTICA AQUI: O balcão agora escuta e aceita o estado 'definido' vindo da Cloud instantaneamente
       if (data && (data.definido || data.carne !== undefined)) {
         estoqueInicial.carne = data.carne !== undefined ? parseInt(data.carne) : 0;
         estoqueInicial.peixe = data.peixe !== undefined ? parseInt(data.peixe) : 0;
         estoqueInicial.veg = data.veg !== undefined ? parseInt(data.veg) : 0;
         estoqueInicial.opcao = data.opcao !== undefined ? parseInt(data.opcao) : 9999;
-        estaConfiguradoFirebase = true;
+        estaConfiguradoFirebase = true; // Liberta os ecrãs remotamente
       } else {
         if(!estaConfiguradoFirebase) {
            estoqueInicial.carne = 0; 
@@ -902,7 +900,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       verificarExibicaoEstoqueModal();
-      atualizar();
+      atualizar(); // Força a renderização imediata do balcão
     });
 
     onValue(pedidosRef, (snapshot) => {
