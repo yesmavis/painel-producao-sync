@@ -486,9 +486,6 @@ button:disabled {
     <label>🟩 Limite de Veg:</label>
     <input type="number" id="initVeg" value="10" min="0">
 
-    <label>⚫ Limite de Opções:</label>
-    <input type="number" id="initOpcao" value="15" min="0">
-
     <button onclick="salvarEstoqueInicial()">🚀 Salvar e Iniciar Turno</button>
   </div>
 </div>
@@ -510,7 +507,7 @@ button:disabled {
 🔴 <span id="cCarne">0 / 0</span>
 🟦 <span id="cPeixe">0 / 0</span>
 🟩 <span id="cVeg">0 / 0</span>
-⚫ <span id="cOpcao">0 / 0</span>
+⚫ <span id="cOpcao">0</span>
 </div>
 
 <div class="painel-ajuste-estoque" id="painelAjusteEstoque">
@@ -574,7 +571,7 @@ const SENHAS = { balcao: '1111', cozinha: '2222', admin: '9999' };
 let usuarioSelecionado = null;
 let pin = [];
 let modo = 'fila';
-const estoqueInicial = { carne: 0, peixe: 0, veg: 0, opacity: 0 };
+const estoqueInicial = { carne: 0, peixe: 0, veg: 0, opcao: 9999 };
 
 const cont = {
   carne: 0, peixe: 0, veg: 0, opcao: 0,
@@ -673,14 +670,14 @@ function atualizar() {
   const restCarne = Math.max(0, estoqueInicial.carne - cont.carne);
   const restPeixe = Math.max(0, estoqueInicial.peixe - cont.peixe);
   const restVeg = Math.max(0, estoqueInicial.veg - cont.veg);
-  const restOpcao = Math.max(0, estoqueInicial.opcao - cont.opcao);
 
   document.getElementById('cCarne').innerText = `${restCarne} / ${estoqueInicial.carne}`;
   document.getElementById('cPeixe').innerText = `${restPeixe} / ${estoqueInicial.peixe}`;
   document.getElementById('cVeg').innerText = `${restVeg} / ${estoqueInicial.veg}`;
-  document.getElementById('cOpcao').innerText = `${restOpcao} / ${estoqueInicial.opcao}`;
+  document.getElementById('cOpcao').innerText = `${cont.opcao}`;
 
-  const podePedir = (getRole() === 'balcao' || getRole() === 'admin');
+  const role = getRole();
+  const podePedir = (role === 'balcao' || role === 'admin');
 
   document.getElementById('btn_carne').disabled = !podePedir || restCarne <= 0;
   document.getElementById('btn_carne_take').disabled = !podePedir || restCarne <= 0;
@@ -688,8 +685,8 @@ function atualizar() {
   document.getElementById('btn_peixe_take').disabled = !podePedir || restPeixe <= 0;
   document.getElementById('btn_veg').disabled = !podePedir || restVeg <= 0;
   document.getElementById('btn_veg_take').disabled = !podePedir || restVeg <= 0;
-  document.getElementById('btn_opcao').disabled = !podePedir || restOpcao <= 0;
-  document.getElementById('btn_opcao_take').disabled = !podePedir || restOpcao <= 0;
+  document.getElementById('btn_opcao').disabled = !podePedir;
+  document.getElementById('btn_opcao_take').disabled = !podePedir;
 }
 
 let opcaoTakeSelecionado = false;
@@ -697,6 +694,7 @@ function abrirModalOpcoes(isTake) {
   opcaoTakeSelecionado = isTake;
   document.getElementById('modalOpcoes').style.display = 'flex';
 }
+width=280;
 function fecharModalOpcoes() { document.getElementById('modalOpcoes').style.display = 'none'; }
 function confirmarOpcao(nome) { fecharModalOpcoes(); novoPedido('opcao', opcaoTakeSelecionado, nome); }
 
@@ -708,8 +706,13 @@ function novoPedido(tipo, take, opcaoTipo = null) {
 
 function adicionarDoseManual(tipo) {
   if (window.firebaseDB && window.firebaseDB.atualizarEstoqueFirebase) {
-    const valorAtual = estoqueInicial[tipo] || 0;
-    window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
+    if (tipo === 'opcao') {
+      // Como opções não têm limite restrito, somar no contador de forma livre
+      window.firebaseDB.atualizarEstoqueFirebase(tipo, 9999); 
+    } else {
+      const valorAtual = estoqueInicial[tipo] || 0;
+      window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
+    }
   }
 }
 
@@ -717,10 +720,9 @@ function salvarEstoqueInicial() {
   const c = parseInt(document.getElementById('initCarne').value) || 0;
   const p = parseInt(document.getElementById('initPeixe').value) || 0;
   const v = parseInt(document.getElementById('initVeg').value) || 0;
-  const o = parseInt(document.getElementById('initOpcao').value) || 0;
 
   if (window.firebaseDB && window.firebaseDB.configurarEstoqueInicialFirebase) {
-    window.firebaseDB.configurarEstoqueInicialFirebase(c, p, v, o);
+    window.firebaseDB.configurarEstoqueInicialFirebase(c, p, v, 9999);
     document.getElementById('modalEstoqueInicial').style.display = 'none';
   }
 }
@@ -877,10 +879,10 @@ document.addEventListener('DOMContentLoaded', () => {
         estoqueInicial.carne = data.carne || 0;
         estoqueInicial.peixe = data.peixe || 0;
         estoqueInicial.veg = data.veg || 0;
-        estoqueInicial.opcao = data.opcao || 0;
+        estoqueInicial.opcao = data.opcao || 9999;
         estaConfiguradoFirebase = true;
       } else {
-        estoqueInicial.carne = 0; estoqueInicial.peixe = 0; estoqueInicial.veg = 0; estoqueInicial.opcao = 0;
+        estoqueInicial.carne = 0; estoqueInicial.peixe = 0; estoqueInicial.veg = 0; estoqueInicial.opcao = 9999;
         estaConfiguradoFirebase = false;
       }
       verificarExibicaoEstoqueModal();
