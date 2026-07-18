@@ -7,7 +7,7 @@
 
 <meta name="theme-color" content="#111111">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Painel de Produção">
+<meta name="apple-mobile-web-app-title" content="Painel de Production">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -317,9 +317,10 @@ button:disabled {
 }
 .pedido.delivery {
   background: linear-gradient(to right, #ffffff 0%, #ffffff 33%, transparent 33%), var(--base-color);
+  color: #000000;
 }
 
-/* Correção de contraste: Opções + Modos Claros */
+/* Correção de contraste para Opções quando combinadas com Modos Claros */
 .pedido.encomenda.opcao, .pedido.delivery.opcao {
   color: #fff;
 }
@@ -526,8 +527,8 @@ button:disabled {
 <div class="modos">
 <button class="fila ativo" onclick="setModo('fila',this)">🧍 FILA</button>
 <button class="encomenda" onclick="setModo('encomenda',this)">📦 ENCOMENDA</button>
-<button class="senha" onclick="setModo('senha',this)">🎫 SENHA</button>
 <button class="delivery" onclick="setModo('delivery',this)">🛵 DELIVERY</button>
+<button class="senha" onclick="setModo('senha',this)">🎫 SENHA</button>
 </div>
 
 <!-- Contadores Visuais Dinâmicos -->
@@ -538,7 +539,7 @@ button:disabled {
 ⚫ <span id="cOpcao">0 / 0</span>
 </div>
 
-<!-- 🛠️ BARRA DE FERRAMENTAS +1 (APENAS COZINHA/ADMIN) -->
+<!-- 🛠️ BARRA DE FERRAMENTAS +1 -->
 <div class="painel-ajuste-estoque" id="painelAjusteEstoque">
   <button class="btn-ajuste carne" onclick="adicionarDoseManual('carne')">+1 Carne</button>
   <button class="btn-ajuste peixe" onclick="adicionarDoseManual('peixe')">+1 Peixe</button>
@@ -589,15 +590,10 @@ button:disabled {
    CONFIGURAÇÕES GERAIS
 ========================== */
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.0.51';
+const VERSAO_APP = '1.0.65';
 const LOCALE = 'en-US';
-
-// 🔐 SENHA DE FECHO
 const SENHA_FECHO = '0001';
 
-/* =========================
-   LOGIN / PERMISSÕES
-========================= */
 const SENHAS = {
   balcao: '1111',
   cozinha: '2222',
@@ -706,7 +702,6 @@ document.addEventListener('DOMContentLoaded', () => {
    ESTADO GLOBAL E CONTADORES
 ========================= */
 let modo = 'fila';
-
 const estoqueInicial = { carne: 0, peixe: 0, veg: 0, opcao: 0 };
 
 const cont = {
@@ -896,13 +891,24 @@ async function fecharCozinha() {
   rOpcaoTake.innerText = ultimoResumoTurno.take.opcao;
 
   rTotal.innerText = ultimoResumoTurno.total;
+  
+  const btnEncerrar = document.querySelector('.btn-encerrar');
+  if (btnEncerrar) {
+    btnEncerrar.innerText = "⏹ Encerrar e reiniciar";
+    btnEncerrar.disabled = false;
+  }
+
   resumo.style.display = 'flex';
 
-  const relatorioRef = window.firebaseDB.ref(window.firebaseDB.db, 'relatorios');
-  await window.firebaseDB.push(relatorioRef, ultimoResumoTurno);
+  try {
+    const relatorioRef = window.firebaseDB.ref(window.firebaseDB.db, 'relatorios');
+    await window.firebaseDB.push(relatorioRef, ultimoResumoTurno);
 
-  const pedidosRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos');
-  await window.firebaseDB.remove(pedidosRef);
+    const pedidosRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos');
+    await window.firebaseDB.remove(pedidosRef);
+  } catch (error) {
+    console.error("Erro ao salvar relatório ou limpar pedidos:", error);
+  }
 }
 
 function confirmarFecho() {
@@ -913,15 +919,28 @@ function confirmarFecho() {
 }
 
 async function confirmarReiniciarTurno() {
+  const btnEncerrar = document.querySelector('.btn-encerrar');
+  
+  if (btnEncerrar) {
+    btnEncerrar.innerText = "A reiniciar...";
+    btnEncerrar.disabled = true;
+  }
+
   if (window.firebaseDB && window.firebaseDB.limparEstoqueTurno) {
-    document.querySelector('.btn-encerrar').innerText = "A reiniciar...";
-    document.querySelector('.btn-encerrar').disabled = true;
-    await window.firebaseDB.limparEstoqueTurno();
-    setTimeout(() => {
-      location.reload();
-    }, 800);
+    try {
+      await window.firebaseDB.limparEstoqueTurno();
+      document.getElementById('resumo').style.display = 'none';
+      
+      setTimeout(() => {
+        window.location.href = window.location.origin + window.location.pathname + '?r=' + Date.now();
+      }, 500);
+      
+    } catch (error) {
+      console.error("Erro ao reiniciar turno:", error);
+      window.location.reload(true);
+    }
   } else {
-    location.reload();
+    window.location.reload(true);
   }
 }
 
