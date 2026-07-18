@@ -191,6 +191,7 @@ header {
 .fila { background:#555; }
 .encomenda { background:#ffca28; color:#000; }
 .senha { background:#ab47bc; }
+.delivery { background:#ffffff; color:#000000; }
 
 .contadores {
   display:flex;
@@ -211,7 +212,7 @@ header {
 }
 .btn-ajuste {
   flex: 1;
-  height: 34px;
+  height: 38px;
   font-size: 13px;
   font-weight: bold;
   border-radius: 8px;
@@ -307,21 +308,19 @@ button:disabled {
   background:var(--base-color);
 }
 
-/* Faixas ENCOMENDA e SENHA */
+/* Faixas Modos */
 .pedido.encomenda {
-  background:
-    linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%),
-    var(--base-color);
+  background: linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%), var(--base-color);
 }
-
 .pedido.senha {
-  background:
-    linear-gradient(to right, #ab47bc 0%, #ab47bc 33%, transparent 33%),
-    var(--base-color);
+  background: linear-gradient(to right, #ab47bc 0%, #ab47bc 33%, transparent 33%), var(--base-color);
+}
+.pedido.delivery {
+  background: linear-gradient(to right, #ffffff 0%, #ffffff 33%, transparent 33%), var(--base-color);
 }
 
-/* 🛑 Correção de contraste: OPÇÕES + ENCOMENDA */
-.pedido.encomenda.opcao {
+/* Correção de contraste: Opções + Modos Claros */
+.pedido.encomenda.opcao, .pedido.delivery.opcao {
   color: #fff;
 }
 
@@ -528,6 +527,7 @@ button:disabled {
 <button class="fila ativo" onclick="setModo('fila',this)">🧍 FILA</button>
 <button class="encomenda" onclick="setModo('encomenda',this)">📦 ENCOMENDA</button>
 <button class="senha" onclick="setModo('senha',this)">🎫 SENHA</button>
+<button class="delivery" onclick="setModo('delivery',this)">🛵 DELIVERY</button>
 </div>
 
 <!-- Contadores Visuais Dinâmicos -->
@@ -543,7 +543,6 @@ button:disabled {
   <button class="btn-ajuste carne" onclick="adicionarDoseManual('carne')">+1 Carne</button>
   <button class="btn-ajuste peixe" onclick="adicionarDoseManual('peixe')">+1 Peixe</button>
   <button class="btn-ajuste veg" onclick="adicionarDoseManual('veg')">+1 Veg</button>
-  <button class="btn-ajuste opcao" onclick="adicionarDoseManual('opcao')">+1 Opção</button>
 </div>
 
 <div class="botoes">
@@ -590,7 +589,7 @@ button:disabled {
    CONFIGURAÇÕES GERAIS
 ========================== */
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.0.6';
+const VERSAO_APP = '1.0.51';
 const LOCALE = 'en-US';
 
 // 🔐 SENHA DE FECHO
@@ -607,10 +606,7 @@ const SENHAS = {
 
 let usuarioSelecionado = null;
 
-function getRole() {
-  return localStorage.getItem('usuario_role');
-}
-
+function getRole() { return localStorage.getItem('usuario_role'); }
 function isAdmin() { return getRole() === 'admin'; }
 function podeCriarPedido() { const role = getRole(); return role === 'balcao' || role === 'admin'; }
 function podeMoverPedido() { const role = getRole(); return role === 'cozinha' || role === 'admin'; }
@@ -680,7 +676,6 @@ function aplicarPermissoes() {
     btnLogout.style.display = role ? 'block' : 'none';
   }
 
-  // Exibe ou oculta os botões +1 para Cozinha/Admin
   const painelAjuste = document.getElementById('painelAjusteEstoque');
   if (painelAjuste) {
     painelAjuste.style.display = (role === 'cozinha' || role === 'admin') ? 'flex' : 'none';
@@ -709,25 +704,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ==========================
    ESTADO GLOBAL E CONTADORES
-========================== */
+========================= */
 let modo = 'fila';
 
-// Objeto para controle de limites iniciais (vindos do Firebase)
-const estoqueInicial = {
-  carne: 0,
-  peixe: 0,
-  veg: 0,
-  opcao: 0
-};
+const estoqueInicial = { carne: 0, peixe: 0, veg: 0, opcao: 0 };
 
-// Contadores ativos do painel
 const cont = {
   carne: 0, peixe: 0, veg: 0, opcao: 0,
   take: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
   origem: {
     fila: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
     encomenda: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
-    senha: { carne: 0, peixe: 0, veg: 0, opcao: 0 }
+    senha: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
+    delivery: { carne: 0, peixe: 0, veg: 0, opcao: 0 }
   }
 };
 
@@ -742,34 +731,27 @@ function setModo(m, b) {
 }
 
 function atualizar() {
-  // Cálculo exato das doses restantes (Estoque Inicial - O que já está em Preparo/Pronto/Finalizado no snapshot ativo)
   const restCarne = Math.max(0, estoqueInicial.carne - cont.carne);
   const restPeixe = Math.max(0, estoqueInicial.peixe - cont.peixe);
   const restVeg = Math.max(0, estoqueInicial.veg - cont.veg);
   const restOpcao = Math.max(0, estoqueInicial.opcao - cont.opcao);
 
-  // Exibição amigável: Restante / Inicial
   cCarne.innerText = `${restCarne} / ${estoqueInicial.carne}`;
   cPeixe.innerText = `${restPeixe} / ${estoqueInicial.peixe}`;
   cVeg.innerText = `${restVeg} / ${estoqueInicial.veg}`;
   cOpcao.innerText = `${restOpcao} / ${estoqueInicial.opcao}`;
 
-  // Bloqueio Rígido dos botões do Balcão se atingir o limite zero
-  const travarCarne = restCarne <= 0;
-  document.getElementById('btn_carne').disabled = travarCarne;
-  document.getElementById('btn_carne_take').disabled = travarCarne;
+  document.getElementById('btn_carne').disabled = restCarne <= 0;
+  document.getElementById('btn_carne_take').disabled = restCarne <= 0;
 
-  const travarPeixe = restPeixe <= 0;
-  document.getElementById('btn_peixe').disabled = travarPeixe;
-  document.getElementById('btn_peixe_take').disabled = travarPeixe;
+  document.getElementById('btn_peixe').disabled = restPeixe <= 0;
+  document.getElementById('btn_peixe_take').disabled = restPeixe <= 0;
 
-  const travarVeg = restVeg <= 0;
-  document.getElementById('btn_veg').disabled = travarVeg;
-  document.getElementById('btn_veg_take').disabled = travarVeg;
+  document.getElementById('btn_veg').disabled = restVeg <= 0;
+  document.getElementById('btn_veg_take').disabled = restVeg <= 0;
 
-  const travarOpcao = restOpcao <= 0;
-  document.getElementById('btn_opcao').disabled = travarOpcao;
-  document.getElementById('btn_opcao_take').disabled = travarOpcao;
+  document.getElementById('btn_opcao').disabled = restOpcao <= 0;
+  document.getElementById('btn_opcao_take').disabled = restOpcao <= 0;
 }
 
 let opcaoTakeSelecionado = false;
@@ -798,22 +780,19 @@ function novoPedido(tipo, take, opcaoTipo = null) {
   }
 }
 
-// Injeção manual de estoque em tempo real (Apenas Cozinha/Admin)
 function adicionarDoseManual(tipo) {
   if (!podeMoverPedido()) return;
   if (window.firebaseDB && window.firebaseDB.atualizarEstoqueFirebase) {
-    const novoValor = estoqueInicial[tipo] + 1;
-    window.firebaseDB.atualizarEstoqueFirebase(tipo, novoValor);
+    const valorAtual = estoqueInicial[tipo] || 0;
+    window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
   }
 }
 
 function verificarExibicaoEstoqueModal() {
   const role = getRole();
   const modal = document.getElementById('modalEstoqueInicial');
-  
   if (!role || !estoqueFirebaseCarregado) return;
 
-  // Só pede configuração de estoque se o nó do Firebase estiver vazio E for Cozinha ou Admin
   if (!estaConfiguradoFirebase) {
     if (role === 'cozinha' || role === 'admin') {
       modal.style.display = 'flex';
@@ -845,7 +824,7 @@ function renderPedido(id, pedido) {
   const nomes = { carne: 'CARNE', peixe: 'PEIXE', veg: 'VEG', opcao: 'OPÇÕES' };
 
   const p = document.createElement('div');
-  p.className = `pedido ${pedido.modo} ${tipo}` + (take ? ' take' : '');
+  p.className = `pedido ${pedido.modo || 'fila'} ${tipo}` + (take ? ' take' : '');
   p.style.setProperty('--base-color', cores[tipo]);
   p.dataset.id = id;
   let texto = nomes[tipo];
@@ -871,7 +850,6 @@ function renderPedido(id, pedido) {
   
   function avancarStatus(e) {
     e.preventDefault(); e.stopPropagation();
-
     let novoStatus = null;
     if (pedido.status === 'preparo') {
       if (!podeMoverPedido()) return;
@@ -880,7 +858,6 @@ function renderPedido(id, pedido) {
       if (!podeFinalizarPedido()) return;
       novoStatus = 'finalizado';
     }
-      
     if (!novoStatus) return;
 
     const pedidoRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos/' + id);
@@ -900,10 +877,7 @@ function renderPedido(id, pedido) {
 <script>  
 async function fecharCozinha() {
   ultimoResumoTurno = {
-    carne: cont.carne,
-    peixe: cont.peixe,
-    veg: cont.veg,
-    opcao: cont.opcao,
+    carne: cont.carne, peixe: cont.peixe, veg: cont.veg, opcao: cont.opcao,
     take: { carne: cont.take.carne, peixe: cont.take.peixe, veg: cont.take.veg, opcao: cont.take.opcao },
     origem: JSON.parse(JSON.stringify(cont.origem)),
     total: cont.carne + cont.peixe + cont.veg + cont.opcao,
@@ -940,9 +914,15 @@ function confirmarFecho() {
 
 async function confirmarReiniciarTurno() {
   if (window.firebaseDB && window.firebaseDB.limparEstoqueTurno) {
+    document.querySelector('.btn-encerrar').innerText = "A reiniciar...";
+    document.querySelector('.btn-encerrar').disabled = true;
     await window.firebaseDB.limparEstoqueTurno();
+    setTimeout(() => {
+      location.reload();
+    }, 800);
+  } else {
+    location.reload();
   }
-  location.reload();
 }
 
 function gerarPDFResumo() {
@@ -970,7 +950,10 @@ function gerarPDFResumo() {
     const cardStartX = marginX + barWidth + gap; const cardWidth = totalContentWidth - barWidth - gap;
 
     const total = ultimoResumoTurno[typeKey]; const take = ultimoResumoTurno.take[typeKey];
-    const fila = ultimoResumoTurno.origem.fila[typeKey]; const enc = ultimoResumoTurno.origem.encomenda[typeKey]; const senha = ultimoResumoTurno.origem.senha[typeKey];
+    const fila = ultimoResumoTurno.origem.fila[typeKey] || 0; 
+    const enc = ultimoResumoTurno.origem.encomenda[typeKey] || 0; 
+    const senha = ultimoResumoTurno.origem.senha[typeKey] || 0;
+    const deliv = ultimoResumoTurno.origem.delivery ? (ultimoResumoTurno.origem.delivery[typeKey] || 0) : 0;
 
     doc.setFillColor(...colorRGB); doc.rect(marginX, currentY, barWidth, cardHeight, 'F');
     doc.setFillColor(230, 230, 230); doc.rect(cardStartX + 1, currentY + 1, cardWidth, cardHeight, 'F');
@@ -990,8 +973,8 @@ function gerarPDFResumo() {
 
     const row2Y = row1Y + rowHeight;
     doc.setFillColor(...colors.bgRowGray); doc.rect(cardStartX, row2Y, cardWidth, rowHeight, 'F');
-    doc.setFontSize(11); doc.setTextColor(80, 80, 80);
-    doc.text(`Fila: ${fila}    |    Encomenda: ${enc}    |    Senha: ${senha}`, cardStartX + 5, row2Y + 8);
+    doc.setFontSize(10); doc.setTextColor(80, 80, 80);
+    doc.text(`Fila: ${fila}  |  Enc: ${enc}  |  Senha: ${senha}  |  Deliv: ${deliv}`, cardStartX + 5, row2Y + 8);
 
     currentY += cardHeight + 8; 
   }
@@ -1034,7 +1017,6 @@ signInAnonymously(auth).catch(console.error);
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log("🔐 Autenticado:", user.uid);
     iniciarFirebase();
   }
 });
@@ -1052,12 +1034,10 @@ function iniciarFirebase() {
     });
   }
 
-  // Configura a carga do estoque diretamente no nó colaborativo do Firebase
   function configurarEstoqueInicialFirebase(c, p, v, o) {
     set(estoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
   }
 
-  // Incrementa em tempo real via botões +1
   function atualizarEstoqueFirebase(tipo, novoValor) {
     const tipoRef = ref(db, `configEstoque/${tipo}`);
     set(tipoRef, novoValor);
@@ -1067,7 +1047,6 @@ function iniciarFirebase() {
     return set(estoqueRef, null);
   }
 
-  // 1️⃣ Listener para sincronização do estoque inicial configurado por qualquer aparelho
   onValue(estoqueRef, (snapshot) => {
     const data = snapshot.val();
     estoqueFirebaseCarregado = true;
@@ -1090,7 +1069,6 @@ function iniciarFirebase() {
     atualizar();
   });
 
-  // 2️⃣ Listener principal de pedidos ativos
   onValue(pedidosRef, (snapshot) => {
     preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
     pronto.innerHTML = '<h2>✅ PRONTO</h2>';
@@ -1110,7 +1088,6 @@ function iniciarFirebase() {
       return;
     }
 
-    // Ordenação garantida por timestamp de criação para consistência visual
     const pedidosOrdenados = Object.entries(dados).sort((a, b) => (a[1].criadoEm || 0) - (b[1].criadoEm || 0));
 
     pedidosOrdenados.forEach(([id, pedido]) => {
