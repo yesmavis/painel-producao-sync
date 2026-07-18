@@ -564,7 +564,7 @@ button:disabled {
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.0.8';
+const VERSAO_APP = '1.0.9';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -680,7 +680,7 @@ function atualizar() {
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
 
-  // Os botões só bloqueiam se restCarne/restPeixe/restVeg forem 0 E o estoque total inicial for de fato 0
+  // CORREÇÃO CRÍTICA: Bloqueia APENAS se houver stock total definido E a quantidade restante for de facto zero.
   document.getElementById('btn_carne').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0);
   document.getElementById('btn_carne_take').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0);
   document.getElementById('btn_peixe').disabled = !podePedir || (estoqueInicial.peixe > 0 && restPeixe <= 0);
@@ -710,7 +710,12 @@ function adicionarDoseManual(tipo) {
     if (tipo === 'opcao') {
       window.firebaseDB.atualizarEstoqueFirebase(tipo, 9999); 
     } else {
+      // Incrementa primeiro no ecrã de forma instantânea para desbloquear o botão
       const valorAtual = estoqueInicial[tipo] || 0;
+      estoqueInicial[tipo] = valorAtual + 1;
+      atualizar();
+      
+      // Sincroniza a alteração diretamente no nó correto da Cloud
       window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
     }
   }
@@ -721,7 +726,6 @@ function salvarEstoqueInicial() {
   const p = parseInt(document.getElementById('initPeixe').value) || 0;
   const v = parseInt(document.getElementById('initVeg').value) || 0;
 
-  // 1. Atualiza imediatamente o estado local da app para evitar "delay" visual
   estoqueInicial.carne = c;
   estoqueInicial.peixe = p;
   estoqueInicial.veg = v;
@@ -730,7 +734,6 @@ function salvarEstoqueInicial() {
   document.getElementById('modalEstoqueInicial').style.display = 'none';
   atualizar();
 
-  // 2. Dispara e guarda no Firebase
   if (window.firebaseDB && window.firebaseDB.configurarEstoqueInicialFirebase) {
     window.firebaseDB.configurarEstoqueInicialFirebase(c, p, v, 9999);
   }
@@ -884,7 +887,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onValue(estoqueRef, (snapshot) => {
       const data = snapshot.val();
-      // Validação melhorada: se contiver propriedades numéricas válidas, aceita
       if (data && (data.definido || data.carne !== undefined)) {
         estoqueInicial.carne = data.carne !== undefined ? parseInt(data.carne) : 0;
         estoqueInicial.peixe = data.peixe !== undefined ? parseInt(data.peixe) : 0;
@@ -892,7 +894,6 @@ document.addEventListener('DOMContentLoaded', () => {
         estoqueInicial.opcao = data.opcao !== undefined ? parseInt(data.opcao) : 9999;
         estaConfiguradoFirebase = true;
       } else {
-        // Se ainda não houver dados estruturados na cloud, não zera o ecrã se o admin já tiver digitado localmente
         if(!estaConfiguradoFirebase) {
            estoqueInicial.carne = 0; 
            estoqueInicial.peixe = 0; 
