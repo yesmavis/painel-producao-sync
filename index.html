@@ -564,7 +564,7 @@ button:disabled {
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.0.10';
+const VERSAO_APP = '1.1.0';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -680,13 +680,14 @@ function atualizar() {
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
 
-  // Bloqueio inteligente: só desativa se o stock restante for zero E houver uma quantidade inicial definida.
-  document.getElementById('btn_carne').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0) || (estaConfiguradoFirebase && estoqueInicial.carne === 0);
-  document.getElementById('btn_carne_take').disabled = !podePedir || (estoqueInicial.carne > 0 && restCarne <= 0) || (estaConfiguradoFirebase && estoqueInicial.carne === 0);
-  document.getElementById('btn_peixe').disabled = !podePedir || (estoqueInicial.peixe > 0 && restPeixe <= 0) || (estaConfiguradoFirebase && estoqueInicial.peixe === 0);
-  document.getElementById('btn_peixe_take').disabled = !podePedir || (estoqueInicial.peixe > 0 && restPeixe <= 0) || (estaConfiguradoFirebase && estoqueInicial.peixe === 0);
-  document.getElementById('btn_veg').disabled = !podePedir || (estoqueInicial.veg > 0 && restVeg <= 0) || (estaConfiguradoFirebase && estoqueInicial.veg === 0);
-  document.getElementById('btn_veg_take').disabled = !podePedir || (estoqueInicial.veg > 0 && restVeg <= 0) || (estaConfiguradoFirebase && estoqueInicial.veg === 0);
+  // Lógica de bloqueio corrigida: Bloqueia se o stock for 0 OU se houver limite definido e as doses acabarem.
+  document.getElementById('btn_carne').disabled = !podePedir || estoqueInicial.carne === 0 || restCarne <= 0;
+  document.getElementById('btn_carne_take').disabled = !podePedir || estoqueInicial.carne === 0 || restCarne <= 0;
+  document.getElementById('btn_peixe').disabled = !podePedir || estoqueInicial.peixe === 0 || restPeixe <= 0;
+  document.getElementById('btn_peixe_take').disabled = !podePedir || estoqueInicial.peixe === 0 || restPeixe <= 0;
+  document.getElementById('btn_veg').disabled = !podePedir || estoqueInicial.veg === 0 || restVeg <= 0;
+  document.getElementById('btn_veg_take').disabled = !podePedir || estoqueInicial.veg === 0 || restVeg <= 0;
+  
   document.getElementById('btn_opcao').disabled = !podePedir;
   document.getElementById('btn_opcao_take').disabled = !podePedir;
 }
@@ -783,9 +784,9 @@ function renderPedido(id, pedido) {
 }
 
 function confirmarFecho() {
-  const senha = prompt('🔐 Digite a senha para fechar a cozinha:');
-  if (senha === SENHA_FECHO) fecharCozinha();
-  else if (senha !== null) alert('❌ Senha incorreta!');
+  const sender = prompt('🔐 Digite a senha para fechar a cozinha:');
+  if (sender === SENHA_FECHO) fecharCozinha();
+  else if (sender !== null) alert('❌ Senha incorreta!');
 }
 
 async function fecharCozinha() {
@@ -884,23 +885,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onValue(estoqueRef, (snapshot) => {
       const data = snapshot.val();
-      // CORREÇÃO CRÍTICA AQUI: O balcão agora escuta e aceita o estado 'definido' vindo da Cloud instantaneamente
-      if (data && (data.definido || data.carne !== undefined)) {
+      if (data) {
         estoqueInicial.carne = data.carne !== undefined ? parseInt(data.carne) : 0;
         estoqueInicial.peixe = data.peixe !== undefined ? parseInt(data.peixe) : 0;
         estoqueInicial.veg = data.veg !== undefined ? parseInt(data.veg) : 0;
         estoqueInicial.opcao = data.opcao !== undefined ? parseInt(data.opcao) : 9999;
-        estaConfiguradoFirebase = true; // Liberta os ecrãs remotamente
+        estaConfiguradoFirebase = true;
       } else {
-        if(!estaConfiguradoFirebase) {
-           estoqueInicial.carne = 0; 
-           estoqueInicial.peixe = 0; 
-           estoqueInicial.veg = 0; 
-           estoqueInicial.opcao = 9999;
-        }
+        estoqueInicial.carne = 0; 
+        estoqueInicial.peixe = 0; 
+        estoqueInicial.veg = 0; 
+        estoqueInicial.opcao = 9999;
+        estaConfiguradoFirebase = false;
       }
       verificarExibicaoEstoqueModal();
-      atualizar(); // Força a renderização imediata do balcão
+      atualizar();
     });
 
     onValue(pedidosRef, (snapshot) => {
