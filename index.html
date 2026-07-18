@@ -1003,104 +1003,104 @@ function gerarPDFResumo() {
     appId: "1:563084163424:web:274866215bb7b2faf7c605"
   };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const auth = getAuth(app);
 
-signInAnonymously(auth).catch(console.error);
+  signInAnonymously(auth).catch(console.error);
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    iniciarFirebase();
-  }
-});
-
-function iniciarFirebase() {
-  const pedidosRef = ref(db, 'pedidos');
-  const确定estoqueRef = ref(db, 'configEstoque');
-
-  function criarPedido(tipo, take = false, opcaoTipo = null) {
-    const novoPedidoRef = push(pedidosRef);
-    set(novoPedidoRef, {
-      tipo, take, opcaoTipo, modo,
-      status: 'preparo',
-      criadoEm: Date.now()
-    });
-  }
-
-  function configurarEstoqueInicialFirebase(c, p, v, o) {
-    set(确定estoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
-  }
-
-  function atualizarEstoqueFirebase(tipo, novoValor) {
-    const tipoRef = ref(db, `configEstoque/${tipo}`);
-    set(tipoRef, novoValor);
-  }
-
-  function limparEstoqueTurno() {
-    return set(确定estoqueRef, null);
-  }
-
-  onValue(确定estoqueRef, (snapshot) => {
-    const data = snapshot.val();
-    estoqueFirebaseCarregado = true;
-
-    if (data && data.definido) {
-      estoqueInicial.carne = data.carne || 0;
-      estoqueInicial.peixe = data.peixe || 0;
-      estoqueInicial.veg = data.veg || 0;
-      estoqueInicial.opcao = data.opcao || 0;
-      estaConfiguradoFirebase = true;
-    } else {
-      estoqueInicial.carne = 0;
-      estoqueInicial.peixe = 0;
-      estoqueInicial.veg = 0;
-      estoqueInicial.opcao = 0;
-      estaConfiguradoFirebase = false;
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      iniciarFirebase();
     }
-    
-    verificarExibicaoEstoqueModal();
-    atualizar();
   });
 
-  onValue(pedidosRef, (snapshot) => {
-    preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
-    pronto.innerHTML = '<h2>✅ PRONTO</h2>';
+  function iniciarFirebase() {
+    const pedidosRef = ref(db, 'pedidos');
+    const estoqueRef = ref(db, 'configEstoque');
 
-    cont.carne = 0; cont.peixe = 0; cont.veg = 0; cont.opcao = 0;
-    cont.take.carne = 0; cont.take.peixe = 0; cont.take.veg = 0; cont.take.opcao = 0;
-
-    Object.keys(cont.origem).forEach(origem => {
-      Object.keys(cont.origem[origem]).forEach(tipo => {
-        cont.origem[origem][tipo] = 0;
+    function criarPedido(tipo, take = false, opcaoTipo = null) {
+      const novoPedidoRef = push(pedidosRef);
+      set(novoPedidoRef, {
+        tipo, take, opcaoTipo, modo,
+        status: 'preparo',
+        criadoEm: Date.now()
       });
-    });
-
-    const dados = snapshot.val();
-    if (!dados) {
-      atualizar();
-      return;
     }
 
-    const pedidosOrdenados = Object.entries(dados).sort((a, b) => (a[1].criadoEm || 0) - (b[1].criadoEm || 0));
+    function configurarEstoqueInicialFirebase(c, p, v, o) {
+      set(estoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
+    }
 
-    pedidosOrdenados.forEach(([id, pedido]) => {
-      cont[pedido.tipo]++;
-      if (pedido.take) cont.take[pedido.tipo]++;
-      if (pedido.modo && cont.origem[pedido.modo]) {
-        cont.origem[pedido.modo][pedido.tipo]++;
+    function atualizarEstoqueFirebase(tipo, novoValor) {
+      const tipoRef = ref(db, `configEstoque/${tipo}`);
+      set(tipoRef, novoValor);
+    }
+
+    function limparEstoqueTurno() {
+      return set(estoqueRef, null);
+    }
+
+    onValue(estoqueRef, (snapshot) => {
+      const data = snapshot.val();
+      estoqueFirebaseCarregado = true;
+
+      if (data && data.definido) {
+        estoqueInicial.carne = data.carne || 0;
+        estoqueInicial.peixe = data.peixe || 0;
+        estoqueInicial.veg = data.veg || 0;
+        estoqueInicial.opcao = data.opcao || 0;
+        estaConfiguradoFirebase = true;
+      } else {
+        estoqueInicial.carne = 0;
+        estoqueInicial.peixe = 0;
+        estoqueInicial.veg = 0;
+        estoqueInicial.opcao = 0;
+        estaConfiguradoFirebase = false;
       }
-      renderPedido(id, pedido);
+      
+      verificarExibicaoEstoqueModal();
+      atualizar();
     });
 
-    atualizar();
-  });
+    onValue(pedidosRef, (snapshot) => {
+      preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
+      pronto.innerHTML = '<h2>✅ PRONTO</h2>';
 
-  window.firebaseDB = {
-    db, ref, set, push, onValue, remove,
-    pedidosRef, criarPedido, configurarEstoqueInicialFirebase, atualizarEstoqueFirebase, limparEstoqueTurno
-  };
-}
+      cont.carne = 0; cont.peixe = 0; cont.veg = 0; cont.opcao = 0;
+      cont.take.carne = 0; cont.take.peixe = 0; cont.take.veg = 0; cont.take.opcao = 0;
+
+      Object.keys(cont.origem).forEach(origem => {
+        Object.keys(cont.origem[origem]).forEach(tipo => {
+          cont.origem[origem][tipo] = 0;
+        });
+      });
+
+      const dados = snapshot.val();
+      if (!dados) {
+        atualizar();
+        return;
+      }
+
+      const pedidosOrdenados = Object.entries(dados).sort((a, b) => (a[1].criadoEm || 0) - (b[1].criadoEm || 0));
+
+      pedidosOrdenados.forEach(([id, pedido]) => {
+        cont[pedido.tipo]++;
+        if (pedido.take) cont.take[pedido.tipo]++;
+        if (pedido.modo && cont.origem[pedido.modo]) {
+          cont.origem[pedido.modo][pedido.tipo]++;
+        }
+        renderPedido(id, pedido);
+      });
+
+      atualizar();
+    });
+
+    window.firebaseDB = {
+      db, ref, set, push, onValue, remove,
+      pedidosRef, criarPedido, configurarEstoqueInicialFirebase, atualizarEstoqueFirebase, limparEstoqueTurno
+    };
+  }
 </script>
 
 <div id="modalOpcoes" style="
