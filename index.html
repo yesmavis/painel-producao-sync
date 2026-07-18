@@ -739,17 +739,24 @@ function adicionarDoseManual(tipo) {
 }
 
 function verificarExibicaoEstoqueModal() {
-  const role = getRole();
+  const role = localStorage.getItem('usuario_role');
   const modal = document.getElementById('modalEstoqueInicial');
-  if (!role || !estoqueFirebaseCarregado) return;
+  
+  // Se não houver utilizador logado, não faz nada ainda
+  if (!role) return;
 
+  // Se o Firebase diz que o turno NÃO está configurado
   if (!estaConfiguradoFirebase) {
+    // Apenas Cozinha ou Admin podem configurar
     if (role === 'cozinha' || role === 'admin') {
       modal.style.display = 'flex';
     } else {
+      // Se for balcão, avisa que precisa de esperar pela cozinha
       modal.style.display = 'none';
+      alert('⏳ O stock deste turno ainda não foi definido pela Cozinha ou Admin. Por favor, aguarde.');
     }
   } else {
+    // Se já estiver configurado, garante que o modal fica fechado
     modal.style.display = 'none';
   }
 }
