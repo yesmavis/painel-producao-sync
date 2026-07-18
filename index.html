@@ -630,26 +630,10 @@ function fazerLogin() {
   erro.innerText = '';
 
   aplicarPermissoes();
+  
+  // Forçamos o estado do Firebase a ser validado após o login bem-sucedido
+  estoqueFirebaseCarregado = true; 
   verificarExibicaoEstoqueModal();
-}
-
-function aplicarPermissoes() {
-  const role = localStorage.getItem('usuario_role');
-
-  const btnFechar = document.getElementById('fecharCozinha');
-  if (btnFechar) {
-    btnFechar.style.display = (role === 'cozinha' || role === 'admin') ? 'block' : 'none';
-  }
-
-  const btnLogout = document.getElementById('logoutBtn');
-  if (btnLogout) {
-    btnLogout.style.display = role ? 'block' : 'none';
-  }
-
-  const painelAjuste = document.getElementById('painelAjusteEstoque');
-  if (painelAjuste) {
-    painelAjuste.style.display = (role === 'cozinha' || role === 'admin') ? 'flex' : 'none';
-  }
 }
 
 function logout() {
