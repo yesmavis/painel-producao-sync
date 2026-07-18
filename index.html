@@ -928,18 +928,27 @@ async function confirmarReiniciarTurno() {
 
   if (window.firebaseDB && window.firebaseDB.limparEstoqueTurno) {
     try {
+      // 1. Limpa o stock no Firebase
       await window.firebaseDB.limparEstoqueTurno();
+      
+      // 2. Esconde o resumo imediatamente
       document.getElementById('resumo').style.display = 'none';
       
+      // 3. Força a limpeza do utilizador local para obrigar a um login limpo na próxima rodada
+      localStorage.removeItem('usuario_role');
+      
+      // 4. Dá o refresh definitivo com quebra de cache
       setTimeout(() => {
         window.location.href = window.location.origin + window.location.pathname + '?r=' + Date.now();
       }, 500);
       
     } catch (error) {
       console.error("Erro ao reiniciar turno:", error);
+      localStorage.removeItem('usuario_role');
       window.location.reload(true);
     }
   } else {
+    localStorage.removeItem('usuario_role');
     window.location.reload(true);
   }
 }
