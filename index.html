@@ -529,7 +529,7 @@ button:disabled {
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.1.2';
+const VERSAO_APP = '1.1.3';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -538,7 +538,6 @@ let usuarioSelecionado = null;
 let pin = [];
 let modo = 'fila';
 
-// Fallback Inteligente baseado nos teus dados ideais
 const estoqueInicial = JSON.parse(localStorage.getItem('local_estoque')) || { carne: 20, peixe: 20, veg: 10, opcao: 9999 };
 let estaConfiguradoFirebase = localStorage.getItem('local_configurado') === 'true'; 
 
@@ -592,7 +591,6 @@ function fazerLogin() {
   pin = []; atualizarPin(); erro.innerText = '';
 
   aplicarPermissoes();
-  verificarExibicaoEstoqueModal();
 }
 
 function aplicarPermissoes() {
