@@ -1,4 +1,4 @@
-const CACHE_NAME = 'painel-producao-v1.0.9'; // Subir a versão aqui
+const CACHE_NAME = 'painel-producao-v1.0.10'; // Subir a versão aqui
 const FILES_TO_CACHE = [
   './',
   './index.html',
