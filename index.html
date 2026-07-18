@@ -7,7 +7,7 @@
 
 <meta name="theme-color" content="#111111">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Painel de Production">
+<meta name="apple-mobile-web-app-title" content="Painel de Produção">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 <link class="apple-touch-icon" href="icon-192.png">
@@ -56,39 +56,40 @@ header {
   margin-bottom: 15px;
 }
 
-.usuarios {
+.usuarios.avatars {
   display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
-.usuarios button {
+.avatar {
   flex: 1;
-  height: 45px;
-  border-radius: 10px;
-  border: none;
-  font-weight: bold;
+  background: #333;
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
   cursor: pointer;
-  background: #444;
-  color: #fff;
-  opacity: .6;
+  opacity: 0.5;
+  transition: all 0.2s ease;
 }
 
-.usuarios button.ativo {
+.avatar img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin-bottom: 6px;
+}
+
+.avatar span {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.avatar.ativo {
   opacity: 1;
   outline: 2px solid #ffca28;
-}
-
-.login-box input {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  margin: 0 auto 12px auto;
-  font-size: 16px;
-  text-align: center;
-  display: block;
-  box-sizing: border-box;
 }
 
 #loginErro {
@@ -360,42 +361,6 @@ button:disabled {
 #resumo .btn-pdf { background: #1e88e5; color: #fff; }
 #resumo .btn-encerrar { background: #e53935; color: #fff; }
 
-.usuarios.avatars {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.avatar {
-  flex: 1;
-  background: #333;
-  border-radius: 14px;
-  padding: 12px 8px;
-  text-align: center;
-  cursor: pointer;
-  opacity: 0.5;
-  transition: all 0.2s ease;
-}
-
-.avatar img {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  margin-bottom: 6px;
-}
-
-.avatar span {
-  display: block;
-  font-size: 13px;
-  font-weight: bold;
-}
-
-.avatar.ativo {
-  opacity: 1;
-  outline: 2px solid #ffca28;
-}
-
 #modalEstoqueInicial {
   position: fixed;
   inset: 0;
@@ -492,7 +457,7 @@ button:disabled {
 </div>
 
 <header>
-🍽️ PAINEL DE PRODUÇÃO
+🍽️ PAINEL DE PRODUÇÃO <span id="statusConexao" style="font-size:11px; color:#ffca28; margin-left:10px;"></span>
 <button id="logoutBtn" onclick="logout()">🚪 Sair</button>
 <button id="fecharCozinha" onclick="confirmarFecho()">Fechar Cozinha</button>
 </header>
@@ -505,10 +470,10 @@ button:disabled {
 </div>
 
 <div class="contadores">
-🔴 <span id="cCarne">0 / 0</span>
-🟦 <span id="cPeixe">0 / 0</span>
-🟩 <span id="cVeg">0 / 0</span>
-⚫ <span id="cOpcao">0</span>
+  🔴 <span id="cCarne">20 / 20</span>
+  🟦 <span id="cPeixe">20 / 20</span>
+  🟩 <span id="cVeg">10 / 10</span>
+  ⚫ <span id="cOpcao">0</span>
 </div>
 
 <div class="painel-ajuste-estoque" id="painelAjusteEstoque">
@@ -564,7 +529,7 @@ button:disabled {
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.1.0';
+const VERSAO_APP = '1.1.2';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -572,7 +537,10 @@ const SENHAS = { balcao: '1111', cozinha: '2222', admin: '9999' };
 let usuarioSelecionado = null;
 let pin = [];
 let modo = 'fila';
-const estoqueInicial = { carne: 0, peixe: 0, veg: 0, opcao: 9999 };
+
+// Fallback Inteligente baseado nos teus dados ideais
+const estoqueInicial = JSON.parse(localStorage.getItem('local_estoque')) || { carne: 20, peixe: 20, veg: 10, opcao: 9999 };
+let estaConfiguradoFirebase = localStorage.getItem('local_configurado') === 'true'; 
 
 const cont = {
   carne: 0, peixe: 0, veg: 0, opcao: 0,
@@ -586,7 +554,6 @@ const cont = {
 };
 
 let ultimoResumoTurno = null;
-let estaConfiguradoFirebase = false; 
 
 function getRole() { return localStorage.getItem('usuario_role'); }
 function selecionarUsuario(role, el) {
@@ -656,12 +623,8 @@ function verificarExibicaoEstoqueModal() {
   const modal = document.getElementById('modalEstoqueInicial');
   if (!role) return;
 
-  if (!estaConfiguradoFirebase) {
-    if (role === 'cozinha' || role === 'admin') {
-      modal.style.display = 'flex';
-    } else {
-      modal.style.display = 'none';
-    }
+  if (!estaConfiguradoFirebase && (role === 'cozinha' || role === 'admin')) {
+    modal.style.display = 'flex';
   } else {
     modal.style.display = 'none';
   }
@@ -680,13 +643,12 @@ function atualizar() {
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
 
-  // Lógica de bloqueio corrigida: Bloqueia se o stock for 0 OU se houver limite definido e as doses acabarem.
-  document.getElementById('btn_carne').disabled = !podePedir || estoqueInicial.carne === 0 || restCarne <= 0;
-  document.getElementById('btn_carne_take').disabled = !podePedir || estoqueInicial.carne === 0 || restCarne <= 0;
-  document.getElementById('btn_peixe').disabled = !podePedir || estoqueInicial.peixe === 0 || restPeixe <= 0;
-  document.getElementById('btn_peixe_take').disabled = !podePedir || estoqueInicial.peixe === 0 || restPeixe <= 0;
-  document.getElementById('btn_veg').disabled = !podePedir || estoqueInicial.veg === 0 || restVeg <= 0;
-  document.getElementById('btn_veg_take').disabled = !podePedir || estoqueInicial.veg === 0 || restVeg <= 0;
+  document.getElementById('btn_carne').disabled = !podePedir || restCarne <= 0;
+  document.getElementById('btn_carne_take').disabled = !podePedir || restCarne <= 0;
+  document.getElementById('btn_peixe').disabled = !podePedir || restPeixe <= 0;
+  document.getElementById('btn_peixe_take').disabled = !podePedir || restPeixe <= 0;
+  document.getElementById('btn_veg').disabled = !podePedir || restVeg <= 0;
+  document.getElementById('btn_veg_take').disabled = !podePedir || restVeg <= 0;
   
   document.getElementById('btn_opcao').disabled = !podePedir;
   document.getElementById('btn_opcao_take').disabled = !podePedir;
@@ -713,6 +675,7 @@ function adicionarDoseManual(tipo) {
     } else {
       const valorAtual = estoqueInicial[tipo] || 0;
       estoqueInicial[tipo] = valorAtual + 1;
+      localStorage.setItem('local_estoque', JSON.stringify(estoqueInicial));
       atualizar();
       window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
     }
@@ -728,6 +691,9 @@ function salvarEstoqueInicial() {
   estoqueInicial.peixe = p;
   estoqueInicial.veg = v;
   estaConfiguradoFirebase = true;
+
+  localStorage.setItem('local_estoque', JSON.stringify(estoqueInicial));
+  localStorage.setItem('local_configurado', 'true');
 
   document.getElementById('modalEstoqueInicial').style.display = 'none';
   atualizar();
@@ -822,6 +788,8 @@ async function confirmarReiniciarTurno() {
     try {
       await window.firebaseDB.limparEstoqueTurno();
       localStorage.removeItem('usuario_role');
+      localStorage.removeItem('local_estoque');
+      localStorage.removeItem('local_configurado');
       window.location.href = window.location.origin + window.location.pathname + '?r=' + Date.now();
     } catch (e) { localStorage.removeItem('usuario_role'); window.location.reload(); }
   }
@@ -840,6 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loginOverlay').style.display = 'none';
     aplicarPermissoes();
   }
+  atualizar();
 });
 </script>
 
@@ -886,20 +855,21 @@ document.addEventListener('DOMContentLoaded', () => {
     onValue(estoqueRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        estoqueInicial.carne = data.carne !== undefined ? parseInt(data.carne) : 0;
-        estoqueInicial.peixe = data.peixe !== undefined ? parseInt(data.peixe) : 0;
-        estoqueInicial.veg = data.veg !== undefined ? parseInt(data.veg) : 0;
+        estoqueInicial.carne = data.carne !== undefined ? parseInt(data.carne) : 20;
+        estoqueInicial.peixe = data.peixe !== undefined ? parseInt(data.peixe) : 20;
+        estoqueInicial.veg = data.veg !== undefined ? parseInt(data.veg) : 10;
         estoqueInicial.opcao = data.opcao !== undefined ? parseInt(data.opcao) : 9999;
         estaConfiguradoFirebase = true;
+        localStorage.setItem('local_estoque', JSON.stringify(estoqueInicial));
+        localStorage.setItem('local_configurado', 'true');
+        document.getElementById('statusConexao').innerText = "⚡ Sincronizado";
       } else {
-        estoqueInicial.carne = 0; 
-        estoqueInicial.peixe = 0; 
-        estoqueInicial.veg = 0; 
-        estoqueInicial.opcao = 9999;
         estaConfiguradoFirebase = false;
       }
       verificarExibicaoEstoqueModal();
       atualizar();
+    }, (error) => {
+      document.getElementById('statusConexao').innerText = "ℹ️ Modo Local Ativo";
     });
 
     onValue(pedidosRef, (snapshot) => {
