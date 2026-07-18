@@ -470,9 +470,9 @@ button:disabled {
 </div>
 
 <div class="contadores">
-  🔴 <span id="cCarne">20 / 20</span>
-  🟦 <span id="cPeixe">20 / 20</span>
-  🟩 <span id="cVeg">10 / 10</span>
+  🔴 <span id="cCarne">0 / 0</span>
+  🟦 <span id="cPeixe">0 / 0</span>
+  🟩 <span id="cVeg">0 / 0</span>
   ⚫ <span id="cOpcao">0</span>
 </div>
 
@@ -529,7 +529,7 @@ button:disabled {
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.1.3';
+const VERSAO_APP = '1.1.4';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -538,7 +538,8 @@ let usuarioSelecionado = null;
 let pin = [];
 let modo = 'fila';
 
-const estoqueInicial = JSON.parse(localStorage.getItem('local_estoque')) || { carne: 20, peixe: 20, veg: 10, opcao: 9999 };
+// Inicia com stock zerado para bloquear o balcão até ativação formal
+const estoqueInicial = JSON.parse(localStorage.getItem('local_estoque')) || { carne: 0, peixe: 0, veg: 0, opcao: 9999 };
 let estaConfiguradoFirebase = localStorage.getItem('local_configurado') === 'true'; 
 
 const cont = {
@@ -641,15 +642,17 @@ function atualizar() {
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
 
-  document.getElementById('btn_carne').disabled = !podePedir || restCarne <= 0;
-  document.getElementById('btn_carne_take').disabled = !podePedir || restCarne <= 0;
-  document.getElementById('btn_peixe').disabled = !podePedir || restPeixe <= 0;
-  document.getElementById('btn_peixe_take').disabled = !podePedir || restPeixe <= 0;
-  document.getElementById('btn_veg').disabled = !podePedir || restVeg <= 0;
-  document.getElementById('btn_veg_take').disabled = !podePedir || restVeg <= 0;
+  // Bloqueia se o stock for menor/igual a zero OU se o total de doses permitidas for zero (turno fechado)
+  document.getElementById('btn_carne').disabled = !podePedir || restCarne <= 0 || estoqueInicial.carne === 0;
+  document.getElementById('btn_carne_take').disabled = !podePedir || restCarne <= 0 || estoqueInicial.carne === 0;
+  document.getElementById('btn_peixe').disabled = !podePedir || restPeixe <= 0 || estoqueInicial.peixe === 0;
+  document.getElementById('btn_peixe_take').disabled = !podePedir || restPeixe <= 0 || estoqueInicial.peixe === 0;
+  document.getElementById('btn_veg').disabled = !podePedir || restVeg <= 0 || estoqueInicial.veg === 0;
+  document.getElementById('btn_veg_take').disabled = !podePedir || restVeg <= 0 || estoqueInicial.veg === 0;
   
-  document.getElementById('btn_opcao').disabled = !podePedir;
-  document.getElementById('btn_opcao_take').disabled = !podePedir;
+  // Opções também travam se as doses gerais do turno não estiverem abertas
+  document.getElementById('btn_opcao').disabled = !podePedir || (!estaConfiguradoFirebase && role !== 'admin');
+  document.getElementById('btn_opcao_take').disabled = !podePedir || (!estaConfiguradoFirebase && role !== 'admin');
 }
 
 let opcaoTakeSelecionado = false;
@@ -834,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function iniciarFirebase() {
     const pedidosRef = ref(db, 'pedidos');
-    const estoqueRef = ref(db, 'configEstoque');
+    const toggleEstoqueRef = ref(db, 'configEstoque');
 
     window.firebaseDB = {
       db, ref, set, push, onValue, remove, pedidosRef,
@@ -842,27 +845,34 @@ document.addEventListener('DOMContentLoaded', () => {
         push(pedidosRef, { tipo, take, opcaoTipo, modo, status: 'preparo', criadoEm: Date.now() });
       },
       configurarEstoqueInicialFirebase: (c, p, v, o) => {
-        set(estoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
+        set(toggleEstoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
       },
       atualizarEstoqueFirebase: (tipo, novoValor) => {
         set(ref(db, `configEstoque/${tipo}`), novoValor);
       },
-      limparEstoqueTurno: () => set(estoqueRef, null)
+      limparEstoqueTurno: () => set(toggleEstoqueRef, null)
     };
 
-    onValue(estoqueRef, (snapshot) => {
+    onValue(toggleEstoqueRef, (snapshot) => {
       const data = snapshot.val();
-      if (data) {
-        estoqueInicial.carne = data.carne !== undefined ? parseInt(data.carne) : 20;
-        estoqueInicial.peixe = data.peixe !== undefined ? parseInt(data.peixe) : 20;
-        estoqueInicial.veg = data.veg !== undefined ? parseInt(data.veg) : 10;
+      if (data && data.definido === true) {
+        estoqueInicial.carne = data.carne !== undefined ? parseInt(data.carne) : 0;
+        estoqueInicial.peixe = data.peixe !== undefined ? parseInt(data.peixe) : 0;
+        estoqueInicial.veg = data.veg !== undefined ? parseInt(data.veg) : 0;
         estoqueInicial.opcao = data.opcao !== undefined ? parseInt(data.opcao) : 9999;
         estaConfiguradoFirebase = true;
         localStorage.setItem('local_estoque', JSON.stringify(estoqueInicial));
         localStorage.setItem('local_configurado', 'true');
         document.getElementById('statusConexao').innerText = "⚡ Sincronizado";
       } else {
+        // Zera o stock e força o bloqueio operacional se o turno estiver limpo/fechado
+        estoqueInicial.carne = 0;
+        estoqueInicial.peixe = 0;
+        estoqueInicial.veg = 0;
         estaConfiguradoFirebase = false;
+        localStorage.removeItem('local_estoque');
+        localStorage.removeItem('local_configurado');
+        document.getElementById('statusConexao').innerText = "⏳ Aguardando Abertura de Turno";
       }
       verificarExibicaoEstoqueModal();
       atualizar();
