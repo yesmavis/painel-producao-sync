@@ -694,7 +694,6 @@ function abrirModalOpcoes(isTake) {
   opcaoTakeSelecionado = isTake;
   document.getElementById('modalOpcoes').style.display = 'flex';
 }
-width=280;
 function fecharModalOpcoes() { document.getElementById('modalOpcoes').style.display = 'none'; }
 function confirmarOpcao(nome) { fecharModalOpcoes(); novoPedido('opcao', opcaoTakeSelecionado, nome); }
 
@@ -707,7 +706,6 @@ function novoPedido(tipo, take, opcaoTipo = null) {
 function adicionarDoseManual(tipo) {
   if (window.firebaseDB && window.firebaseDB.atualizarEstoqueFirebase) {
     if (tipo === 'opcao') {
-      // Como opções não têm limite restrito, somar no contador de forma livre
       window.firebaseDB.atualizarEstoqueFirebase(tipo, 9999); 
     } else {
       const valorAtual = estoqueInicial[tipo] || 0;
@@ -876,13 +874,16 @@ document.addEventListener('DOMContentLoaded', () => {
     onValue(estoqueRef, (snapshot) => {
       const data = snapshot.val();
       if (data && data.definido) {
-        estoqueInicial.carne = data.carne || 0;
-        estoqueInicial.peixe = data.peixe || 0;
-        estoqueInicial.veg = data.veg || 0;
-        estoqueInicial.opcao = data.opcao || 9999;
+        estoqueInicial.carne = data.carne !== undefined ? data.carne : 0;
+        estoqueInicial.peixe = data.peixe !== undefined ? data.peixe : 0;
+        estoqueInicial.veg = data.veg !== undefined ? data.veg : 0;
+        estoqueInicial.opcao = data.opcao !== undefined ? data.opcao : 9999;
         estaConfiguradoFirebase = true;
       } else {
-        estoqueInicial.carne = 0; estoqueInicial.peixe = 0; estoqueInicial.veg = 0; estoqueInicial.opcao = 9999;
+        estoqueInicial.carne = 0; 
+        estoqueInicial.peixe = 0; 
+        estoqueInicial.veg = 0; 
+        estoqueInicial.opcao = 9999;
         estaConfiguradoFirebase = false;
       }
       verificarExibicaoEstoqueModal();
