@@ -354,14 +354,10 @@ button:disabled {
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 #resumo .btn-pdf { background: #1e88e5; color: #fff; }
-#resumo .btn-pdf:hover { background: #1565c0; }
 #resumo .btn-encerrar { background: #e53935; color: #fff; }
-#resumo .btn-encerrar:hover { background: #c62828; }
-#resumo .box button:active { transform: scale(0.97); }
 
 .usuarios.avatars {
   display: flex;
@@ -465,12 +461,12 @@ button:disabled {
       <span></span><span></span><span></span><span></span>
     </div>
     <div class="keypad">
-      <button>1</button><button>2</button><button>3</button>
-      <button>4</button><button>5</button><button>6</button>
-      <button>7</button><button>8</button><button>9</button>
-      <button class="clear">C</button>
-      <button>0</button>
-      <button class="ok">✔</button>
+      <button onclick="pressPin('1')">1</button><button onclick="pressPin('2')">2</button><button onclick="pressPin('3')">3</button>
+      <button onclick="pressPin('4')">4</button><button onclick="pressPin('5')">5</button><button onclick="pressPin('6')">6</button>
+      <button onclick="pressPin('7')">7</button><button onclick="pressPin('8')">8</button><button onclick="pressPin('9')">9</button>
+      <button class="clear" onclick="pressPin('C')">C</button>
+      <button onclick="pressPin('0')">0</button>
+      <button class="ok" onclick="pressPin('✔')">✔</button>
     </div>
     <p id="loginErro"></p>
   </div>
@@ -479,7 +475,7 @@ button:disabled {
 <div id="modalEstoqueInicial">
   <div class="box-estoque">
     <h3>📈 Iniciar Doses do Turno</h3>
-    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Definido uma vez por turno em qualquer aparelho</p>
+    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Definido uma vez por turno</p>
     
     <label>🔴 Limite de Carne:</label>
     <input type="number" id="initCarne" value="20" min="0">
@@ -521,6 +517,7 @@ button:disabled {
   <button class="btn-ajuste carne" onclick="adicionarDoseManual('carne')">+1 Carne</button>
   <button class="btn-ajuste peixe" onclick="adicionarDoseManual('peixe')">+1 Peixe</button>
   <button class="btn-ajuste veg" onclick="adicionarDoseManual('veg')">+1 Veg</button>
+  <button class="btn-ajuste opcao" onclick="adicionarDoseManual('opcao')">+1 Opção</button>
 </div>
 
 <div class="botoes">
@@ -545,22 +542,27 @@ button:disabled {
 <div id="resumo">
   <div class="box">
     <h2>📊 Resumo do Turno</h2>
-    <p>🔴 Carne: <strong id="rCarne"></strong><br>
-    <small>Take: <strong id="rCarneTake"></strong></small></p>
-
-    <p>🟦 Peixe: <strong id="rPeixe"></strong><br>
-    <small>Take: <strong id="rPeixeTake"></strong></small></p>
-
-    <p>🟩 Veg: <strong id="rVeg"></strong><br>
-    <small>Take: <strong id="rVegTake"></strong></small></p>
-
-    <p>⚫ Opções: <strong id="rOpcao"></strong><br>
-    <small>Take: <strong id="rOpcaoTake"></strong></small></p>
+    <p>🔴 Carne: <strong id="rCarne"></strong><br><small>Take: <strong id="rCarneTake"></strong></small></p>
+    <p>🟦 Peixe: <strong id="rPeixe"></strong><br><small>Take: <strong id="rPeixeTake"></strong></small></p>
+    <p>🟩 Veg: <strong id="rVeg"></strong><br><small>Take: <strong id="rVegTake"></strong></small></p>
+    <p>⚫ Opções: <strong id="rOpcao"></strong><br><small>Take: <strong id="rOpcaoTake"></strong></small></p>
     <p><strong>TOTAL SELECIONADO: <span id="rTotal"></span></strong></p>
     <button class="btn-pdf" onclick="gerarPDFResumo()">📄 Baixar PDF</button>
     <button class="btn-encerrar" onclick="confirmarReiniciarTurno()">⏹ Encerrar e reiniciar</button>
   </div>
 </div>
+
+<div id="modalOpcoes" style="position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 9999;">
+  <div style="background: #1e1e1e; padding: 20px; border-radius: 16px; width: 280px; text-align: center;">
+    <h3>Escolha a opção</h3>
+    <button class="opcao-btn" onclick="confirmarOpcao('Frango')">🍗 Frango</button>
+    <button class="opcao-btn" onclick="confirmarOpcao('Omelete')">🍳 Omelete</button>
+    <button class="opcao-btn" onclick="confirmarOpcao('Hambúrguer')">🍔 Hambúrguer</button>
+    <button onclick="fecharModalOpcoes()" class="cancelar">Cancelar</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
@@ -568,39 +570,39 @@ const VERSAO_APP = '1.0.7';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
-const SENHAS = {
-  balcao: '1111',
-  cozinha: '2222',
-  admin: '9999'
+const SENHAS = { balcao: '1111', cozinha: '2222', admin: '9999' };
+let usuarioSelecionado = null;
+let pin = [];
+let modo = 'fila';
+const estoqueInicial = { carne: 0, peixe: 0, veg: 0, opacity: 0 };
+
+const cont = {
+  carne: 0, peixe: 0, veg: 0, opcao: 0,
+  take: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
+  origem: {
+    fila: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
+    encomenda: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
+    senha: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
+    delivery: { carne: 0, peixe: 0, veg: 0, opcao: 0 }
+  }
 };
 
-let usuarioSelecionado = null;
+let ultimoResumoTurno = null;
+let estaConfiguradoFirebase = false; 
 
 function getRole() { return localStorage.getItem('usuario_role'); }
-function isAdmin() { return getRole() === 'admin'; }
-function podeCriarPedido() { const role = getRole(); return role === 'balcao' || role === 'admin'; }
-function podeMoverPedido() { const role = getRole(); return role === 'cozinha' || role === 'admin'; }
-function podeFinalizarPedido() { const role = getRole(); return role === 'balcao' || role === 'admin'; }
-function podeExcluirPedido() { const role = getRole(); return role === 'balcao' || role === 'admin'; }
-function podeFecharCozinha() { const role = getRole(); return role === 'cozinha' || role === 'admin'; }
-
 function selecionarUsuario(role, el) {
   usuarioSelecionado = role;
   document.querySelectorAll('.avatar').forEach(a => a.classList.remove('ativo'));
   el.classList.add('ativo');
 }
 
-let pin = [];
-
-document.querySelectorAll('.keypad button').forEach(btn => {
-  btn.onclick = () => {
-    const v = btn.textContent;
-    if (v === 'C') { pin = []; } 
-    else if (v === '✔') { fazerLogin(); return; } 
-    else if (pin.length < 4) { pin.push(v); }
-    atualizarPin();
-  };
-});
+function pressPin(v) {
+  if (v === 'C') { pin = []; } 
+  else if (v === '✔') { fazerLogin(); return; } 
+  else if (pin.length < 4) { pin.push(v); }
+  atualizarPin();
+}
 
 function atualizarPin() {
   document.querySelectorAll('.pin span').forEach((dot, i) => {
@@ -617,67 +619,54 @@ function fazerLogin() {
 
   if (senha !== SENHAS[usuarioSelecionado]) {
     erro.innerText = 'Senha incorreta';
-    pin = [];
-    atualizarPin();
-    return;
+    pin = []; atualizarPin(); return;
   }
 
   localStorage.setItem('usuario_role', usuarioSelecionado);
   document.getElementById('loginOverlay').style.display = 'none';
-
-  pin = [];
-  atualizarPin();
-  erro.innerText = '';
+  pin = []; atualizarPin(); erro.innerText = '';
 
   aplicarPermissoes();
-  
-  // Forçamos o estado do Firebase a ser validado após o login bem-sucedido
-  estoqueFirebaseCarregado = true; 
   verificarExibicaoEstoqueModal();
+}
+
+function aplicarPermissoes() {
+  const role = getRole();
+  document.getElementById('fecharCozinha').style.display = (role === 'cozinha' || role === 'admin') ? 'block' : 'none';
+  document.getElementById('logoutBtn').style.display = role ? 'block' : 'none';
+  document.getElementById('painelAjusteEstoque').style.display = (role === 'cozinha' || role === 'admin') ? 'flex' : 'none';
 }
 
 function logout() {
   if (!confirm('Deseja sair do sistema?')) return;
   localStorage.removeItem('usuario_role');
-  usuarioSelecionado = null;
-  pin = [];
-  atualizarPin();
+  usuarioSelecionado = null; pin = []; atualizarPin();
   document.getElementById('loginErro').innerText = '';
   document.querySelectorAll('.avatar').forEach(b => b.classList.remove('ativo'));
   document.getElementById('loginOverlay').style.display = 'flex';
   aplicarPermissoes();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const role = localStorage.getItem('usuario_role');
-  if (role) {
-    document.getElementById('loginOverlay').style.display = 'none';
-    aplicarPermissoes();
-  }
-});
-
-let modo = 'fila';
-const estoqueInicial = { carne: 0, peixe: 0, veg: 0, opcao: 0 };
-
-const cont = {
-  carne: 0, peixe: 0, veg: 0, opcao: 0,
-  take: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
-  origem: {
-    fila: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
-    encomenda: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
-    senha: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
-    delivery: { carne: 0, peixe: 0, veg: 0, opcao: 0 }
-  }
-};
-
-let ultimoResumoTurno = null;
-let estoqueFirebaseCarregado = false; 
-let estaConfiguradoFirebase = false; 
-
 function setModo(m, b) {
   modo = m;
   document.querySelectorAll('.modos button').forEach(x => x.classList.remove('ativo'));
   b.classList.add('ativo');
+}
+
+function verificarExibicaoEstoqueModal() {
+  const role = getRole();
+  const modal = document.getElementById('modalEstoqueInicial');
+  if (!role) return;
+
+  if (!estaConfiguradoFirebase) {
+    if (role === 'cozinha' || role === 'admin') {
+      modal.style.display = 'flex';
+    } else {
+      modal.style.display = 'none';
+    }
+  } else {
+    modal.style.display = 'none';
+  }
 }
 
 function atualizar() {
@@ -686,78 +675,41 @@ function atualizar() {
   const restVeg = Math.max(0, estoqueInicial.veg - cont.veg);
   const restOpcao = Math.max(0, estoqueInicial.opcao - cont.opcao);
 
-  cCarne.innerText = `${restCarne} / ${estoqueInicial.carne}`;
-  cPeixe.innerText = `${restPeixe} / ${estoqueInicial.peixe}`;
-  cVeg.innerText = `${restVeg} / ${estoqueInicial.veg}`;
-  cOpcao.innerText = `${restOpcao} / ${estoqueInicial.opcao}`;
+  document.getElementById('cCarne').innerText = `${restCarne} / ${estoqueInicial.carne}`;
+  document.getElementById('cPeixe').innerText = `${restPeixe} / ${estoqueInicial.peixe}`;
+  document.getElementById('cVeg').innerText = `${restVeg} / ${estoqueInicial.veg}`;
+  document.getElementById('cOpcao').innerText = `${restOpcao} / ${estoqueInicial.opcao}`;
 
-  document.getElementById('btn_carne').disabled = restCarne <= 0;
-  document.getElementById('btn_carne_take').disabled = restCarne <= 0;
+  const podePedir = (getRole() === 'balcao' || getRole() === 'admin');
 
-  document.getElementById('btn_peixe').disabled = restPeixe <= 0;
-  document.getElementById('btn_peixe_take').disabled = restPeixe <= 0;
-
-  document.getElementById('btn_veg').disabled = restVeg <= 0;
-  document.getElementById('btn_veg_take').disabled = restVeg <= 0;
-
-  document.getElementById('btn_opcao').disabled = restOpcao <= 0;
-  document.getElementById('btn_opcao_take').disabled = restOpcao <= 0;
+  document.getElementById('btn_carne').disabled = !podePedir || restCarne <= 0;
+  document.getElementById('btn_carne_take').disabled = !podePedir || restCarne <= 0;
+  document.getElementById('btn_peixe').disabled = !podePedir || restPeixe <= 0;
+  document.getElementById('btn_peixe_take').disabled = !podePedir || restPeixe <= 0;
+  document.getElementById('btn_veg').disabled = !podePedir || restVeg <= 0;
+  document.getElementById('btn_veg_take').disabled = !podePedir || restVeg <= 0;
+  document.getElementById('btn_opcao').disabled = !podePedir || restOpcao <= 0;
+  document.getElementById('btn_opcao_take').disabled = !podePedir || restOpcao <= 0;
 }
 
 let opcaoTakeSelecionado = false;
-
 function abrirModalOpcoes(isTake) {
   opcaoTakeSelecionado = isTake;
   document.getElementById('modalOpcoes').style.display = 'flex';
 }
-
-function fecharModalOpcoes() {
-  document.getElementById('modalOpcoes').style.display = 'none';
-}
-
-function confirmarOpcao(nome) {
-  fecharModalOpcoes();
-  novoPedido('opcao', opcaoTakeSelecionado, nome);
-}
+function fecharModalOpcoes() { document.getElementById('modalOpcoes').style.display = 'none'; }
+function confirmarOpcao(nome) { fecharModalOpcoes(); novoPedido('opcao', opcaoTakeSelecionado, nome); }
 
 function novoPedido(tipo, take, opcaoTipo = null) {
-  if (!podeCriarPedido()) {
-    alert('🚫 Você não tem permissão para criar pedidos.');
-    return;
-  }
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
     window.firebaseDB.criarPedido(tipo, take, opcaoTipo);
   }
 }
 
 function adicionarDoseManual(tipo) {
-  if (!podeMoverPedido()) return;
   if (window.firebaseDB && window.firebaseDB.atualizarEstoqueFirebase) {
     const valorAtual = estoqueInicial[tipo] || 0;
     window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
-  }
-}
-
-function verificarExibicaoEstoqueModal() {
-  const role = localStorage.getItem('usuario_role');
-  const modal = document.getElementById('modalEstoqueInicial');
-  
-  // Se não houver utilizador logado, não faz nada ainda
-  if (!role) return;
-
-  // Se o Firebase diz que o turno NÃO está configurado
-  if (!estaConfiguradoFirebase) {
-    // Apenas Cozinha ou Admin podem configurar
-    if (role === 'cozinha' || role === 'admin') {
-      modal.style.display = 'flex';
-    } else {
-      // Se for balcão, avisa que precisa de esperar pela cozinha
-      modal.style.display = 'none';
-      alert('⏳ O stock deste turno ainda não foi definido pela Cozinha ou Admin. Por favor, aguarde.');
-    }
-  } else {
-    // Se já estiver configurado, garante que o modal fica fechado
-    modal.style.display = 'none';
   }
 }
 
@@ -790,48 +742,41 @@ function renderPedido(id, pedido) {
   if (take) texto += ' + TAKE';
   p.innerText = texto;
 
-  if (podeExcluirPedido()) {
+  const role = getRole();
+  if (role === 'balcao' || role === 'admin') {
     const del = document.createElement('span');
     del.className = 'excluir';
     del.innerText = '❌';
-
-    function excluirPedido(e) {
-      e.preventDefault(); e.stopPropagation();
+    del.onclick = (e) => {
+      e.stopPropagation();
       const pedidoRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos/' + id);
       window.firebaseDB.remove(pedidoRef);
-    }
-    del.onclick = excluirPedido;
-    del.addEventListener('touchend', excluirPedido, { passive: false });
+    };
     p.appendChild(del);
   }
   
-  function avancarStatus(e) {
-    e.preventDefault(); e.stopPropagation();
+  p.onclick = () => {
     let novoStatus = null;
-    if (pedido.status === 'preparo') {
-      if (!podeMoverPedido()) return;
+    if (pedido.status === 'preparo' && (role === 'cozinha' || role === 'admin')) {
       novoStatus = 'pronto';
-    } else if (pedido.status === 'pronto') {
-      if (!podeFinalizarPedido()) return;
+    } else if (pedido.status === 'pronto' && (role === 'balcao' || role === 'admin')) {
       novoStatus = 'finalizado';
     }
     if (!novoStatus) return;
-
     const pedidoRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos/' + id);
     window.firebaseDB.set(pedidoRef, { ...pedido, status: novoStatus });
-  }
-
-  p.onclick = avancarStatus;
-  p.addEventListener('touchend', avancarStatus, { passive: false });
+  };
 
   if (status === 'preparo') preparo.appendChild(p);
   else if (status === 'pronto') pronto.appendChild(p);
 }
-</script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+function confirmarFecho() {
+  const senha = prompt('🔐 Digite a senha para fechar a cozinha:');
+  if (senha === SENHA_FECHO) fecharCozinha();
+  else if (senha !== null) alert('❌ Senha incorreta!');
+}
 
-<script>  
 async function fecharCozinha() {
   ultimoResumoTurno = {
     carne: cont.carne, peixe: cont.peixe, veg: cont.veg, opcao: cont.opcao,
@@ -842,141 +787,48 @@ async function fecharCozinha() {
     encerradoEmTexto: new Date().toLocaleString(LOCALE)
   };
 
-  rCarne.innerText = ultimoResumoTurno.carne;
-  rPeixe.innerText = ultimoResumoTurno.peixe;
-  rVeg.innerText = ultimoResumoTurno.veg;
-  rOpcao.innerText = ultimoResumoTurno.opcao;
-
-  rCarneTake.innerText = ultimoResumoTurno.take.carne;
-  rPeixeTake.innerText = ultimoResumoTurno.take.peixe;
-  rVegTake.innerText = ultimoResumoTurno.take.veg;
-  rOpcaoTake.innerText = ultimoResumoTurno.take.opcao;
-
-  rTotal.innerText = ultimoResumoTurno.total;
+  document.getElementById('rCarne').innerText = ultimoResumoTurno.carne;
+  document.getElementById('rPeixe').innerText = ultimoResumoTurno.peixe;
+  document.getElementById('rVeg').innerText = ultimoResumoTurno.veg;
+  document.getElementById('rOpcao').innerText = ultimoResumoTurno.opcao;
+  document.getElementById('rCarneTake').innerText = ultimoResumoTurno.take.carne;
+  document.getElementById('rPeixeTake').innerText = ultimoResumoTurno.take.peixe;
+  document.getElementById('rVegTake').innerText = ultimoResumoTurno.take.veg;
+  document.getElementById('rOpcaoTake').innerText = ultimoResumoTurno.take.opcao;
+  document.getElementById('rTotal').innerText = ultimoResumoTurno.total;
   
-  const btnEncerrar = document.querySelector('.btn-encerrar');
-  if (btnEncerrar) {
-    btnEncerrar.innerText = "⏹ Encerrar e reiniciar";
-    btnEncerrar.disabled = false;
-  }
-
-  resumo.style.display = 'flex';
+  document.getElementById('resumo').style.display = 'flex';
 
   try {
-    const relatorioRef = window.firebaseDB.ref(window.firebaseDB.db, 'relatorios');
-    await window.firebaseDB.push(relatorioRef, ultimoResumoTurno);
-
-    const pedidosRef = window.firebaseDB.ref(window.firebaseDB.db, 'pedidos');
-    await window.firebaseDB.remove(pedidosRef);
-  } catch (error) {
-    console.error("Erro ao salvar relatório ou limpar pedidos:", error);
-  }
-}
-
-function confirmarFecho() {
-  const senha = prompt('🔐 Digite a senha para fechar a cozinha:');
-  if (senha === null) return;
-  if (senha !== SENHA_FECHO) { alert('❌ Senha incorreta!'); return; }
-  fecharCozinha();
+    await window.firebaseDB.push(window.firebaseDB.ref(window.firebaseDB.db, 'relatorios'), ultimoResumoTurno);
+    await window.firebaseDB.remove(window.firebaseDB.ref(window.firebaseDB.db, 'pedidos'));
+  } catch (e) { console.error(e); }
 }
 
 async function confirmarReiniciarTurno() {
-  const btnEncerrar = document.querySelector('.btn-encerrar');
-  
-  if (btnEncerrar) {
-    btnEncerrar.innerText = "A reiniciar...";
-    btnEncerrar.disabled = true;
-  }
-
   if (window.firebaseDB && window.firebaseDB.limparEstoqueTurno) {
     try {
       await window.firebaseDB.limparEstoqueTurno();
-      document.getElementById('resumo').style.display = 'none';
-      
       localStorage.removeItem('usuario_role');
-      
-      setTimeout(() => {
-        window.location.href = window.location.origin + window.location.pathname + '?r=' + Date.now();
-      }, 500);
-      
-    } catch (error) {
-      console.error("Erro ao reiniciar turno:", error);
-      localStorage.removeItem('usuario_role');
-      window.location.reload(true);
-    }
-  } else {
-    localStorage.removeItem('usuario_role');
-    window.location.reload(true);
+      window.location.href = window.location.origin + window.location.pathname + '?r=' + Date.now();
+    } catch (e) { localStorage.removeItem('usuario_role'); window.location.reload(); }
   }
 }
 
 function gerarPDFResumo() {
-  if (!ultimoResumoTurno) { alert('Resumo ainda não disponível.'); return; }
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  const pageWidth = 210; const marginX = 10; const totalContentWidth = pageWidth - (marginX * 2); 
-  let currentY = 0;
-
-  const colors = {
-    bgHeader: [40, 40, 45], bgFooter: [230, 81, 0], bgCard: [255, 255, 255], bgRowGray: [240, 240, 240],
-    types: { carne: [211, 47, 47], peixe: [25, 118, 210], veg: [56, 142, 60], opcao: [40, 40, 45] }
-  };
-
-  doc.setFillColor(...colors.bgHeader); doc.rect(0, 0, pageWidth, 45, 'F');
-  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(22);
-  doc.text(RESTAURANTE, pageWidth / 2, 18, { align: 'center' });
-  doc.setFontSize(16); doc.setFont('helvetica', 'normal'); doc.text("Resumo do Turno", pageWidth / 2, 28, { align: 'center' });
-  doc.setFontSize(10); doc.setTextColor(200, 200, 200); doc.text(`Encerrado em: ${ultimoResumoTurno.encerradoEmTexto}`, pageWidth / 2, 38, { align: 'center' });
-
-  currentY = 55; 
-
-  function drawCard(label, typeKey, colorRGB) {
-    const cardHeight = 35; const headerHeight = 12; const rowHeight = 11.5; const barWidth = 5; const gap = 3;
-    const cardStartX = marginX + barWidth + gap; const cardWidth = totalContentWidth - barWidth - gap;
-
-    const total = ultimoResumoTurno[typeKey]; const take = ultimoResumoTurno.take[typeKey];
-    const fila = ultimoResumoTurno.origem.fila[typeKey] || 0; 
-    const enc = ultimoResumoTurno.origem.encomenda[typeKey] || 0; 
-    const senha = ultimoResumoTurno.origem.senha[typeKey] || 0;
-    const deliv = ultimoResumoTurno.origem.delivery ? (ultimoResumoTurno.origem.delivery[typeKey] || 0) : 0;
-
-    doc.setFillColor(...colorRGB); doc.rect(marginX, currentY, barWidth, cardHeight, 'F');
-    doc.setFillColor(230, 230, 230); doc.rect(cardStartX + 1, currentY + 1, cardWidth, cardHeight, 'F');
-    doc.setFillColor(255, 255, 255); doc.rect(cardStartX, currentY, cardWidth, cardHeight, 'F');
-
-    doc.setFillColor(...colorRGB);
-    const ribbonWidth = 70; 
-    doc.lines([[ribbonWidth, 0], [-10, headerHeight], [-(ribbonWidth - 10), 0], [0, -headerHeight]], cardStartX, currentY, [1, 1], 'F', true);
-
-    doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
-    doc.text(`${label.toUpperCase()}: ${total}`, cardStartX + 5, currentY + 8);
-    doc.setTextColor(40, 40, 40); doc.setFontSize(16); doc.text(total.toString(), cardStartX + cardWidth - 5, currentY + 8, { align: 'right' });
-
-    const row1Y = currentY + headerHeight;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(12); doc.setTextColor(50, 50, 50);
-    doc.text(`Vendido: ${total} (Take: ${take})`, cardStartX + 5, row1Y + 8);
-
-    const row2Y = row1Y + rowHeight;
-    doc.setFillColor(...colors.bgRowGray); doc.rect(cardStartX, row2Y, cardWidth, rowHeight, 'F');
-    doc.setFontSize(10); doc.setTextColor(80, 80, 80);
-    doc.text(`Fila: ${fila}  |  Enc: ${enc}  |  Senha: ${senha}  |  Deliv: ${deliv}`, cardStartX + 5, row2Y + 8);
-
-    currentY += cardHeight + 8; 
-  }
-
-  drawCard('Carne', 'carne', colors.types.carne);
-  drawCard('Peixe', 'peixe', colors.types.peixe);
-  drawCard('Veg', 'veg', colors.types.veg);
-  drawCard('Opções', 'opcao', colors.types.opcao);
-
-  const footerY = currentY + 5; 
-  doc.setFillColor(...colors.bgFooter); doc.rect(0, footerY, pageWidth, 15, 'F');
-  doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(16);
-  doc.text('TOTAL DE PRATOS SAÍDOS:', marginX + 5, footerY + 10);
-  doc.text(ultimoResumoTurno.total.toString(), pageWidth - marginX - 5, footerY + 10, { align: 'right' });
-
-  doc.save(`Resumo_Turno_${new Date().toISOString().slice(0,10)}.pdf`);
+  const { jsPDF } = window.jspdf; const doc = new jsPDF();
+  doc.text(RESTAURANTE, 10, 10);
+  doc.text(`Total de pratos: ${ultimoResumoTurno.total}`, 10, 20);
+  doc.save('resumo.pdf');
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const role = getRole();
+  if (role) {
+    document.getElementById('loginOverlay').style.display = 'none';
+    aplicarPermissoes();
+  }
+});
 </script>
 
 <script type="module">
@@ -999,43 +851,28 @@ function gerarPDFResumo() {
   const auth = getAuth(app);
 
   signInAnonymously(auth).catch(console.error);
-
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      iniciarFirebase();
-    }
-  });
+  onAuthStateChanged(auth, (user) => { if (user) iniciarFirebase(); });
 
   function iniciarFirebase() {
     const pedidosRef = ref(db, 'pedidos');
     const estoqueRef = ref(db, 'configEstoque');
 
-    function criarPedido(tipo, take = false, opcaoTipo = null) {
-      const novoPedidoRef = push(pedidosRef);
-      set(novoPedidoRef, {
-        tipo, take, opcaoTipo, modo,
-        status: 'preparo',
-        criadoEm: Date.now()
-      });
-    }
-
-    function configurarEstoqueInicialFirebase(c, p, v, o) {
-      set(estoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
-    }
-
-    function atualizarEstoqueFirebase(tipo, novoValor) {
-      const tipoRef = ref(db, `configEstoque/${tipo}`);
-      set(tipoRef, novoValor);
-    }
-
-    function limparEstoqueTurno() {
-      return set(estoqueRef, null);
-    }
+    window.firebaseDB = {
+      db, ref, set, push, onValue, remove, pedidosRef,
+      criarPedido: (tipo, take, opcaoTipo) => {
+        push(pedidosRef, { tipo, take, opcaoTipo, modo, status: 'preparo', criadoEm: Date.now() });
+      },
+      configurarEstoqueInicialFirebase: (c, p, v, o) => {
+        set(estoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
+      },
+      atualizarEstoqueFirebase: (tipo, novoValor) => {
+        set(ref(db, `configEstoque/${tipo}`), novoValor);
+      },
+      limparEstoqueTurno: () => set(estoqueRef, null)
+    };
 
     onValue(estoqueRef, (snapshot) => {
       const data = snapshot.val();
-      estoqueFirebaseCarregado = true;
-
       if (data && data.definido) {
         estoqueInicial.carne = data.carne || 0;
         estoqueInicial.peixe = data.peixe || 0;
@@ -1043,13 +880,9 @@ function gerarPDFResumo() {
         estoqueInicial.opcao = data.opcao || 0;
         estaConfiguradoFirebase = true;
       } else {
-        estoqueInicial.carne = 0;
-        estoqueInicial.peixe = 0;
-        estoqueInicial.veg = 0;
-        estoqueInicial.opcao = 0;
+        estoqueInicial.carne = 0; estoqueInicial.peixe = 0; estoqueInicial.veg = 0; estoqueInicial.opcao = 0;
         estaConfiguradoFirebase = false;
       }
-      
       verificarExibicaoEstoqueModal();
       atualizar();
     });
@@ -1057,65 +890,23 @@ function gerarPDFResumo() {
     onValue(pedidosRef, (snapshot) => {
       preparo.innerHTML = '<h2>👨‍🍳 EM PREPARO</h2>';
       pronto.innerHTML = '<h2>✅ PRONTO</h2>';
-
       cont.carne = 0; cont.peixe = 0; cont.veg = 0; cont.opcao = 0;
       cont.take.carne = 0; cont.take.peixe = 0; cont.take.veg = 0; cont.take.opcao = 0;
 
-      Object.keys(cont.origem).forEach(origem => {
-        Object.keys(cont.origem[origem]).forEach(tipo => {
-          cont.origem[origem][tipo] = 0;
-        });
-      });
+      Object.keys(cont.origem).forEach(o => Object.keys(cont.origem[o]).forEach(t => cont.origem[o][t] = 0));
 
       const dados = snapshot.val();
-      if (!dados) {
-        atualizar();
-        return;
-      }
+      if (!dados) { atualizar(); return; }
 
-      const pedidosOrdenados = Object.entries(dados).sort((a, b) => (a[1].criadoEm || 0) - (b[1].criadoEm || 0));
-
-      pedidosOrdenados.forEach(([id, pedido]) => {
+      Object.entries(dados).sort((a,b) => (a[1].criadoEm||0)-(b[1].criadoEm||0)).forEach(([id, pedido]) => {
         cont[pedido.tipo]++;
         if (pedido.take) cont.take[pedido.tipo]++;
-        if (pedido.modo && cont.origem[pedido.modo]) {
-          cont.origem[pedido.modo][pedido.tipo]++;
-        }
+        if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
         renderPedido(id, pedido);
       });
-
       atualizar();
     });
-
-    window.firebaseDB = {
-      db, ref, set, push, onValue, remove,
-      pedidosRef, criarPedido, configurarEstoqueInicialFirebase, atualizarEstoqueFirebase, limparEstoqueTurno
-    };
   }
 </script>
-
-<div id="modalOpcoes" style="
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.75);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-">
-  <div style="
-    background: #1e1e1e;
-    padding: 20px;
-    border-radius: 16px;
-    width: 280px;
-    text-align: center;
-  ">
-    <h3>Escolha a opção</h3>
-    <button class="opcao-btn" onclick="confirmarOpcao('Frango')">🍗 Frango</button>
-    <button class="opcao-btn" onclick="confirmarOpcao('Omelete')">🍳 Omelete</button>
-    <button class="opcao-btn" onclick="confirmarOpcao('Hambúrguer')">🍔 Hambúrguer</button>
-    <button onclick="fecharModalOpcoes()" class="cancelar">Cancelar</button>
-  </div>
-</div>
 </body>
 </html>
