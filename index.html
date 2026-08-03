@@ -144,7 +144,8 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 .pedido.encomenda { background: linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%), var(--base-color); }
 .pedido.senha { background: linear-gradient(to right, #ab47bc 0%, #ab47bc 33%, transparent 33%), var(--base-color); }
 .pedido.delivery { background: linear-gradient(to right, #ffffff 0%, #ffffff 33%, transparent 33%), var(--base-color); color: #000000; }
-.pedido.encomenda.opcao, .pedido.delivery.opcao { color: #fff; }
+.pedido.encomenda.opcao, .pedido.senha.opcao { color: #fff; }
+.pedido.delivery.opcao { color: #000; }
 .excluir { position:absolute; right:6px; top:6px; font-size:16px; cursor:pointer; }
 
 /* Modal Resumo do Turno */
@@ -428,7 +429,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.4';
+const VERSAO_APP = '1.2.5';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -539,9 +540,14 @@ function verificarExibicaoEstoqueModal() {
 }
 
 function atualizar() {
-  const restCarne = Math.max(0, estoqueInicial.carne - cont.carne);
-  const restPeixe = Math.max(0, estoqueInicial.peixe - cont.peixe);
-  const restVeg = Math.max(0, estoqueInicial.veg - cont.veg);
+  // O estoque total configurado menos os pratos consumidos/reservados no balão
+  const carneReservada = contadoresBalao.carne.normal + contadoresBalao.carne.take;
+  const peixeReservado = contadoresBalao.peixe.normal + contadoresBalao.peixe.take;
+  const vegReservada = contadoresBalao.veg.normal + contadoresBalao.veg.take;
+
+  const restCarne = Math.max(0, estoqueInicial.carne - cont.carne - carneReservada);
+  const restPeixe = Math.max(0, estoqueInicial.peixe - cont.peixe - peixeReservado);
+  const restVeg = Math.max(0, estoqueInicial.veg - cont.veg - vegReservada);
 
   document.getElementById('cCarne').innerText = `${restCarne} / ${estoqueInicial.carne}`;
   document.getElementById('cPeixe').innerText = `${restPeixe} / ${estoqueInicial.peixe}`;
@@ -665,15 +671,6 @@ function salvarEstoqueInicial() {
   let p = parseInt(document.getElementById('initPeixe').value) || 0;
   let v = parseInt(document.getElementById('initVeg').value) || 0;
 
-  // Subtração automática das encomendas no limite inicial disponível
-  const carneReservada = contadoresBalao.carne.normal + contadoresBalao.carne.take;
-  const peixeReservado = contadoresBalao.peixe.normal + contadoresBalao.peixe.take;
-  const vegReservada = contadoresBalao.veg.normal + contadoresBalao.veg.take;
-
-  c = Math.max(0, c - carneReservada);
-  p = Math.max(0, p - peixeReservado);
-  v = Math.max(0, v - vegReservada);
-
   estoqueInicial.carne = c;
   estoqueInicial.peixe = p;
   estoqueInicial.veg = v;
@@ -698,7 +695,8 @@ function renderPedido(id, pedido) {
   const nomes = { carne: 'CARNE', peixe: 'PEIXE', veg: 'VEG', opcao: 'OPÇÕES' };
 
   const p = document.createElement('div');
-  p.className = `pedido ${pedido.modo || 'fila'} ${tipo}` + (take ? ' take' : '');
+  const modoClasse = pedido.modo || 'fila';
+  p.className = `pedido ${modoClasse} ${tipo}` + (take ? ' take' : '');
   p.style.setProperty('--base-color', cores[tipo]);
   p.dataset.id = id;
   let texto = nomes[tipo];
@@ -888,13 +886,14 @@ document.addEventListener('DOMContentLoaded', () => {
     window.firebaseDB = {
       db, ref, set, push, onValue, remove, pedidosRef,
       criarPedido: (tipo, take, opcaoTipo) => {
-        // Todo o pedido criado no modo 'encomenda' vai para o estado de reserva do Balão (balao = true)
-        const eReservaBalao = (modo === 'encomenda');
+        // Guarda o modo ativo selecionado (fila, encomenda, delivery, senha)
+        const modoAtivo = modo;
+        const eReservaBalao = (modoAtivo === 'encomenda');
         push(pedidosRef, { 
           tipo, 
           take, 
           opcaoTipo, 
-          modo: 'encomenda', 
+          modo: modoAtivo, 
           status: 'preparo', 
           balao: eReservaBalao, 
           criadoEm: Date.now() 
