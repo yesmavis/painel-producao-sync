@@ -174,7 +174,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   font-size: 15px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   cursor: pointer;
-  z-index: 9990;
+  z-index: 10005; /* Sempre visível na frente de modais se necessário */
   display: flex;
   align-items: center;
   gap: 8px;
@@ -184,7 +184,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 #modalBalaoResumo {
   position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-  display: none; align-items: center; justify-content: center; z-index: 10001;
+  display: none; align-items: center; justify-content: center; z-index: 10010;
 }
 #modalBalaoResumo .box-balao {
   background: #222; padding: 22px; border-radius: 16px; width: 330px; text-align: center;
@@ -228,7 +228,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   </div>
 </div>
 
-<!-- BALÃO FLUTUANTE DE PRÉ-RESERVAS -->
+<!-- BALÃO FLUTUANTE DE PRÉ-RESERVAS (SEMPRE ACESSÍVEL) -->
 <div id="balaoReservas">
   📦 <span id="balaoContador">0 Encomendas</span>
 </div>
@@ -237,7 +237,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 <div id="modalBalaoResumo">
   <div class="box-balao">
     <h3>📦 Encomendas da Manhã</h3>
-    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Resumo para a contagem do Chef</p>
+    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Resumo para contagem do Chef</p>
 
     <div class="linha-reserva">
       <span>🔴 <strong>Carne:</strong></span>
@@ -278,7 +278,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 <div id="modalEstoqueInicial">
   <div class="box-estoque">
     <h3>📈 Iniciar Doses do Turno</h3>
-    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Definido uma vez por turno</p>
+    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Consulte o balão no canto para ajudar no limite</p>
     
     <label>🔴 Limite de Carne:</label>
     <input type="number" id="initCarne" value="20" min="0">
@@ -366,7 +366,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.2';
+const VERSAO_APP = '1.2.3';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -435,6 +435,7 @@ function fazerLogin() {
   pin = []; atualizarPin(); erro.innerText = '';
 
   aplicarPermissoes();
+  verificarExibicaoEstoqueModal();
 }
 
 function aplicarPermissoes() {
@@ -452,6 +453,7 @@ function logout() {
   document.querySelectorAll('.avatar').forEach(b => b.classList.remove('ativo'));
   document.getElementById('loginOverlay').style.display = 'flex';
   aplicarPermissoes();
+  verificarExibicaoEstoqueModal();
 }
 
 function setModo(m, b) {
@@ -464,7 +466,7 @@ function setModo(m, b) {
 function verificarExibicaoEstoqueModal() {
   const role = getRole();
   const modal = document.getElementById('modalEstoqueInicial');
-  if (!role) return;
+  if (!role) { modal.style.display = 'none'; return; }
 
   if (!estaConfiguradoFirebase && (role === 'cozinha' || role === 'admin')) {
     modal.style.display = 'flex';
@@ -489,6 +491,7 @@ function atualizar() {
   const liberadoPorTurno = estaConfiguradoFirebase;
   const modoEncomenda = (modo === 'encomenda');
 
+  // Balcão pode registar ENCOMENDAS a qualquer hora (antes ou depois da abertura)
   document.getElementById('btn_carne').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0);
   document.getElementById('btn_carne_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0);
   document.getElementById('btn_peixe').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0);
@@ -678,7 +681,7 @@ function gerarPDFResumo() {
   doc.save('resumo.pdf');
 }
 
-// CORREÇÃO: Lógica de arrastar/clicar no balão sem desaparecer e sem abrir indesejadamente
+// ARRASTAR E CLICAR NO BALÃO FLUTUANTE
 const balao = document.getElementById('balaoReservas');
 let isDragging = false;
 let startX, startY, initialLeft, initialTop;
@@ -742,6 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (role) {
     document.getElementById('loginOverlay').style.display = 'none';
     aplicarPermissoes();
+    verificarExibicaoEstoqueModal();
   }
   atualizar();
 });
@@ -834,13 +838,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       Object.entries(dados).sort((a,b) => (a[1].criadoEm||0)-(b[1].criadoEm||0)).forEach(([id, pedido]) => {
-        // Se o turno AINDA NÃO estive aberto (antes do meio-dia) e for ENCOMENDA:
-        if (!estaConfiguradoFirebase && pedido.modo === 'encomenda') {
-          // Vai apenas para o BALÃO FLUTUANTE
+        // QUALQUER ENCOMENDA vai EXCLUSIVAMENTE para o Balão Flutuante e NÃO renderiza no "Em Preparo"
+        if (pedido.modo === 'encomenda') {
           if (pedido.take) reservasBalao[pedido.tipo].take++;
           else reservasBalao[pedido.tipo].normal++;
         } else {
-          // Fluxo do Turno Aberto (Cozinha Ativa)
+          // Apenas Fila, Delivery e Senha entram na esteira de produção (Em Preparo)
           cont[pedido.tipo]++;
           if (pedido.take) cont.take[pedido.tipo]++;
           if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
