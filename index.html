@@ -163,16 +163,24 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 /* --- WIDGET FLUTUANTE DE RESERVAS (BALÃO) --- */
 #balaoReservas {
-  position: fixed; bottom: 20px; right: 20px;
-  background: #ffca28; color: #000;
-  padding: 12px 18px; border-radius: 30px;
-  font-weight: bold; font-size: 15px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ffca28;
+  color: #000;
+  padding: 12px 18px;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 15px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-  cursor: grab; z-index: 9990;
-  display: flex; align-items: center; gap: 8px;
-  user-select: none; touch-action: none;
+  cursor: pointer;
+  z-index: 9990;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  touch-action: none;
 }
-#balaoReservas:active { cursor: grabbing; }
 
 #modalBalaoResumo {
   position: fixed; inset: 0; background: rgba(0,0,0,0.85);
@@ -221,7 +229,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 </div>
 
 <!-- BALÃO FLUTUANTE DE PRÉ-RESERVAS -->
-<div id="balaoReservas" onclick="abrirResumoBalao()">
+<div id="balaoReservas">
   📦 <span id="balaoContador">0 Encomendas</span>
 </div>
 
@@ -358,7 +366,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.1';
+const VERSAO_APP = '1.2.2';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -381,7 +389,6 @@ const cont = {
   }
 };
 
-// Objeto isolado para contagem das Encomendas no Balão
 const reservasBalao = {
   carne: { normal: 0, take: 0 },
   peixe: { normal: 0, take: 0 },
@@ -480,7 +487,6 @@ function atualizar() {
   const podePedir = (role === 'balcao' || role === 'admin');
 
   const liberadoPorTurno = estaConfiguradoFirebase;
-  // Apenas a guia ENCOMENDA fica liberada para lançamento prévio antes da abertura do turno
   const modoEncomenda = (modo === 'encomenda');
 
   document.getElementById('btn_carne').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0);
@@ -496,7 +502,6 @@ function atualizar() {
 
 // LÓGICA DO BALÃO DE ENCOMENDAS
 function abrirResumoBalao() {
-  if (isDragging) return;
   document.getElementById('modalBalaoResumo').style.display = 'flex';
 }
 function fecharResumoBalao() {
@@ -673,47 +678,64 @@ function gerarPDFResumo() {
   doc.save('resumo.pdf');
 }
 
-// Drag do balão flutuante
+// CORREÇÃO: Lógica de arrastar/clicar no balão sem desaparecer e sem abrir indesejadamente
 const balao = document.getElementById('balaoReservas');
-let isDragging = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+let isDragging = false;
+let startX, startY, initialLeft, initialTop;
+let dragThresholdPassed = false;
 
-balao.addEventListener('touchstart', dragStart, false);
-balao.addEventListener('touchend', dragEnd, false);
-balao.addEventListener('touchmove', drag, false);
-balao.addEventListener('mousedown', dragStart, false);
-document.addEventListener('mouseup', dragEnd, false);
-document.addEventListener('mousemove', drag, false);
+balao.addEventListener('mousedown', startDrag);
+balao.addEventListener('touchstart', startDrag, { passive: false });
 
-function dragStart(e) {
-  if (e.type === 'touchstart') {
-    initialX = e.touches[0].clientX - xOffset;
-    initialY = e.touches[0].clientY - yOffset;
-  } else {
-    initialX = e.clientX - xOffset;
-    initialY = e.clientY - yOffset;
+function startDrag(e) {
+  isDragging = true;
+  dragThresholdPassed = false;
+  const event = e.touches ? e.touches[0] : e;
+  startX = event.clientX;
+  startY = event.clientY;
+
+  const rect = balao.getBoundingClientRect();
+  initialLeft = rect.left;
+  initialTop = rect.top;
+
+  document.addEventListener('mousemove', onDrag);
+  document.addEventListener('touchmove', onDrag, { passive: false });
+  document.addEventListener('mouseup', stopDrag);
+  document.addEventListener('touchend', stopDrag);
+}
+
+function onDrag(e) {
+  if (!isDragging) return;
+  const event = e.touches ? e.touches[0] : e;
+  const deltaX = event.clientX - startX;
+  const deltaY = event.clientY - startY;
+
+  if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+    dragThresholdPassed = true;
   }
-  if (e.target === balao || balao.contains(e.target)) isDragging = true;
+
+  if (e.cancelable) e.preventDefault();
+
+  balao.style.left = `${initialLeft + deltaX}px`;
+  balao.style.top = `${initialTop + deltaY}px`;
+  balao.style.bottom = 'auto';
+  balao.style.right = 'auto';
 }
 
-function dragEnd() {
-  initialX = currentX; initialY = currentY;
-  setTimeout(() => isDragging = false, 50);
+function stopDrag() {
+  if (!isDragging) return;
+  isDragging = false;
+  document.removeEventListener('mousemove', onDrag);
+  document.removeEventListener('touchmove', onDrag);
+  document.removeEventListener('mouseup', stopDrag);
+  document.removeEventListener('touchend', stopDrag);
 }
 
-function drag(e) {
-  if (isDragging) {
-    e.preventDefault();
-    if (e.type === 'touchmove') {
-      currentX = e.touches[0].clientX - initialX;
-      currentY = e.touches[0].clientY - initialY;
-    } else {
-      currentX = e.clientX - initialX;
-      currentY = e.clientY - initialY;
-    }
-    xOffset = currentX; yOffset = currentY;
-    balao.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+balao.addEventListener('click', (e) => {
+  if (!dragThresholdPassed) {
+    abrirResumoBalao();
   }
-}
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const role = getRole();
@@ -775,7 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
         estaConfiguradoFirebase = true;
         localStorage.setItem('local_estoque', JSON.stringify(estoqueInicial));
         localStorage.setItem('local_configurado', 'true');
-        document.getElementById('statusConexao').innerText = "⚡ Sincronizado";
+        document.getElementById('statusConexao').innerText = "⚡ Turno Aberto";
       } else {
         estoqueInicial.carne = 0;
         estoqueInicial.peixe = 0;
@@ -783,7 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
         estaConfiguradoFirebase = false;
         localStorage.removeItem('local_estoque');
         localStorage.removeItem('local_configurado');
-        document.getElementById('statusConexao').innerText = "⏳ Aguardando Abertura de Turno";
+        document.getElementById('statusConexao').innerText = "⏳ Turno Fechado (Reservas da Manhã)";
       }
       verificarExibicaoEstoqueModal();
       atualizar();
@@ -797,7 +819,6 @@ document.addEventListener('DOMContentLoaded', () => {
       cont.carne = 0; cont.peixe = 0; cont.veg = 0; cont.opcao = 0;
       cont.take.carne = 0; cont.take.peixe = 0; cont.take.veg = 0; cont.take.opcao = 0;
 
-      // Reset das Encomendas no Balão
       reservasBalao.carne = { normal: 0, take: 0 };
       reservasBalao.peixe = { normal: 0, take: 0 };
       reservasBalao.veg = { normal: 0, take: 0 };
@@ -813,17 +834,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       Object.entries(dados).sort((a,b) => (a[1].criadoEm||0)-(b[1].criadoEm||0)).forEach(([id, pedido]) => {
-        cont[pedido.tipo]++;
-        if (pedido.take) cont.take[pedido.tipo]++;
-        if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
-
-        // Apenas contabiliza no balão se foi sob a guia ENCOMENDA e o turno não foi aberto
+        // Se o turno AINDA NÃO estive aberto (antes do meio-dia) e for ENCOMENDA:
         if (!estaConfiguradoFirebase && pedido.modo === 'encomenda') {
+          // Vai apenas para o BALÃO FLUTUANTE
           if (pedido.take) reservasBalao[pedido.tipo].take++;
           else reservasBalao[pedido.tipo].normal++;
+        } else {
+          // Fluxo do Turno Aberto (Cozinha Ativa)
+          cont[pedido.tipo]++;
+          if (pedido.take) cont.take[pedido.tipo]++;
+          if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
+          renderPedido(id, pedido);
         }
-
-        renderPedido(id, pedido);
       });
 
       atualizarBalaoUI();
