@@ -188,7 +188,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   display: none; align-items: center; justify-content: center; z-index: 10010;
 }
 #modalBalaoResumo .box-balao {
-  background: #222; padding: 20px; border-radius: 16px; width: 350px; text-align: center; max-height: 90vh; overflow-y: auto;
+  background: #222; padding: 20px; border-radius: 16px; width: 420px; max-width: 95vw; text-align: center; max-height: 90vh; overflow-y: auto;
 }
 .linha-reserva-item {
   background: #2d2d2d; margin: 10px 0; padding: 12px; border-radius: 12px; text-align: left;
@@ -202,13 +202,17 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 .coluna-acao {
   background: #222; padding: 6px; border-radius: 8px; text-align: center;
 }
-.coluna-acao span { font-size: 11px; color: #aaa; display: block; margin-bottom: 4px; font-weight: bold; }
+.coluna-acao span { font-size: 11px; color: #aaa; display: block; margin-bottom: 6px; font-weight: bold; }
+.botoes-liberacao {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+}
 .btn-liberar {
-  width: 100%; height: 28px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; margin-top: 4px;
+  width: 100%; height: 30px; border-radius: 6px; font-size: 10px; font-weight: bold; border: none; cursor: pointer; padding: 2px;
 }
 .btn-liberar.enc { background: #ffca28; color: #000; }
+.btn-liberar.del { background: #ffffff; color: #000; }
 .btn-liberar.sen { background: #ab47bc; color: #fff; }
-.btn-liberar:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-liberar:disabled { opacity: 0.2; cursor: not-allowed; }
 </style>
 </head>
 
@@ -263,13 +267,19 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
       <div class="grade-acoes">
         <div class="coluna-acao">
           <span>NORMAL (<b id="bCarneNormCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bCarneNormEnc" onclick="liberarBalao('carne', false, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bCarneNormSen" onclick="liberarBalao('carne', false, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bCarneNormEnc" onclick="liberarBalao('carne', false, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bCarneNormDel" onclick="liberarBalao('carne', false, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bCarneNormSen" onclick="liberarBalao('carne', false, 'senha')">🎫 Sen</button>
+          </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bCarneTakeCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bCarneTakeEnc" onclick="liberarBalao('carne', true, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bCarneTakeSen" onclick="liberarBalao('carne', true, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bCarneTakeEnc" onclick="liberarBalao('carne', true, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bCarneTakeDel" onclick="liberarBalao('carne', true, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bCarneTakeSen" onclick="liberarBalao('carne', true, 'senha')">🎫 Sen</button>
+          </div>
         </div>
       </div>
     </div>
@@ -283,13 +293,19 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
       <div class="grade-acoes">
         <div class="coluna-acao">
           <span>NORMAL (<b id="bPeixeNormCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bPeixeNormEnc" onclick="liberarBalao('peixe', false, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bPeixeNormSen" onclick="liberarBalao('peixe', false, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bPeixeNormEnc" onclick="liberarBalao('peixe', false, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bPeixeNormDel" onclick="liberarBalao('peixe', false, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bPeixeNormSen" onclick="liberarBalao('peixe', false, 'senha')">🎫 Sen</button>
+          </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bPeixeTakeCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bPeixeTakeEnc" onclick="liberarBalao('peixe', true, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bPeixeTakeSen" onclick="liberarBalao('peixe', true, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bPeixeTakeEnc" onclick="liberarBalao('peixe', true, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bPeixeTakeDel" onclick="liberarBalao('peixe', true, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bPeixeTakeSen" onclick="liberarBalao('peixe', true, 'senha')">🎫 Sen</button>
+          </div>
         </div>
       </div>
     </div>
@@ -303,13 +319,19 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
       <div class="grade-acoes">
         <div class="coluna-acao">
           <span>NORMAL (<b id="bVegNormCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bVegNormEnc" onclick="liberarBalao('veg', false, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bVegNormSen" onclick="liberarBalao('veg', false, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bVegNormEnc" onclick="liberarBalao('veg', false, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bVegNormDel" onclick="liberarBalao('veg', false, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bVegNormSen" onclick="liberarBalao('veg', false, 'senha')">🎫 Sen</button>
+          </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bVegTakeCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bVegTakeEnc" onclick="liberarBalao('veg', true, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bVegTakeSen" onclick="liberarBalao('veg', true, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bVegTakeEnc" onclick="liberarBalao('veg', true, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bVegTakeDel" onclick="liberarBalao('veg', true, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bVegTakeSen" onclick="liberarBalao('veg', true, 'senha')">🎫 Sen</button>
+          </div>
         </div>
       </div>
     </div>
@@ -323,13 +345,19 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
       <div class="grade-acoes">
         <div class="coluna-acao">
           <span>NORMAL (<b id="bOpcaoNormCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bOpcaoNormEnc" onclick="abrirModalOpcoesBalao(false, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bOpcaoNormSen" onclick="abrirModalOpcoesBalao(false, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bOpcaoNormEnc" onclick="abrirModalOpcoesBalao(false, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bOpcaoNormDel" onclick="abrirModalOpcoesBalao(false, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bOpcaoNormSen" onclick="abrirModalOpcoesBalao(false, 'senha')">🎫 Sen</button>
+          </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bOpcaoTakeCount">0</b>)</span>
-          <button class="btn-liberar enc" id="bOpcaoTakeEnc" onclick="abrirModalOpcoesBalao(true, 'encomenda')">📦 Encomenda</button>
-          <button class="btn-liberar sen" id="bOpcaoTakeSen" onclick="abrirModalOpcoesBalao(true, 'senha')">🎫 Senha</button>
+          <div class="botoes-liberacao">
+            <button class="btn-liberar enc" id="bOpcaoTakeEnc" onclick="abrirModalOpcoesBalao(true, 'encomenda')">📦 Enc</button>
+            <button class="btn-liberar del" id="bOpcaoTakeDel" onclick="abrirModalOpcoesBalao(true, 'delivery')">🛵 Del</button>
+            <button class="btn-liberar sen" id="bOpcaoTakeSen" onclick="abrirModalOpcoesBalao(true, 'senha')">🎫 Sen</button>
+          </div>
         </div>
       </div>
     </div>
@@ -429,7 +457,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.6';
+const VERSAO_APP = '1.2.8';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -540,7 +568,6 @@ function verificarExibicaoEstoqueModal() {
 }
 
 function atualizar() {
-  // O estoque total configurado menos os pratos consumidos/reservados no balão
   const carneReservada = contadoresBalao.carne.normal + contadoresBalao.carne.take;
   const peixeReservado = contadoresBalao.peixe.normal + contadoresBalao.peixe.take;
   const vegReservada = contadoresBalao.veg.normal + contadoresBalao.veg.take;
@@ -587,32 +614,40 @@ function atualizarBalaoUI() {
   document.getElementById('bCarneNormCount').innerText = contadoresBalao.carne.normal;
   document.getElementById('bCarneTakeCount').innerText = contadoresBalao.carne.take;
   document.getElementById('bCarneNormEnc').disabled = contadoresBalao.carne.normal <= 0;
+  document.getElementById('bCarneNormDel').disabled = contadoresBalao.carne.normal <= 0;
   document.getElementById('bCarneNormSen').disabled = contadoresBalao.carne.normal <= 0;
   document.getElementById('bCarneTakeEnc').disabled = contadoresBalao.carne.take <= 0;
+  document.getElementById('bCarneTakeDel').disabled = contadoresBalao.carne.take <= 0;
   document.getElementById('bCarneTakeSen').disabled = contadoresBalao.carne.take <= 0;
 
   document.getElementById('bPeixeTotal').innerText = totPeixe;
   document.getElementById('bPeixeNormCount').innerText = contadoresBalao.peixe.normal;
   document.getElementById('bPeixeTakeCount').innerText = contadoresBalao.peixe.take;
   document.getElementById('bPeixeNormEnc').disabled = contadoresBalao.peixe.normal <= 0;
+  document.getElementById('bPeixeNormDel').disabled = contadoresBalao.peixe.normal <= 0;
   document.getElementById('bPeixeNormSen').disabled = contadoresBalao.peixe.normal <= 0;
   document.getElementById('bPeixeTakeEnc').disabled = contadoresBalao.peixe.take <= 0;
+  document.getElementById('bPeixeTakeDel').disabled = contadoresBalao.peixe.take <= 0;
   document.getElementById('bPeixeTakeSen').disabled = contadoresBalao.peixe.take <= 0;
 
   document.getElementById('bVegTotal').innerText = totVeg;
   document.getElementById('bVegNormCount').innerText = contadoresBalao.veg.normal;
   document.getElementById('bVegTakeCount').innerText = contadoresBalao.veg.take;
   document.getElementById('bVegNormEnc').disabled = contadoresBalao.veg.normal <= 0;
+  document.getElementById('bVegNormDel').disabled = contadoresBalao.veg.normal <= 0;
   document.getElementById('bVegNormSen').disabled = contadoresBalao.veg.normal <= 0;
   document.getElementById('bVegTakeEnc').disabled = contadoresBalao.veg.take <= 0;
+  document.getElementById('bVegTakeDel').disabled = contadoresBalao.veg.take <= 0;
   document.getElementById('bVegTakeSen').disabled = contadoresBalao.veg.take <= 0;
 
   document.getElementById('bOpcaoTotal').innerText = totOpcao;
   document.getElementById('bOpcaoNormCount').innerText = contadoresBalao.opcao.normal;
   document.getElementById('bOpcaoTakeCount').innerText = contadoresBalao.opcao.take;
   document.getElementById('bOpcaoNormEnc').disabled = contadoresBalao.opcao.normal <= 0;
+  document.getElementById('bOpcaoNormDel').disabled = contadoresBalao.opcao.normal <= 0;
   document.getElementById('bOpcaoNormSen').disabled = contadoresBalao.opcao.normal <= 0;
   document.getElementById('bOpcaoTakeEnc').disabled = contadoresBalao.opcao.take <= 0;
+  document.getElementById('bOpcaoTakeDel').disabled = contadoresBalao.opcao.take <= 0;
   document.getElementById('bOpcaoTakeSen').disabled = contadoresBalao.opcao.take <= 0;
 }
 
@@ -647,9 +682,7 @@ function confirmarOpcao(nome) {
 }
 
 function novoPedido(tipo, take, opcaoTipo = null) {
-  // Garantir que no modo 'delivery', TAKE seja sempre verdadeiro (+TAKE)
   const takeFinal = (modo === 'delivery') ? true : take;
-  
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
     window.firebaseDB.criarPedido(tipo, takeFinal, opcaoTipo);
   }
@@ -889,7 +922,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.firebaseDB = {
       db, ref, set, push, onValue, remove, pedidosRef,
       criarPedido: (tipo, take, opcaoTipo) => {
-        // Guarda o modo ativo selecionado (fila, encomenda, delivery, senha)
         const modoAtivo = modo;
         const eReservaBalao = (modoAtivo === 'encomenda');
         push(pedidosRef, { 
@@ -904,13 +936,16 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       liberarEncomendaParaPreparo: (id, novoModo, opcaoTipo) => {
         const itemRef = ref(db, `pedidos/${id}`);
+        const itemOriginal = listaReservasBalao.find(r => r.id === id);
+        const takeFinal = (novoModo === 'delivery') ? true : itemOriginal.take;
+
         set(itemRef, {
-          tipo: listaReservasBalao.find(r => r.id === id).tipo,
-          take: listaReservasBalao.find(r => r.id === id).take,
-          opcaoTipo: opcaoTipo || null,
-          modo: novoModo, // 'encomenda' ou 'senha'
+          tipo: itemOriginal.tipo,
+          take: takeFinal,
+          opcaoTipo: opcaoTipo || itemOriginal.opcaoTipo,
+          modo: novoModo, 
           status: 'preparo',
-          balao: false, // Libera para a esteira
+          balao: false, 
           criadoEm: Date.now()
         });
       },
@@ -971,13 +1006,11 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       Object.entries(dados).sort((a,b) => (a[1].criadoEm||0)-(b[1].criadoEm||0)).forEach(([id, pedido]) => {
-        // Encomendas retidas no Balão
         if (pedido.balao === true) {
           listaReservasBalao.push({ id, ...pedido });
           if (pedido.take) contadoresBalao[pedido.tipo].take++;
           else contadoresBalao[pedido.tipo].normal++;
         } else {
-          // Pratos ativos na esteira
           cont[pedido.tipo]++;
           if (pedido.take) cont.take[pedido.tipo]++;
           if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
