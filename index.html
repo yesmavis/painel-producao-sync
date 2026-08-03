@@ -429,7 +429,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.5';
+const VERSAO_APP = '1.2.6';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -647,8 +647,11 @@ function confirmarOpcao(nome) {
 }
 
 function novoPedido(tipo, take, opcaoTipo = null) {
+  // Garantir que no modo 'delivery', TAKE seja sempre verdadeiro (+TAKE)
+  const takeFinal = (modo === 'delivery') ? true : take;
+  
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
-    window.firebaseDB.criarPedido(tipo, take, opcaoTipo);
+    window.firebaseDB.criarPedido(tipo, takeFinal, opcaoTipo);
   }
 }
 
