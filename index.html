@@ -112,7 +112,7 @@ header {
 
 .fila { background:#555; }
 .encomenda { background:#ffca28; color:#000; }
-.senha { background:#ab47bc; }
+.senha { background:#ab47bc; color:#fff; }
 .delivery { background:#ffffff; color:#000000; }
 
 .contadores { display:flex; justify-content:space-around; background:#222; padding:6px; font-size:14px; }
@@ -161,7 +161,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 #modalEstoqueInicial input { width: 100%; padding: 10px; margin-top: 4px; border-radius: 8px; border: none; background: #333; color: #fff; font-size: 16px; text-align: center; box-sizing: border-box; }
 #modalEstoqueInicial button { width: 100%; margin-top: 18px; background: #2e7d32; height: 45px; }
 
-/* --- WIDGET FLUTUANTE DE RESERVAS (BALÃO) --- */
+/* WIDGET FLUTUANTE DE RESERVAS (BALÃO) */
 #balaoReservas {
   position: fixed;
   bottom: 20px;
@@ -174,7 +174,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   font-size: 15px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.5);
   cursor: pointer;
-  z-index: 10005; /* Sempre visível na frente de modais se necessário */
+  z-index: 10005;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -187,13 +187,27 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   display: none; align-items: center; justify-content: center; z-index: 10010;
 }
 #modalBalaoResumo .box-balao {
-  background: #222; padding: 22px; border-radius: 16px; width: 330px; text-align: center;
+  background: #222; padding: 20px; border-radius: 16px; width: 350px; text-align: center; max-height: 90vh; overflow-y: auto;
 }
-.linha-reserva {
-  display: flex; justify-content: space-between; align-items: center;
-  background: #333; margin: 8px 0; padding: 10px 14px; border-radius: 10px; font-size: 14px;
+.linha-reserva-item {
+  background: #2d2d2d; margin: 10px 0; padding: 12px; border-radius: 12px; text-align: left;
 }
-.detalhe-take { font-size: 11px; color: #ffca28; display: block; text-align: right; }
+.linha-reserva-header {
+  display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 6px; margin-bottom: 8px;
+}
+.grade-acoes {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;
+}
+.coluna-acao {
+  background: #222; padding: 6px; border-radius: 8px; text-align: center;
+}
+.coluna-acao span { font-size: 11px; color: #aaa; display: block; margin-bottom: 4px; font-weight: bold; }
+.btn-liberar {
+  width: 100%; height: 28px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; cursor: pointer; margin-top: 4px;
+}
+.btn-liberar.enc { background: #ffca28; color: #000; }
+.btn-liberar.sen { background: #ab47bc; color: #fff; }
+.btn-liberar:disabled { opacity: 0.3; cursor: not-allowed; }
 </style>
 </head>
 
@@ -228,65 +242,113 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   </div>
 </div>
 
-<!-- BALÃO FLUTUANTE DE PRÉ-RESERVAS (SEMPRE ACESSÍVEL) -->
+<!-- BALÃO FLUTUANTE DE PRÉ-RESERVAS -->
 <div id="balaoReservas">
   📦 <span id="balaoContador">0 Encomendas</span>
 </div>
 
-<!-- MODAL DE RESUMO DO BALÃO -->
+<!-- MODAL DE RESUMO E LIBERAÇÃO DO BALÃO -->
 <div id="modalBalaoResumo">
   <div class="box-balao">
     <h3>📦 Encomendas da Manhã</h3>
-    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Resumo para contagem do Chef</p>
+    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Liberar pratos para "EM PREPARO"</p>
 
-    <div class="linha-reserva">
-      <span>🔴 <strong>Carne:</strong></span>
-      <div>
-        <span id="bCarneTotal" style="font-size:16px;">0</span>
-        <span class="detalhe-take" id="bCarneTake">(0 Normal | 0 +TAKE)</span>
+    <!-- CARNE -->
+    <div class="linha-reserva-item">
+      <div class="linha-reserva-header">
+        <span>🔴 <strong>Carne</strong></span>
+        <strong id="bCarneTotal" style="font-size:16px;">0</strong>
+      </div>
+      <div class="grade-acoes">
+        <div class="coluna-acao">
+          <span>NORMAL (<b id="bCarneNormCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bCarneNormEnc" onclick="liberarBalao('carne', false, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bCarneNormSen" onclick="liberarBalao('carne', false, 'senha')">🎫 Senha</button>
+        </div>
+        <div class="coluna-acao">
+          <span>+TAKE (<b id="bCarneTakeCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bCarneTakeEnc" onclick="liberarBalao('carne', true, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bCarneTakeSen" onclick="liberarBalao('carne', true, 'senha')">🎫 Senha</button>
+        </div>
       </div>
     </div>
 
-    <div class="linha-reserva">
-      <span>🟦 <strong>Peixe:</strong></span>
-      <div>
-        <span id="bPeixeTotal" style="font-size:16px;">0</span>
-        <span class="detalhe-take" id="bPeixeTake">(0 Normal | 0 +TAKE)</span>
+    <!-- PEIXE -->
+    <div class="linha-reserva-item">
+      <div class="linha-reserva-header">
+        <span>🟦 <strong>Peixe</strong></span>
+        <strong id="bPeixeTotal" style="font-size:16px;">0</strong>
+      </div>
+      <div class="grade-acoes">
+        <div class="coluna-acao">
+          <span>NORMAL (<b id="bPeixeNormCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bPeixeNormEnc" onclick="liberarBalao('peixe', false, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bPeixeNormSen" onclick="liberarBalao('peixe', false, 'senha')">🎫 Senha</button>
+        </div>
+        <div class="coluna-acao">
+          <span>+TAKE (<b id="bPeixeTakeCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bPeixeTakeEnc" onclick="liberarBalao('peixe', true, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bPeixeTakeSen" onclick="liberarBalao('peixe', true, 'senha')">🎫 Senha</button>
+        </div>
       </div>
     </div>
 
-    <div class="linha-reserva">
-      <span>🟩 <strong>Veg:</strong></span>
-      <div>
-        <span id="bVegTotal" style="font-size:16px;">0</span>
-        <span class="detalhe-take" id="bVegTake">(0 Normal | 0 +TAKE)</span>
+    <!-- VEG -->
+    <div class="linha-reserva-item">
+      <div class="linha-reserva-header">
+        <span>🟩 <strong>Veg</strong></span>
+        <strong id="bVegTotal" style="font-size:16px;">0</strong>
+      </div>
+      <div class="grade-acoes">
+        <div class="coluna-acao">
+          <span>NORMAL (<b id="bVegNormCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bVegNormEnc" onclick="liberarBalao('veg', false, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bVegNormSen" onclick="liberarBalao('veg', false, 'senha')">🎫 Senha</button>
+        </div>
+        <div class="coluna-acao">
+          <span>+TAKE (<b id="bVegTakeCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bVegTakeEnc" onclick="liberarBalao('veg', true, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bVegTakeSen" onclick="liberarBalao('veg', true, 'senha')">🎫 Senha</button>
+        </div>
       </div>
     </div>
 
-    <div class="linha-reserva">
-      <span>⚫ <strong>Opções:</strong></span>
-      <div>
-        <span id="bOpcaoTotal" style="font-size:16px;">0</span>
-        <span class="detalhe-take" id="bOpcaoTake">(0 Normal | 0 +TAKE)</span>
+    <!-- OPÇÕES -->
+    <div class="linha-reserva-item">
+      <div class="linha-reserva-header">
+        <span>⚫ <strong>Opções</strong></span>
+        <strong id="bOpcaoTotal" style="font-size:16px;">0</strong>
+      </div>
+      <div class="grade-acoes">
+        <div class="coluna-acao">
+          <span>NORMAL (<b id="bOpcaoNormCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bOpcaoNormEnc" onclick="abrirModalOpcoesBalao(false, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bOpcaoNormSen" onclick="abrirModalOpcoesBalao(false, 'senha')">🎫 Senha</button>
+        </div>
+        <div class="coluna-acao">
+          <span>+TAKE (<b id="bOpcaoTakeCount">0</b>)</span>
+          <button class="btn-liberar enc" id="bOpcaoTakeEnc" onclick="abrirModalOpcoesBalao(true, 'encomenda')">📦 Encomenda</button>
+          <button class="btn-liberar sen" id="bOpcaoTakeSen" onclick="abrirModalOpcoesBalao(true, 'senha')">🎫 Senha</button>
+        </div>
       </div>
     </div>
 
-    <button onclick="fecharResumoBalao()" class="cancelar" style="background:#555; margin-top:15px;">Minimizar / Fechar</button>
+    <button onclick="fecharResumoBalao()" class="cancelar" style="background:#555; margin-top:10px;">Minimizar / Fechar</button>
   </div>
 </div>
 
 <div id="modalEstoqueInicial">
   <div class="box-estoque">
-    <h3>📈 Iniciar Doses do Turno</h3>
-    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Consulte o balão no canto para ajudar no limite</p>
+    <h3>📈 Total de Doses Confecionadas</h3>
+    <p style="font-size:12px; color:#aaa; margin-top:-8px;">O sistema abaterá as encomendas do balão automaticamente</p>
     
-    <label>🔴 Limite de Carne:</label>
+    <label>🔴 Total de Carne:</label>
     <input type="number" id="initCarne" value="20" min="0">
 
-    <label>🟦 Limite de Peixe:</label>
+    <label>🟦 Total de Peixe:</label>
     <input type="number" id="initPeixe" value="20" min="0">
 
-    <label>🟩 Limite de Veg:</label>
+    <label>🟩 Total de Veg:</label>
     <input type="number" id="initVeg" value="10" min="0">
 
     <button onclick="salvarEstoqueInicial()">🚀 Salvar e Iniciar Turno</button>
@@ -366,7 +428,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.3';
+const VERSAO_APP = '1.2.4';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -389,7 +451,8 @@ const cont = {
   }
 };
 
-const reservasBalao = {
+let listaReservasBalao = []; 
+let contadoresBalao = {
   carne: { normal: 0, take: 0 },
   peixe: { normal: 0, take: 0 },
   veg: { normal: 0, take: 0 },
@@ -487,50 +550,79 @@ function atualizar() {
 
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
-
   const liberadoPorTurno = estaConfiguradoFirebase;
   const modoEncomenda = (modo === 'encomenda');
 
-  // Balcão pode registar ENCOMENDAS a qualquer hora (antes ou depois da abertura)
-  document.getElementById('btn_carne').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0);
-  document.getElementById('btn_carne_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0);
-  document.getElementById('btn_peixe').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0);
-  document.getElementById('btn_peixe_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0);
-  document.getElementById('btn_veg').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0);
-  document.getElementById('btn_veg_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0);
+  document.getElementById('btn_carne').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0 && !modoEncomenda);
+  document.getElementById('btn_carne_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0 && !modoEncomenda);
+  document.getElementById('btn_peixe').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0 && !modoEncomenda);
+  document.getElementById('btn_peixe_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0 && !modoEncomenda);
+  document.getElementById('btn_veg').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0 && !modoEncomenda);
+  document.getElementById('btn_veg_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0 && !modoEncomenda);
   
   document.getElementById('btn_opcao').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda);
   document.getElementById('btn_opcao_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda);
 }
 
 // LÓGICA DO BALÃO DE ENCOMENDAS
-function abrirResumoBalao() {
-  document.getElementById('modalBalaoResumo').style.display = 'flex';
-}
-function fecharResumoBalao() {
-  document.getElementById('modalBalaoResumo').style.display = 'none';
-}
+function abrirResumoBalao() { document.getElementById('modalBalaoResumo').style.display = 'flex'; }
+function fecharResumoBalao() { document.getElementById('modalBalaoResumo').style.display = 'none'; }
 
 function atualizarBalaoUI() {
-  const totCarne = reservasBalao.carne.normal + reservasBalao.carne.take;
-  const totPeixe = reservasBalao.peixe.normal + reservasBalao.peixe.take;
-  const totVeg = reservasBalao.veg.normal + reservasBalao.veg.take;
-  const totOpcao = reservasBalao.opcao.normal + reservasBalao.opcao.take;
+  const totCarne = contadoresBalao.carne.normal + contadoresBalao.carne.take;
+  const totPeixe = contadoresBalao.peixe.normal + contadoresBalao.peixe.take;
+  const totVeg = contadoresBalao.veg.normal + contadoresBalao.veg.take;
+  const totOpcao = contadoresBalao.opcao.normal + contadoresBalao.opcao.take;
   const grandTotal = totCarne + totPeixe + totVeg + totOpcao;
 
   document.getElementById('balaoContador').innerText = `${grandTotal} Encomendas`;
 
   document.getElementById('bCarneTotal').innerText = totCarne;
-  document.getElementById('bCarneTake').innerText = `(${reservasBalao.carne.normal} Normal | ${reservasBalao.carne.take} +TAKE)`;
+  document.getElementById('bCarneNormCount').innerText = contadoresBalao.carne.normal;
+  document.getElementById('bCarneTakeCount').innerText = contadoresBalao.carne.take;
+  document.getElementById('bCarneNormEnc').disabled = contadoresBalao.carne.normal <= 0;
+  document.getElementById('bCarneNormSen').disabled = contadoresBalao.carne.normal <= 0;
+  document.getElementById('bCarneTakeEnc').disabled = contadoresBalao.carne.take <= 0;
+  document.getElementById('bCarneTakeSen').disabled = contadoresBalao.carne.take <= 0;
 
   document.getElementById('bPeixeTotal').innerText = totPeixe;
-  document.getElementById('bPeixeTake').innerText = `(${reservasBalao.peixe.normal} Normal | ${reservasBalao.peixe.take} +TAKE)`;
+  document.getElementById('bPeixeNormCount').innerText = contadoresBalao.peixe.normal;
+  document.getElementById('bPeixeTakeCount').innerText = contadoresBalao.peixe.take;
+  document.getElementById('bPeixeNormEnc').disabled = contadoresBalao.peixe.normal <= 0;
+  document.getElementById('bPeixeNormSen').disabled = contadoresBalao.peixe.normal <= 0;
+  document.getElementById('bPeixeTakeEnc').disabled = contadoresBalao.peixe.take <= 0;
+  document.getElementById('bPeixeTakeSen').disabled = contadoresBalao.peixe.take <= 0;
 
   document.getElementById('bVegTotal').innerText = totVeg;
-  document.getElementById('bVegTake').innerText = `(${reservasBalao.veg.normal} Normal | ${reservasBalao.veg.take} +TAKE)`;
+  document.getElementById('bVegNormCount').innerText = contadoresBalao.veg.normal;
+  document.getElementById('bVegTakeCount').innerText = contadoresBalao.veg.take;
+  document.getElementById('bVegNormEnc').disabled = contadoresBalao.veg.normal <= 0;
+  document.getElementById('bVegNormSen').disabled = contadoresBalao.veg.normal <= 0;
+  document.getElementById('bVegTakeEnc').disabled = contadoresBalao.veg.take <= 0;
+  document.getElementById('bVegTakeSen').disabled = contadoresBalao.veg.take <= 0;
 
   document.getElementById('bOpcaoTotal').innerText = totOpcao;
-  document.getElementById('bOpcaoTake').innerText = `(${reservasBalao.opcao.normal} Normal | ${reservasBalao.opcao.take} +TAKE)`;
+  document.getElementById('bOpcaoNormCount').innerText = contadoresBalao.opcao.normal;
+  document.getElementById('bOpcaoTakeCount').innerText = contadoresBalao.opcao.take;
+  document.getElementById('bOpcaoNormEnc').disabled = contadoresBalao.opcao.normal <= 0;
+  document.getElementById('bOpcaoNormSen').disabled = contadoresBalao.opcao.normal <= 0;
+  document.getElementById('bOpcaoTakeEnc').disabled = contadoresBalao.opcao.take <= 0;
+  document.getElementById('bOpcaoTakeSen').disabled = contadoresBalao.opcao.take <= 0;
+}
+
+let modoOpcaoBalao = { take: false, novoModo: 'encomenda' };
+function abrirModalOpcoesBalao(take, novoModo) {
+  modoOpcaoBalao = { take, novoModo };
+  document.getElementById('modalOpcoes').style.display = 'flex';
+}
+
+function liberarBalao(tipo, take, novoModo, opcaoTipo = null) {
+  const item = listaReservasBalao.find(r => r.tipo === tipo && !!r.take === !!take);
+  if (!item) return;
+
+  if (window.firebaseDB && window.firebaseDB.liberarEncomendaParaPreparo) {
+    window.firebaseDB.liberarEncomendaParaPreparo(item.id, novoModo, opcaoTipo || item.opcaoTipo);
+  }
 }
 
 let opcaoTakeSelecionado = false;
@@ -539,7 +631,14 @@ function abrirModalOpcoes(isTake) {
   document.getElementById('modalOpcoes').style.display = 'flex';
 }
 function fecharModalOpcoes() { document.getElementById('modalOpcoes').style.display = 'none'; }
-function confirmarOpcao(nome) { fecharModalOpcoes(); novoPedido('opcao', opcaoTakeSelecionado, nome); }
+function confirmarOpcao(nome) { 
+  fecharModalOpcoes(); 
+  if (document.getElementById('modalBalaoResumo').style.display === 'flex') {
+    liberarBalao('opcao', modoOpcaoBalao.take, modoOpcaoBalao.novoModo, nome);
+  } else {
+    novoPedido('opcao', opcaoTakeSelecionado, nome); 
+  }
+}
 
 function novoPedido(tipo, take, opcaoTipo = null) {
   if (window.firebaseDB && window.firebaseDB.criarPedido) {
@@ -562,9 +661,18 @@ function adicionarDoseManual(tipo) {
 }
 
 function salvarEstoqueInicial() {
-  const c = parseInt(document.getElementById('initCarne').value) || 0;
-  const p = parseInt(document.getElementById('initPeixe').value) || 0;
-  const v = parseInt(document.getElementById('initVeg').value) || 0;
+  let c = parseInt(document.getElementById('initCarne').value) || 0;
+  let p = parseInt(document.getElementById('initPeixe').value) || 0;
+  let v = parseInt(document.getElementById('initVeg').value) || 0;
+
+  // Subtração automática das encomendas no limite inicial disponível
+  const carneReservada = contadoresBalao.carne.normal + contadoresBalao.carne.take;
+  const peixeReservado = contadoresBalao.peixe.normal + contadoresBalao.peixe.take;
+  const vegReservada = contadoresBalao.veg.normal + contadoresBalao.veg.take;
+
+  c = Math.max(0, c - carneReservada);
+  p = Math.max(0, p - peixeReservado);
+  v = Math.max(0, v - vegReservada);
 
   estoqueInicial.carne = c;
   estoqueInicial.peixe = p;
@@ -780,7 +888,29 @@ document.addEventListener('DOMContentLoaded', () => {
     window.firebaseDB = {
       db, ref, set, push, onValue, remove, pedidosRef,
       criarPedido: (tipo, take, opcaoTipo) => {
-        push(pedidosRef, { tipo, take, opcaoTipo, modo, status: 'preparo', criadoEm: Date.now() });
+        // Todo o pedido criado no modo 'encomenda' vai para o estado de reserva do Balão (balao = true)
+        const eReservaBalao = (modo === 'encomenda');
+        push(pedidosRef, { 
+          tipo, 
+          take, 
+          opcaoTipo, 
+          modo: 'encomenda', 
+          status: 'preparo', 
+          balao: eReservaBalao, 
+          criadoEm: Date.now() 
+        });
+      },
+      liberarEncomendaParaPreparo: (id, novoModo, opcaoTipo) => {
+        const itemRef = ref(db, `pedidos/${id}`);
+        set(itemRef, {
+          tipo: listaReservasBalao.find(r => r.id === id).tipo,
+          take: listaReservasBalao.find(r => r.id === id).take,
+          opcaoTipo: opcaoTipo || null,
+          modo: novoModo, // 'encomenda' ou 'senha'
+          status: 'preparo',
+          balao: false, // Libera para a esteira
+          criadoEm: Date.now()
+        });
       },
       configurarEstoqueInicialFirebase: (c, p, v, o) => {
         set(toggleEstoqueRef, { carne: c, peixe: p, veg: v, opcao: o, definido: true });
@@ -823,10 +953,11 @@ document.addEventListener('DOMContentLoaded', () => {
       cont.carne = 0; cont.peixe = 0; cont.veg = 0; cont.opcao = 0;
       cont.take.carne = 0; cont.take.peixe = 0; cont.take.veg = 0; cont.take.opcao = 0;
 
-      reservasBalao.carne = { normal: 0, take: 0 };
-      reservasBalao.peixe = { normal: 0, take: 0 };
-      reservasBalao.veg = { normal: 0, take: 0 };
-      reservasBalao.opcao = { normal: 0, take: 0 };
+      listaReservasBalao = [];
+      contadoresBalao.carne = { normal: 0, take: 0 };
+      contadoresBalao.peixe = { normal: 0, take: 0 };
+      contadoresBalao.veg = { normal: 0, take: 0 };
+      contadoresBalao.opcao = { normal: 0, take: 0 };
 
       Object.keys(cont.origem).forEach(o => Object.keys(cont.origem[o]).forEach(t => cont.origem[o][t] = 0));
 
@@ -838,12 +969,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       Object.entries(dados).sort((a,b) => (a[1].criadoEm||0)-(b[1].criadoEm||0)).forEach(([id, pedido]) => {
-        // QUALQUER ENCOMENDA vai EXCLUSIVAMENTE para o Balão Flutuante e NÃO renderiza no "Em Preparo"
-        if (pedido.modo === 'encomenda') {
-          if (pedido.take) reservasBalao[pedido.tipo].take++;
-          else reservasBalao[pedido.tipo].normal++;
+        // Encomendas retidas no Balão
+        if (pedido.balao === true) {
+          listaReservasBalao.push({ id, ...pedido });
+          if (pedido.take) contadoresBalao[pedido.tipo].take++;
+          else contadoresBalao[pedido.tipo].normal++;
         } else {
-          // Apenas Fila, Delivery e Senha entram na esteira de produção (Em Preparo)
+          // Pratos ativos na esteira
           cont[pedido.tipo]++;
           if (pedido.take) cont.take[pedido.tipo]++;
           if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
