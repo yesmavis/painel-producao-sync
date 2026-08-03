@@ -23,6 +23,7 @@ body {
   height:100vh;
   display:flex;
   flex-direction:column;
+  overflow: hidden;
 }
 
 header {
@@ -52,9 +53,7 @@ header {
   text-align: center;
 }
 
-.login-box h2 {
-  margin-bottom: 15px;
-}
+.login-box h2 { margin-bottom: 15px; }
 
 .usuarios.avatars {
   display: flex;
@@ -81,109 +80,34 @@ header {
   margin-bottom: 6px;
 }
 
-.avatar span {
-  display: block;
-  font-size: 13px;
-  font-weight: bold;
-}
-
-.avatar.ativo {
-  opacity: 1;
-  outline: 2px solid #ffca28;
-}
-
-#loginErro {
-  color: #ff5252;
-  margin-top: 10px;
-}
+.avatar span { display: block; font-size: 13px; font-weight: bold; }
+.avatar.ativo { opacity: 1; outline: 2px solid #ffca28; }
+#loginErro { color: #ff5252; margin-top: 10px; }
 
 #fecharCozinha {
-  position:absolute;
-  right:10px;
-  top:10px;
-  border:1px solid #555;
-  background:transparent;
-  color:#bbb;
-  padding:6px 12px;
-  border-radius:10px;
-  cursor:pointer;
+  position:absolute; right:10px; top:10px;
+  border:1px solid #555; background:transparent; color:#bbb;
+  padding:6px 12px; border-radius:10px; cursor:pointer;
 }
 
 #logoutBtn {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  border: 1px solid #555;
-  background: transparent;
-  color: #bbb;
-  padding: 6px 12px;
-  border-radius: 10px;
-  cursor: pointer;
+  position: absolute; left: 10px; top: 10px;
+  border: 1px solid #555; background: transparent; color: #bbb;
+  padding: 6px 12px; border-radius: 10px; cursor: pointer;
 }
+#logoutBtn:hover { background: #333; }
 
-#logoutBtn:hover {
-  background: #333;
-}
+.pin { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
+.pin span { width: 14px; height: 14px; background: #555; border-radius: 50%; }
+.pin span.filled { background: #fff; }
 
-.pin {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 15px;
-}
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px; }
+.keypad button { height: 48px; font-size: 18px; border-radius: 10px; border: none; background: #333; color: white; font-weight: bold; }
+.keypad .clear { background: #c62828; }
+.keypad .ok { background: #2e7d32; }
 
-.pin span {
-  width: 14px;
-  height: 14px;
-  background: #555;
-  border-radius: 50%;
-}
-
-.pin span.filled {
-  background: #fff;
-}
-
-.keypad {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.keypad button {
-  height: 48px;
-  font-size: 18px;
-  border-radius: 10px;
-  border: none;
-  background: #333;
-  color: white;
-  font-weight: bold;
-}
-
-.keypad .clear {
-  background: #c62828;
-}
-
-.keypad .ok {
-  background: #2e7d32;
-}
-
-.modos {
-  display:flex;
-  gap:6px;
-  padding:6px;
-  background:#222;
-}
-
-.modos button {
-  flex:1;
-  height:40px;
-  border:none;
-  border-radius:10px;
-  font-weight:bold;
-  opacity:.5;
-}
-
+.modos { display:flex; gap:6px; padding:6px; background:#222; }
+.modos button { flex:1; height:40px; border:none; border-radius:10px; font-weight:bold; opacity:.5; }
 .modos .ativo { opacity:1; }
 
 .fila { background:#555; }
@@ -191,217 +115,77 @@ header {
 .senha { background:#ab47bc; }
 .delivery { background:#ffffff; color:#000000; }
 
-.contadores {
-  display:flex;
-  justify-content:space-around;
-  background:#222;
-  padding:6px;
-  font-size:14px;
-}
+.contadores { display:flex; justify-content:space-around; background:#222; padding:6px; font-size:14px; }
 
-.painel-ajuste-estoque {
-  display: none;
-  justify-content: space-around;
-  background: #151515;
-  padding: 8px 6px;
-  gap: 8px;
-  border-bottom: 1px solid #333;
-}
-.btn-ajuste {
-  flex: 1;
-  height: 38px;
-  font-size: 13px;
-  font-weight: bold;
-  border-radius: 8px;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
+.painel-ajuste-estoque { display: none; justify-content: space-around; background: #151515; padding: 8px 6px; gap: 8px; border-bottom: 1px solid #333; }
+.btn-ajuste { flex: 1; height: 38px; font-size: 13px; font-weight: bold; border-radius: 8px; border: none; color: white; cursor: pointer; }
 
-.botoes {
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:8px;
-  padding:8px;
-}
+.botoes { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:8px; }
+button { height:50px; font-size:14px; font-weight:bold; border-radius:12px; border:none; color:white; cursor: pointer; }
+button:disabled { background: #444 !important; color: #777 !important; border: 1px dashed #555 !important; cursor: not-allowed; opacity: 0.6; }
 
-button {
-  height:50px;
-  font-size:14px;
-  font-weight:bold;
-  border-radius:12px;
-  border:none;
-  color:white;
-  cursor: pointer;
-}
-
-button:disabled {
-  background: #444 !important;
-  color: #777 !important;
-  border: 1px dashed #555 !important;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.opcao-btn {
-  width: 100%;
-  padding: 12px;
-  margin-top: 8px;
-  border-radius: 12px;
-  border: none;
-  background: #000;
-  color: #fff;
-  font-weight: bold;
-}
-
-.cancelar {
-  margin-top: 12px;
-  width: 100%;
-  padding: 10px;
-  background: #444;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-}
+.opcao-btn { width: 100%; padding: 12px; margin-top: 8px; border-radius: 12px; border: none; background: #000; color: #fff; font-weight: bold; }
+.cancelar { margin-top: 12px; width: 100%; padding: 10px; background: #444; color: #fff; border: none; border-radius: 12px; }
 
 .carne { background:#e53935; }
 .peixe { background:#1e88e5; }
 .veg { background:#43a047; }
 .opcao { background:#000; border: 1px solid #444; }
+.take { border:2px dashed rgba(255,255,255,.6); }
 
-.take {
-  border:2px dashed rgba(255,255,255,.6);
-}
-
-.painel {
-  flex:1;
-  display:flex;
-  gap:6px;
-  padding:6px;
-}
-
-.coluna {
-  flex:1;
-  background:#2a2a2a;
-  border-radius:10px;
-  padding:6px;
-}
-
-.coluna h2 {
-  text-align:center;
-  font-size:16px;
-  margin:4px 0;
-}
+.painel { flex:1; display:flex; gap:6px; padding:6px; overflow: hidden; }
+.coluna { flex:1; background:#2a2a2a; border-radius:10px; padding:6px; overflow-y: auto; }
+.coluna h2 { text-align:center; font-size:16px; margin:4px 0; }
 
 .pedido {
-  height:38px;
-  margin-bottom:4px;
-  border-radius:8px;
-  font-size:13px;
-  font-weight:bold;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  background:var(--base-color);
+  height:38px; margin-bottom:4px; border-radius:8px; font-size:13px; font-weight:bold;
+  display:flex; align-items:center; justify-content:center; position:relative; background:var(--base-color);
 }
+.pedido.encomenda { background: linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%), var(--base-color); }
+.pedido.senha { background: linear-gradient(to right, #ab47bc 0%, #ab47bc 33%, transparent 33%), var(--base-color); }
+.pedido.delivery { background: linear-gradient(to right, #ffffff 0%, #ffffff 33%, transparent 33%), var(--base-color); color: #000000; }
+.pedido.encomenda.opcao, .pedido.delivery.opcao { color: #fff; }
+.excluir { position:absolute; right:6px; top:6px; font-size:16px; cursor:pointer; }
 
-.pedido.encomenda {
-  background: linear-gradient(to right, #ffca28 0%, #ffca28 33%, transparent 33%), var(--base-color);
-}
-.pedido.senha {
-  background: linear-gradient(to right, #ab47bc 0%, #ab47bc 33%, transparent 33%), var(--base-color);
-}
-.pedido.delivery {
-  background: linear-gradient(to right, #ffffff 0%, #ffffff 33%, transparent 33%), var(--base-color);
-  color: #000000;
-}
-
-.pedido.encomenda.opcao, .pedido.delivery.opcao {
-  color: #fff;
-}
-
-.excluir {
-  position:absolute;
-  right:6px;
-  top:6px;
-  font-size:16px;
-  cursor:pointer;
-}
-
-#resumo {
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.85);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index: 10000;
-}
-
-#resumo .box {
-  background:#222;
-  padding:25px;
-  border-radius:15px;
-  width:320px;
-  text-align:center;
-}
-
-#resumo .box button {
-  width: 100%;
-  margin-top: 12px;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
+/* Modal Resumo do Turno */
+#resumo { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index: 10000; }
+#resumo .box { background:#222; padding:25px; border-radius:15px; width:320px; text-align:center; }
+#resumo .box button { width: 100%; margin-top: 12px; padding: 14px; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; }
 #resumo .btn-pdf { background: #1e88e5; color: #fff; }
 #resumo .btn-encerrar { background: #e53935; color: #fff; }
 
-#modalEstoqueInicial {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.9);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9998;
+/* Modal Estoque Inicial */
+#modalEstoqueInicial { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 9998; }
+#modalEstoqueInicial .box-estoque { background: #222; padding: 25px; border-radius: 16px; width: 290px; text-align: center; }
+#modalEstoqueInicial label { display: block; text-align: left; font-size: 13px; margin-top: 10px; color: #bbb; }
+#modalEstoqueInicial input { width: 100%; padding: 10px; margin-top: 4px; border-radius: 8px; border: none; background: #333; color: #fff; font-size: 16px; text-align: center; box-sizing: border-box; }
+#modalEstoqueInicial button { width: 100%; margin-top: 18px; background: #2e7d32; height: 45px; }
+
+/* --- WIDGET FLUTUANTE DE RESERVAS (BALÃO) --- */
+#balaoReservas {
+  position: fixed; bottom: 20px; right: 20px;
+  background: #ffca28; color: #000;
+  padding: 12px 18px; border-radius: 30px;
+  font-weight: bold; font-size: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  cursor: grab; z-index: 9990;
+  display: flex; align-items: center; gap: 8px;
+  user-select: none; touch-action: none;
 }
-#modalEstoqueInicial .box-estoque {
-  background: #222;
-  padding: 25px;
-  border-radius: 16px;
-  width: 290px;
-  text-align: center;
+#balaoReservas:active { cursor: grabbing; }
+
+#modalBalaoResumo {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: none; align-items: center; justify-content: center; z-index: 10001;
 }
-#modalEstoqueInicial label {
-  display: block;
-  text-align: left;
-  font-size: 13px;
-  margin-top: 10px;
-  color: #bbb;
+#modalBalaoResumo .box-balao {
+  background: #222; padding: 22px; border-radius: 16px; width: 330px; text-align: center;
 }
-#modalEstoqueInicial input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 4px;
-  border-radius: 8px;
-  border: none;
-  background: #333;
-  color: #fff;
-  font-size: 16px;
-  text-align: center;
-  box-sizing: border-box;
+.linha-reserva {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #333; margin: 8px 0; padding: 10px 14px; border-radius: 10px; font-size: 14px;
 }
-#modalEstoqueInicial button {
-  width: 100%;
-  margin-top: 18px;
-  background: #2e7d32;
-  height: 45px;
-}
+.detalhe-take { font-size: 11px; color: #ffca28; display: block; text-align: right; }
 </style>
 </head>
 
@@ -423,9 +207,7 @@ button:disabled {
         <span>Admin</span>
       </div>
     </div>
-    <div class="pin">
-      <span></span><span></span><span></span><span></span>
-    </div>
+    <div class="pin"><span></span><span></span><span></span><span></span></div>
     <div class="keypad">
       <button onclick="pressPin('1')">1</button><button onclick="pressPin('2')">2</button><button onclick="pressPin('3')">3</button>
       <button onclick="pressPin('4')">4</button><button onclick="pressPin('5')">5</button><button onclick="pressPin('6')">6</button>
@@ -435,6 +217,53 @@ button:disabled {
       <button class="ok" onclick="pressPin('✔')">✔</button>
     </div>
     <p id="loginErro"></p>
+  </div>
+</div>
+
+<!-- BALÃO FLUTUANTE DE PRÉ-RESERVAS -->
+<div id="balaoReservas" onclick="abrirResumoBalao()">
+  📦 <span id="balaoContador">0 Encomendas</span>
+</div>
+
+<!-- MODAL DE RESUMO DO BALÃO -->
+<div id="modalBalaoResumo">
+  <div class="box-balao">
+    <h3>📦 Encomendas da Manhã</h3>
+    <p style="font-size:12px; color:#aaa; margin-top:-8px;">Resumo para a contagem do Chef</p>
+
+    <div class="linha-reserva">
+      <span>🔴 <strong>Carne:</strong></span>
+      <div>
+        <span id="bCarneTotal" style="font-size:16px;">0</span>
+        <span class="detalhe-take" id="bCarneTake">(0 Normal | 0 +TAKE)</span>
+      </div>
+    </div>
+
+    <div class="linha-reserva">
+      <span>🟦 <strong>Peixe:</strong></span>
+      <div>
+        <span id="bPeixeTotal" style="font-size:16px;">0</span>
+        <span class="detalhe-take" id="bPeixeTake">(0 Normal | 0 +TAKE)</span>
+      </div>
+    </div>
+
+    <div class="linha-reserva">
+      <span>🟩 <strong>Veg:</strong></span>
+      <div>
+        <span id="bVegTotal" style="font-size:16px;">0</span>
+        <span class="detalhe-take" id="bVegTake">(0 Normal | 0 +TAKE)</span>
+      </div>
+    </div>
+
+    <div class="linha-reserva">
+      <span>⚫ <strong>Opções:</strong></span>
+      <div>
+        <span id="bOpcaoTotal" style="font-size:16px;">0</span>
+        <span class="detalhe-take" id="bOpcaoTake">(0 Normal | 0 +TAKE)</span>
+      </div>
+    </div>
+
+    <button onclick="fecharResumoBalao()" class="cancelar" style="background:#555; margin-top:15px;">Minimizar / Fechar</button>
   </div>
 </div>
 
@@ -529,7 +358,7 @@ button:disabled {
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.1.4';
+const VERSAO_APP = '1.2.1';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -538,7 +367,6 @@ let usuarioSelecionado = null;
 let pin = [];
 let modo = 'fila';
 
-// Inicia com stock zerado para bloquear o balcão até ativação formal
 const estoqueInicial = JSON.parse(localStorage.getItem('local_estoque')) || { carne: 0, peixe: 0, veg: 0, opcao: 9999 };
 let estaConfiguradoFirebase = localStorage.getItem('local_configurado') === 'true'; 
 
@@ -551,6 +379,14 @@ const cont = {
     senha: { carne: 0, peixe: 0, veg: 0, opcao: 0 },
     delivery: { carne: 0, peixe: 0, veg: 0, opcao: 0 }
   }
+};
+
+// Objeto isolado para contagem das Encomendas no Balão
+const reservasBalao = {
+  carne: { normal: 0, take: 0 },
+  peixe: { normal: 0, take: 0 },
+  veg: { normal: 0, take: 0 },
+  opcao: { normal: 0, take: 0 }
 };
 
 let ultimoResumoTurno = null;
@@ -615,6 +451,7 @@ function setModo(m, b) {
   modo = m;
   document.querySelectorAll('.modos button').forEach(x => x.classList.remove('ativo'));
   b.classList.add('ativo');
+  atualizar();
 }
 
 function verificarExibicaoEstoqueModal() {
@@ -642,17 +479,50 @@ function atualizar() {
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
 
-  // Bloqueia se o stock for menor/igual a zero OU se o total de doses permitidas for zero (turno fechado)
-  document.getElementById('btn_carne').disabled = !podePedir || restCarne <= 0 || estoqueInicial.carne === 0;
-  document.getElementById('btn_carne_take').disabled = !podePedir || restCarne <= 0 || estoqueInicial.carne === 0;
-  document.getElementById('btn_peixe').disabled = !podePedir || restPeixe <= 0 || estoqueInicial.peixe === 0;
-  document.getElementById('btn_peixe_take').disabled = !podePedir || restPeixe <= 0 || estoqueInicial.peixe === 0;
-  document.getElementById('btn_veg').disabled = !podePedir || restVeg <= 0 || estoqueInicial.veg === 0;
-  document.getElementById('btn_veg_take').disabled = !podePedir || restVeg <= 0 || estoqueInicial.veg === 0;
+  const liberadoPorTurno = estaConfiguradoFirebase;
+  // Apenas a guia ENCOMENDA fica liberada para lançamento prévio antes da abertura do turno
+  const modoEncomenda = (modo === 'encomenda');
+
+  document.getElementById('btn_carne').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0);
+  document.getElementById('btn_carne_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0);
+  document.getElementById('btn_peixe').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0);
+  document.getElementById('btn_peixe_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0);
+  document.getElementById('btn_veg').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0);
+  document.getElementById('btn_veg_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0);
   
-  // Opções também travam se as doses gerais do turno não estiverem abertas
-  document.getElementById('btn_opcao').disabled = !podePedir || (!estaConfiguradoFirebase && role !== 'admin');
-  document.getElementById('btn_opcao_take').disabled = !podePedir || (!estaConfiguradoFirebase && role !== 'admin');
+  document.getElementById('btn_opcao').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda);
+  document.getElementById('btn_opcao_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda);
+}
+
+// LÓGICA DO BALÃO DE ENCOMENDAS
+function abrirResumoBalao() {
+  if (isDragging) return;
+  document.getElementById('modalBalaoResumo').style.display = 'flex';
+}
+function fecharResumoBalao() {
+  document.getElementById('modalBalaoResumo').style.display = 'none';
+}
+
+function atualizarBalaoUI() {
+  const totCarne = reservasBalao.carne.normal + reservasBalao.carne.take;
+  const totPeixe = reservasBalao.peixe.normal + reservasBalao.peixe.take;
+  const totVeg = reservasBalao.veg.normal + reservasBalao.veg.take;
+  const totOpcao = reservasBalao.opcao.normal + reservasBalao.opcao.take;
+  const grandTotal = totCarne + totPeixe + totVeg + totOpcao;
+
+  document.getElementById('balaoContador').innerText = `${grandTotal} Encomendas`;
+
+  document.getElementById('bCarneTotal').innerText = totCarne;
+  document.getElementById('bCarneTake').innerText = `(${reservasBalao.carne.normal} Normal | ${reservasBalao.carne.take} +TAKE)`;
+
+  document.getElementById('bPeixeTotal').innerText = totPeixe;
+  document.getElementById('bPeixeTake').innerText = `(${reservasBalao.peixe.normal} Normal | ${reservasBalao.peixe.take} +TAKE)`;
+
+  document.getElementById('bVegTotal').innerText = totVeg;
+  document.getElementById('bVegTake').innerText = `(${reservasBalao.veg.normal} Normal | ${reservasBalao.veg.take} +TAKE)`;
+
+  document.getElementById('bOpcaoTotal').innerText = totOpcao;
+  document.getElementById('bOpcaoTake').innerText = `(${reservasBalao.opcao.normal} Normal | ${reservasBalao.opcao.take} +TAKE)`;
 }
 
 let opcaoTakeSelecionado = false;
@@ -803,6 +673,48 @@ function gerarPDFResumo() {
   doc.save('resumo.pdf');
 }
 
+// Drag do balão flutuante
+const balao = document.getElementById('balaoReservas');
+let isDragging = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+
+balao.addEventListener('touchstart', dragStart, false);
+balao.addEventListener('touchend', dragEnd, false);
+balao.addEventListener('touchmove', drag, false);
+balao.addEventListener('mousedown', dragStart, false);
+document.addEventListener('mouseup', dragEnd, false);
+document.addEventListener('mousemove', drag, false);
+
+function dragStart(e) {
+  if (e.type === 'touchstart') {
+    initialX = e.touches[0].clientX - xOffset;
+    initialY = e.touches[0].clientY - yOffset;
+  } else {
+    initialX = e.clientX - xOffset;
+    initialY = e.clientY - yOffset;
+  }
+  if (e.target === balao || balao.contains(e.target)) isDragging = true;
+}
+
+function dragEnd() {
+  initialX = currentX; initialY = currentY;
+  setTimeout(() => isDragging = false, 50);
+}
+
+function drag(e) {
+  if (isDragging) {
+    e.preventDefault();
+    if (e.type === 'touchmove') {
+      currentX = e.touches[0].clientX - initialX;
+      currentY = e.touches[0].clientY - initialY;
+    } else {
+      currentX = e.clientX - initialX;
+      currentY = e.clientY - initialY;
+    }
+    xOffset = currentX; yOffset = currentY;
+    balao.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const role = getRole();
   if (role) {
@@ -865,7 +777,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('local_configurado', 'true');
         document.getElementById('statusConexao').innerText = "⚡ Sincronizado";
       } else {
-        // Zera o stock e força o bloqueio operacional se o turno estiver limpo/fechado
         estoqueInicial.carne = 0;
         estoqueInicial.peixe = 0;
         estoqueInicial.veg = 0;
@@ -886,17 +797,36 @@ document.addEventListener('DOMContentLoaded', () => {
       cont.carne = 0; cont.peixe = 0; cont.veg = 0; cont.opcao = 0;
       cont.take.carne = 0; cont.take.peixe = 0; cont.take.veg = 0; cont.take.opcao = 0;
 
+      // Reset das Encomendas no Balão
+      reservasBalao.carne = { normal: 0, take: 0 };
+      reservasBalao.peixe = { normal: 0, take: 0 };
+      reservasBalao.veg = { normal: 0, take: 0 };
+      reservasBalao.opcao = { normal: 0, take: 0 };
+
       Object.keys(cont.origem).forEach(o => Object.keys(cont.origem[o]).forEach(t => cont.origem[o][t] = 0));
 
       const dados = snapshot.val();
-      if (!dados) { atualizar(); return; }
+      if (!dados) {
+        atualizarBalaoUI();
+        atualizar();
+        return;
+      }
 
       Object.entries(dados).sort((a,b) => (a[1].criadoEm||0)-(b[1].criadoEm||0)).forEach(([id, pedido]) => {
         cont[pedido.tipo]++;
         if (pedido.take) cont.take[pedido.tipo]++;
         if (pedido.modo && cont.origem[pedido.modo]) cont.origem[pedido.modo][pedido.tipo]++;
+
+        // Apenas contabiliza no balão se foi sob a guia ENCOMENDA e o turno não foi aberto
+        if (!estaConfiguradoFirebase && pedido.modo === 'encomenda') {
+          if (pedido.take) reservasBalao[pedido.tipo].take++;
+          else reservasBalao[pedido.tipo].normal++;
+        }
+
         renderPedido(id, pedido);
       });
+
+      atualizarBalaoUI();
       atualizar();
     });
   }
