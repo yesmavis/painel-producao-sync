@@ -204,7 +204,10 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 }
 .coluna-acao span { font-size: 11px; color: #aaa; display: block; margin-bottom: 6px; font-weight: bold; }
 .botoes-liberacao {
-  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+}
+.botoes-liberacao.com-delivery {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 .btn-liberar {
   width: 100%; height: 30px; border-radius: 6px; font-size: 10px; font-weight: bold; border: none; cursor: pointer; padding: 2px;
@@ -269,13 +272,12 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
           <span>NORMAL (<b id="bCarneNormCount">0</b>)</span>
           <div class="botoes-liberacao">
             <button class="btn-liberar enc" id="bCarneNormEnc" onclick="liberarBalao('carne', false, 'encomenda')">📦 Enc</button>
-            <button class="btn-liberar del" id="bCarneNormDel" onclick="liberarBalao('carne', false, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bCarneNormSen" onclick="liberarBalao('carne', false, 'senha')">🎫 Sen</button>
           </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bCarneTakeCount">0</b>)</span>
-          <div class="botoes-liberacao">
+          <div class="botoes-liberacao com-delivery">
             <button class="btn-liberar enc" id="bCarneTakeEnc" onclick="liberarBalao('carne', true, 'encomenda')">📦 Enc</button>
             <button class="btn-liberar del" id="bCarneTakeDel" onclick="liberarBalao('carne', true, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bCarneTakeSen" onclick="liberarBalao('carne', true, 'senha')">🎫 Sen</button>
@@ -295,13 +297,12 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
           <span>NORMAL (<b id="bPeixeNormCount">0</b>)</span>
           <div class="botoes-liberacao">
             <button class="btn-liberar enc" id="bPeixeNormEnc" onclick="liberarBalao('peixe', false, 'encomenda')">📦 Enc</button>
-            <button class="btn-liberar del" id="bPeixeNormDel" onclick="liberarBalao('peixe', false, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bPeixeNormSen" onclick="liberarBalao('peixe', false, 'senha')">🎫 Sen</button>
           </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bPeixeTakeCount">0</b>)</span>
-          <div class="botoes-liberacao">
+          <div class="botoes-liberacao com-delivery">
             <button class="btn-liberar enc" id="bPeixeTakeEnc" onclick="liberarBalao('peixe', true, 'encomenda')">📦 Enc</button>
             <button class="btn-liberar del" id="bPeixeTakeDel" onclick="liberarBalao('peixe', true, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bPeixeTakeSen" onclick="liberarBalao('peixe', true, 'senha')">🎫 Sen</button>
@@ -321,13 +322,12 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
           <span>NORMAL (<b id="bVegNormCount">0</b>)</span>
           <div class="botoes-liberacao">
             <button class="btn-liberar enc" id="bVegNormEnc" onclick="liberarBalao('veg', false, 'encomenda')">📦 Enc</button>
-            <button class="btn-liberar del" id="bVegNormDel" onclick="liberarBalao('veg', false, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bVegNormSen" onclick="liberarBalao('veg', false, 'senha')">🎫 Sen</button>
           </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bVegTakeCount">0</b>)</span>
-          <div class="botoes-liberacao">
+          <div class="botoes-liberacao com-delivery">
             <button class="btn-liberar enc" id="bVegTakeEnc" onclick="liberarBalao('veg', true, 'encomenda')">📦 Enc</button>
             <button class="btn-liberar del" id="bVegTakeDel" onclick="liberarBalao('veg', true, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bVegTakeSen" onclick="liberarBalao('veg', true, 'senha')">🎫 Sen</button>
@@ -347,13 +347,12 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
           <span>NORMAL (<b id="bOpcaoNormCount">0</b>)</span>
           <div class="botoes-liberacao">
             <button class="btn-liberar enc" id="bOpcaoNormEnc" onclick="abrirModalOpcoesBalao(false, 'encomenda')">📦 Enc</button>
-            <button class="btn-liberar del" id="bOpcaoNormDel" onclick="abrirModalOpcoesBalao(false, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bOpcaoNormSen" onclick="abrirModalOpcoesBalao(false, 'senha')">🎫 Sen</button>
           </div>
         </div>
         <div class="coluna-acao">
           <span>+TAKE (<b id="bOpcaoTakeCount">0</b>)</span>
-          <div class="botoes-liberacao">
+          <div class="botoes-liberacao com-delivery">
             <button class="btn-liberar enc" id="bOpcaoTakeEnc" onclick="abrirModalOpcoesBalao(true, 'encomenda')">📦 Enc</button>
             <button class="btn-liberar del" id="bOpcaoTakeDel" onclick="abrirModalOpcoesBalao(true, 'delivery')">🛵 Del</button>
             <button class="btn-liberar sen" id="bOpcaoTakeSen" onclick="abrirModalOpcoesBalao(true, 'senha')">🎫 Sen</button>
@@ -457,7 +456,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.9';
+const VERSAO_APP = '1.2.13';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -614,7 +613,6 @@ function atualizarBalaoUI() {
   document.getElementById('bCarneNormCount').innerText = contadoresBalao.carne.normal;
   document.getElementById('bCarneTakeCount').innerText = contadoresBalao.carne.take;
   document.getElementById('bCarneNormEnc').disabled = contadoresBalao.carne.normal <= 0;
-  document.getElementById('bCarneNormDel').disabled = contadoresBalao.carne.normal <= 0;
   document.getElementById('bCarneNormSen').disabled = contadoresBalao.carne.normal <= 0;
   document.getElementById('bCarneTakeEnc').disabled = contadoresBalao.carne.take <= 0;
   document.getElementById('bCarneTakeDel').disabled = contadoresBalao.carne.take <= 0;
@@ -624,7 +622,6 @@ function atualizarBalaoUI() {
   document.getElementById('bPeixeNormCount').innerText = contadoresBalao.peixe.normal;
   document.getElementById('bPeixeTakeCount').innerText = contadoresBalao.peixe.take;
   document.getElementById('bPeixeNormEnc').disabled = contadoresBalao.peixe.normal <= 0;
-  document.getElementById('bPeixeNormDel').disabled = contadoresBalao.peixe.normal <= 0;
   document.getElementById('bPeixeNormSen').disabled = contadoresBalao.peixe.normal <= 0;
   document.getElementById('bPeixeTakeEnc').disabled = contadoresBalao.peixe.take <= 0;
   document.getElementById('bPeixeTakeDel').disabled = contadoresBalao.peixe.take <= 0;
@@ -634,7 +631,6 @@ function atualizarBalaoUI() {
   document.getElementById('bVegNormCount').innerText = contadoresBalao.veg.normal;
   document.getElementById('bVegTakeCount').innerText = contadoresBalao.veg.take;
   document.getElementById('bVegNormEnc').disabled = contadoresBalao.veg.normal <= 0;
-  document.getElementById('bVegNormDel').disabled = contadoresBalao.veg.normal <= 0;
   document.getElementById('bVegNormSen').disabled = contadoresBalao.veg.normal <= 0;
   document.getElementById('bVegTakeEnc').disabled = contadoresBalao.veg.take <= 0;
   document.getElementById('bVegTakeDel').disabled = contadoresBalao.veg.take <= 0;
@@ -644,7 +640,6 @@ function atualizarBalaoUI() {
   document.getElementById('bOpcaoNormCount').innerText = contadoresBalao.opcao.normal;
   document.getElementById('bOpcaoTakeCount').innerText = contadoresBalao.opcao.take;
   document.getElementById('bOpcaoNormEnc').disabled = contadoresBalao.opcao.normal <= 0;
-  document.getElementById('bOpcaoNormDel').disabled = contadoresBalao.opcao.normal <= 0;
   document.getElementById('bOpcaoNormSen').disabled = contadoresBalao.opcao.normal <= 0;
   document.getElementById('bOpcaoTakeEnc').disabled = contadoresBalao.opcao.take <= 0;
   document.getElementById('bOpcaoTakeDel').disabled = contadoresBalao.opcao.take <= 0;
