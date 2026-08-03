@@ -443,7 +443,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   </div>
 </div>
 
-<div id="modalOpcoes" style="position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 9999;">
+<div id="modalOpcoes" style="position: fixed; inset: 0; background: rgba(0,0,0,.75); display: none; align-items: center; justify-content: center; z-index: 99999;">
   <div style="background: #1e1e1e; padding: 20px; border-radius: 16px; width: 280px; text-align: center;">
     <h3>Escolha a opção</h3>
     <button class="opcao-btn" onclick="confirmarOpcao('Frango')">🍗 Frango</button>
@@ -457,7 +457,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.8';
+const VERSAO_APP = '1.2.9';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -651,16 +651,17 @@ function atualizarBalaoUI() {
   document.getElementById('bOpcaoTakeSen').disabled = contadoresBalao.opcao.take <= 0;
 }
 
-let modoOpcaoBalao = { take: false, novoModo: 'encomenda' };
+let modoOpcaoBalao = null;
 function abrirModalOpcoesBalao(take, novoModo) {
   modoOpcaoBalao = { take, novoModo };
   document.getElementById('modalOpcoes').style.display = 'flex';
 }
 
 function liberarBalao(tipo, take, novoModo, opcaoTipo = null) {
-  const item = listaReservasBalao.find(r => r.tipo === tipo && !!r.take === !!take);
-  if (!item) return;
+  const idx = listaReservasBalao.findIndex(r => r.tipo === tipo && Boolean(r.take) === Boolean(take));
+  if (idx === -1) return;
 
+  const item = listaReservasBalao[idx];
   if (window.firebaseDB && window.firebaseDB.liberarEncomendaParaPreparo) {
     window.firebaseDB.liberarEncomendaParaPreparo(item.id, novoModo, opcaoTipo || item.opcaoTipo);
   }
@@ -668,17 +669,21 @@ function liberarBalao(tipo, take, novoModo, opcaoTipo = null) {
 
 let opcaoTakeSelecionado = false;
 function abrirModalOpcoes(isTake) {
+  modoOpcaoBalao = null;
   opcaoTakeSelecionado = isTake;
   document.getElementById('modalOpcoes').style.display = 'flex';
 }
-function fecharModalOpcoes() { document.getElementById('modalOpcoes').style.display = 'none'; }
+function fecharModalOpcoes() { 
+  document.getElementById('modalOpcoes').style.display = 'none'; 
+  modoOpcaoBalao = null;
+}
 function confirmarOpcao(nome) { 
-  fecharModalOpcoes(); 
-  if (document.getElementById('modalBalaoResumo').style.display === 'flex') {
+  if (modoOpcaoBalao) {
     liberarBalao('opcao', modoOpcaoBalao.take, modoOpcaoBalao.novoModo, nome);
   } else {
     novoPedido('opcao', opcaoTakeSelecionado, nome); 
   }
+  fecharModalOpcoes();
 }
 
 function novoPedido(tipo, take, opcaoTipo = null) {
@@ -937,12 +942,14 @@ document.addEventListener('DOMContentLoaded', () => {
       liberarEncomendaParaPreparo: (id, novoModo, opcaoTipo) => {
         const itemRef = ref(db, `pedidos/${id}`);
         const itemOriginal = listaReservasBalao.find(r => r.id === id);
+        if (!itemOriginal) return;
+
         const takeFinal = (novoModo === 'delivery') ? true : itemOriginal.take;
 
         set(itemRef, {
           tipo: itemOriginal.tipo,
           take: takeFinal,
-          opcaoTipo: opcaoTipo || itemOriginal.opcaoTipo,
+          opcaoTipo: opcaoTipo || itemOriginal.opcaoTipo || null,
           modo: novoModo, 
           status: 'preparo',
           balao: false, 
