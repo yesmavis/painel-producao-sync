@@ -456,7 +456,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.13';
+const VERSAO_APP = '1.2.14';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -583,17 +583,23 @@ function atualizar() {
   const role = getRole();
   const podePedir = (role === 'balcao' || role === 'admin');
   const liberadoPorTurno = estaConfiguradoFirebase;
-  const modoEncomenda = (modo === 'encomenda');
 
-  document.getElementById('btn_carne').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0 && !modoEncomenda);
-  document.getElementById('btn_carne_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restCarne <= 0 && !modoEncomenda);
-  document.getElementById('btn_peixe').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0 && !modoEncomenda);
-  document.getElementById('btn_peixe_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restPeixe <= 0 && !modoEncomenda);
-  document.getElementById('btn_veg').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0 && !modoEncomenda);
-  document.getElementById('btn_veg_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda) || (liberadoPorTurno && restVeg <= 0 && !modoEncomenda);
+  // Novas regras de bloqueio por esgotamento após o turno aberto
+  const carneEsgotada = liberadoPorTurno && restCarne <= 0;
+  const peixeEsgotado = liberadoPorTurno && restPeixe <= 0;
+  const vegEsgotado = liberadoPorTurno && restVeg <= 0;
+
+  document.getElementById('btn_carne').disabled = !podePedir || carneEsgotada;
+  document.getElementById('btn_carne_take').disabled = !podePedir || carneEsgotada;
   
-  document.getElementById('btn_opcao').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda);
-  document.getElementById('btn_opcao_take').disabled = !podePedir || (!liberadoPorTurno && !modoEncomenda);
+  document.getElementById('btn_peixe').disabled = !podePedir || peixeEsgotado;
+  document.getElementById('btn_peixe_take').disabled = !podePedir || peixeEsgotado;
+  
+  document.getElementById('btn_veg').disabled = !podePedir || vegEsgotado;
+  document.getElementById('btn_veg_take').disabled = !podePedir || vegEsgotado;
+  
+  document.getElementById('btn_opcao').disabled = !podePedir;
+  document.getElementById('btn_opcao_take').disabled = !podePedir;
 }
 
 // LÓGICA DO BALÃO DE ENCOMENDAS
