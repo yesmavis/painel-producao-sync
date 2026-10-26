@@ -403,10 +403,16 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
   ⚫ <span id="cOpcao">0</span>
 </div>
 
-<div class="painel-ajuste-estoque" id="painelAjusteEstoque">
+<div class="painel-ajuste-estoque" id="painelAjusteEstoque" style="flex-wrap: wrap;">
   <button class="btn-ajuste carne" onclick="adicionarDoseManual('carne')">+1 Carne</button>
+  <button class="btn-ajuste carne" onclick="removerDoseManual('carne')" style="background: #b71c1c;">-1 Carne</button>
+
   <button class="btn-ajuste peixe" onclick="adicionarDoseManual('peixe')">+1 Peixe</button>
+  <button class="btn-ajuste peixe" onclick="removerDoseManual('peixe')" style="background: #0d47a1;">-1 Peixe</button>
+
   <button class="btn-ajuste veg" onclick="adicionarDoseManual('veg')">+1 Veg</button>
+  <button class="btn-ajuste veg" onclick="removerDoseManual('veg')" style="background: #1b5e20;">-1 Veg</button>
+
   <button class="btn-ajuste opcao" onclick="adicionarDoseManual('opcao')">+1 Opção</button>
 </div>
 
@@ -456,7 +462,7 @@ button:disabled { background: #444 !important; color: #777 !important; border: 1
 
 <script>
 const RESTAURANTE = 'Cafetaria Blend - Vila Real';
-const VERSAO_APP = '1.2.14';
+const VERSAO_APP = '1.2.15';
 const LOCALE = 'en-US';
 const SENHA_FECHO = '0001';
 
@@ -704,6 +710,28 @@ function adicionarDoseManual(tipo) {
       localStorage.setItem('local_estoque', JSON.stringify(estoqueInicial));
       atualizar();
       window.firebaseDB.atualizarEstoqueFirebase(tipo, valorAtual + 1);
+    }
+  }
+}
+
+function removerDoseManual(tipo) {
+  if (window.firebaseDB && window.firebaseDB.atualizarEstoqueFirebase) {
+    if (tipo === 'opcao') {
+      return; // Opções usam contagem infinita (9999), não precisam de remoção numérica
+    } else {
+      const valorAtual = estoqueInicial[tipo] || 0;
+      
+      // Impede que o estoque fique abaixo de 0
+      if (valorAtual <= 0) {
+        alert("O estoque já está em 0!");
+        return;
+      }
+      
+      const novoValor = valorAtual - 1;
+      estoqueInicial[tipo] = novoValor;
+      localStorage.setItem('local_estoque', JSON.stringify(estoqueInicial));
+      atualizar();
+      window.firebaseDB.atualizarEstoqueFirebase(tipo, novoValor);
     }
   }
 }
